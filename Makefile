@@ -4,15 +4,14 @@ YELLOW	= \033[1;33m
 RESET	= \033[0;37m
 SKY		= \033[1;36m
 
-CPP = g++ -std=c++17
+CPP = c++ -std=c++98 -g3 -fsanitize=address
 SRCSPATH = ./
 INCLPATH = ./headers/
 
 SRCS = $(shell find $(SRCSPATH) -name "*.cpp")
 OBJS = $(patsubst $(SRCSPATH)%.cpp, $(SRCSPATH)%.o, $(SRCS))
 
-CFLAGS = -Wall -Wextra -Werror $(addprefix -I, $(shell find $(INCLPATH) -type d))
-# -g-fsanitize=address
+CFLAGS = -Wall -Wextra -Werror  $(addprefix -I, $(shell find $(INCLPATH) -type d)) 
 NAME = webserv
 
 all : $(NAME)

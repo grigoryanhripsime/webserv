@@ -7,5 +7,13 @@
 struct Directive 
 {
     std::multimap<std::string, std::vector<std::string> > values;
-    std::map<std::string, Directive> blocks;
+    std::multimap<std::string, Directive *> blocks;
+
+    ~Directive() {
+        std::multimap<std::string, Directive*>::iterator it;
+        for (it = blocks.begin(); it != blocks.end(); ++it) {
+            delete it->second;
+        }
+        blocks.clear();
+    }
 };

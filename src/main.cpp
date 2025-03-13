@@ -10,4 +10,5 @@ int main(int argc, char *argv[])
     }
     FileReader fileReader(argv[1]);
     fileReader.fileToStr();
+    fileReader.parseConfig();
 }
