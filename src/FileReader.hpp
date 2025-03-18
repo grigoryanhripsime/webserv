@@ -5,6 +5,7 @@
 #include <sstream>
 #include <map>
 #include "Directive.hpp"
+#include <algorithm>
 
 class FileReader
 {
