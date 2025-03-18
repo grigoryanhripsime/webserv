@@ -2,23 +2,16 @@
 
 #include <iostream>
 #include <fstream>
-#include <sstream>
-#include <map>
-#include "Directive.hpp"
-#include <algorithm>
 
 class FileReader
 {
     private:
         std::ifstream file;
         std::string fileStr;
-        Directive directives;
     public:
         FileReader(const std::string &fileName);
-        // std::vector<Directive *> &readConfig();
-        void parseConfig();
-        void printDirective(const Directive &directive, int indent) ;
         void fileToStr();
+        std::string getFileStr() const;
 
         ~FileReader();
         class FileReadingException : public std::exception

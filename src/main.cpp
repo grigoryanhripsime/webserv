@@ -1,5 +1,6 @@
 #include <iostream>
 #include "FileReader.hpp"
+#include "TokenConfig.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -10,5 +11,7 @@ int main(int argc, char *argv[])
     }
     FileReader fileReader(argv[1]);
     fileReader.fileToStr();
-    fileReader.parseConfig();
+    std::string strFile = fileReader.getFileStr();
+    TokenConfig tokenConfig(strFile);
+    tokenConfig.fillingDirectives();
 }

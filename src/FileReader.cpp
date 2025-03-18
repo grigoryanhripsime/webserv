@@ -14,6 +14,12 @@ FileReader::~FileReader()
     std::cout<<"FileReader was destroyed!\n";
 }
 
+std::string FileReader::getFileStr() const
+{
+    return fileStr;
+}
+
+
 FileReader::FileReadingException::FileReadingException(std::string err_msg)
 {
     err_message = err_msg;
@@ -52,87 +58,3 @@ void FileReader::fileToStr()
     }
     std::cout<<fileStr<<std::endl;
 }
-
-void rec(std::stringstream &ss, Directive &directives, FileReader *th)
-{
-    std::string key;
-    while (ss >> key)//esi key-i mej lcnelua minchev space-@?
-    {
-        while (std::isspace(ss.peek()))//Он смотрит на следующий символ в потоке , но не двигает курсор.
-            ss.get();//get() удаляет символ из потока и передвигает курсор вперёд.
-
-        if (ss.peek() == '{')
-        {
-            ss.get();  // Consume '{'
-            Directive *dir = new Directive();
-            directives.blocks.insert(std::make_pair(key, dir));
-
-            std::string block;
-            if (ss.str().find('}') == std::string::npos || !std::getline(ss, block, '}')) // || block.length() < 2)
-                throw std::runtime_error("Error: Invalid block structure");
-            int cnt = std::count(block.begin(), block.end(), '{');
-            while (cnt)
-            {
-                block += '}';
-                std::string tmp;
-                if (!std::getline(ss, tmp, '}'))
-                    throw std::runtime_error("iran hamapatasxan pakox blocky chkar!!");
-                cnt += std::count(tmp.begin(), tmp.end(), '{');
-                block += tmp;
-                cnt--;
-
-            }
-            std::cout<<"block: "<<block<<std::endl;
-            std::stringstream ss2(block);
-            rec(ss2, *dir, th);
-        }
-        else  // Key-value pair case
-        {
-            std::string values, value;
-            if (!std::getline(ss, values, ';'))//inch case kara lini?
-                throw std::runtime_error("Error: Invalid directive syntax");
-            std::stringstream ss2(values);
-            std::vector<std::string> vals;
-            while (ss2 >> value)
-                vals.push_back(value);
-            directives.values.insert(std::make_pair(key, vals));
-        }
-    }  
-}
-
-
-void FileReader::printDirective(const Directive &directive, int indent = 0) 
-{
-    (void)directive;
-    (void)indent;
-    std::string indentation(indent, ' ');
-    
-    // Print values
-    for (std::multimap<std::string, std::vector<std::string> >::const_iterator it = directive.values.begin(); it != directive.values.end(); ++it) {
-        std::cout << indentation << it->first;
-        for (std::vector<std::string>::const_iterator vit = it->second.begin(); vit != it->second.end(); ++vit) {
-            std::cout << " " << *vit;
-        }
-        std::cout << ";\n";
-    }
-    
-    // Print blocks
-    for (std::multimap<std::string, Directive *>::const_iterator it = directive.blocks.begin(); it != directive.blocks.end(); ++it) {
-        std::cout << indentation << it->first << " {\n";
-        printDirective(*(it->second), indent + 4);
-        std::cout << indentation << "}\n";
-    }
-}
-
-
-
-void FileReader::parseConfig()
-{
-    std::stringstream ss(fileStr);
-    rec(ss, directives, this);
-    printDirective(directives, 0);
-}
-
-
-
-
