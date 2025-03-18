@@ -11,7 +11,7 @@ INCLPATH = ./headers/
 SRCS = $(shell find $(SRCSPATH) -name "*.cpp")
 OBJS = $(patsubst $(SRCSPATH)%.cpp, $(SRCSPATH)%.o, $(SRCS))
 
-CFLAGS = -Wall -Wextra -Werror  $(addprefix -I, $(shell find $(INCLPATH) -type d)) 
+CFLAGS = -Wall -Wextra -Werror  #$(addprefix -I, $(shell find $(INCLPATH) -type d)) 
 NAME = webserv
 
 all : $(NAME)
