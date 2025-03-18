@@ -72,13 +72,28 @@ void rec(std::stringstream &ss, Directive &directives, FileReader *th)
         if (ss.peek() == '{')
         {
             std::cout << "ashsssssssssssssssssssssssssssssssssssssssssssssssssssss\n";
+            std::cout<<"key: "<<key<<std::endl;
             ss.get();  // Consume '{'
             Directive *dir = new Directive();
             directives.blocks.insert(std::make_pair(key, dir));
 
             std::string block;
-            if (!std::getline(ss, block, '}') || block.length() < 2)
+            if (ss.str().find('}') == std::string::npos || !std::getline(ss, block, '}')) // || block.length() < 2)
                 throw std::runtime_error("Error: Invalid block structure");
+            int cnt = std::count(block.begin(), block.end(), '{');
+            std::cout<<"cnt: "<< cnt<<std::endl;
+            while (cnt)
+            {
+                block += '}';
+                std::string tmp;
+                if (!std::getline(ss, tmp, '}'))
+                    throw std::runtime_error("iran hamapatasxan pakox blocky chkar!!");
+                cnt += std::count(tmp.begin(), tmp.end(), '{');
+                block += tmp;
+                cnt--;
+
+            }
+            std::cout<<"block: "<<block<<std::endl;
             std::stringstream ss2(block);
             std::cout << "doooooooooooooooooooooooooooooooooooo\n";
             th->printDirective(*dir, 0);
