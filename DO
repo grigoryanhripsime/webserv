@@ -169,7 +169,8 @@ int server_socket = socket(AF_INET, SOCK_STREAM, 0);
 
 1)erb skzbic stexcum enq socket(zut haytararum)->ira status@ not bound a
 2)henc talis enq iran ip ev port statusy poxvuma bound,u karas sockety bind anes
-3)bind aneluc heto statusy poxvuma listenng toist inqy patrasta arden stanal requestner(we are listening out for incoming requests on those details so through that port number we are listening out for clients to connect to this socket through that port number)
+3)bind aneluc heto statusy poxvuma listenng toist inqy patrasta arden stanal requestner(we are listening out for incoming requests on those details,
+so through that port number we are listening out for clients to connect to this socket through that port number)
 4)whether this is another machine on the same local network as the server or indeed the same  machine in our case
 for our practicals we are going to keep it nice  and easy and we are going to create the server and the client on the same machine
 and get them to talk to each other ,but regardless  of whether it is the same machine or two different computers
@@ -178,7 +179,7 @@ the details are added when it is bound you will notice here that the ip address 
 going to resemble our practical so the ip address will be the same because it is the same computer but 
 the port number will be different and the client does not actually have any Control over the port number,
 this is allocated automatically, for the server this can be specified the port number that it wants to listen out on 
-but regardless what it can do is put out a request once it is been bound so it can put out a request to connect to the port number
+but regardless what it can do is put out a request once it has been bound so it can put out a request to connect to the port number
 of the server, so even though it exists on its own different port number it can put out a request to connect to the port number 
 of the server ,and then once that request has been acknowledged and accepted by the server notice here that we dont just connect the two 
 sockets but the server actually duplicates itself actually duplicates the socket to enable the connection beetween the server(tes nkary)
