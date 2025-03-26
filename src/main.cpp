@@ -1,6 +1,7 @@
 #include <iostream>
 #include "FileReader.hpp"
 #include "TokenConfig.hpp"
+#include "Socket.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -14,4 +15,11 @@ int main(int argc, char *argv[])
     std::string strFile = fileReader.getFileStr();
     TokenConfig tokenConfig(strFile);
     tokenConfig.fillingDirectives();
+    try{
+        Socket(AF_INET, SOCK_STREAM, 0, 8080, 10);
+    }
+    catch(std::runtime_error& e)
+    {
+        std::cout << e.what() << std::endl;
+    }
 }

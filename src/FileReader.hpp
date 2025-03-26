@@ -19,7 +19,6 @@ class FileReader
             private:
                 std::string err_message;
             public:
- 
             FileReadingException(std::string err_msg);
                 virtual ~FileReadingException() throw();
                 const char* what() const throw();
