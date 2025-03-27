@@ -1,6 +1,6 @@
 #include "ListeningSocket.hpp"
 
-ListeningSocket::ListeningSocket(int domainIP, int service, int protocol, int port, u_long interface, int backlog) : Server(int domainIP, int service, int protocol, int port, u_long interface)
+ListeningSocket::ListeningSocket(int domainIP, int service, int protocol, int port, unsigned long interface, int backlog) : ServerSocket(domainIP, service, protocol, port, interface)
 {
     max_count_people_in_queue = backlog;
     status = start_listening();
@@ -14,4 +14,4 @@ int ListeningSocket::start_listening()
     return (listen(get_serverFd(), max_count_people_in_queue));
 }
 
-
+ListeningSocket::~ListeningSocket(){}

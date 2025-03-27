@@ -1,6 +1,6 @@
 #include "Socket.hpp"
-
-Socket::Socket(int domainIP, int typeOfService, int protocol, int port, u_long interface)
+// service ->typeOfService
+Socket::Socket(int domainIP, int port, unsigned long interface)
 {
     // Define address structure
     // It is the data type that is used to store the address of the socket.
@@ -8,12 +8,20 @@ Socket::Socket(int domainIP, int typeOfService, int protocol, int port, u_long i
     serverAddr.sin_port = htons(port); //This function is used to convert the unsigned int from machine byte order to network byte order.
     serverAddr.sin_addr.s_addr = htonl(interface); //It is used when we don't want to bind our socket to any particular IP and instead make it listen to all the available IPs.
     
-    // Establish socket
-    sockFd = socket(domainIP, typeOfService, protocol);
-    if (sockFd == -1) 
-        throw std::runtime_error("Creating socket failed!");
 
-    // // Establish network connection
+
+
+    // Establish socket
+    // sockFd = socket(domainIP, service, protocol);
+    // if (sockFd == -1) 
+    //     throw std::runtime_error("Creating socket failed!");//esi pakenq stexic u anenq clientSocketi u serverSocketi ctorum (hamapatasaxabar serverFd = socket(...), clientFd = socket(...)),kam tekuz arancindzin funkciayi mej
+
+// NKATEEEEEEEEEEEEEEEEEEEEEQ
+
+
+
+
+// // Establish network connection
     // // connection = connect_to_network();
     // if (bind(sockFd, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) == -1)
     // {
@@ -37,7 +45,12 @@ Socket::Socket(int domainIP, int typeOfService, int protocol, int port, u_long i
     // }
 }
 
+
+struct sockaddr_in Socket::get_serverAddr() const
+{
+    return serverAddr;
+}
+
 Socket::~Socket() 
 {
-    close(sockFd); 
 }

@@ -1,12 +1,13 @@
 #pragma once
-
-class   ClientSocket : public Socket
+#include "Socket.hpp"
+class ClientSocket : public Socket
 {
 private:
     int clientFd;
     int connection;
-    virtual void connectToNetwork();
+    virtual int connectToNetwork();
 public:
-    ClientSocket(int domainIP, int service, int protocol, int port, u_long interface);
+    ClientSocket(int domainIP, int service, int protocol, int port, unsigned long interface);
     int get_clientFd() const;
+    ~ClientSocket();
 };

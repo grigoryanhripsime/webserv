@@ -1,6 +1,13 @@
 #include "Server.hpp"
 
-Server::Server(int domainIP, int service, int protocol, int port, u_long interface, int backlog) : ListeningSocket(int domainIP, int service, int protocol, int port, u_long interface, int backlog)
+Server::Server(int domainIP, int service, int protocol, int port, unsigned long interface, int backlog)
 {
-    lisSock = new ListeningSocket(int domainIP, int service, int protocol, int port, u_long interface, int backlog);
+    lisSock = new ListeningSocket(domainIP, service, protocol, port, interface, backlog);
 }
+
+ListeningSocket* Server::get_ListeningSocket() const
+{
+    return lisSock;
+}
+
+Server::~Server(){}

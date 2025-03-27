@@ -2,6 +2,11 @@
 #include "FileReader.hpp"
 #include "TokenConfig.hpp"
 #include "Socket.hpp"
+#include "TestServer.hpp"
+#include "Server.hpp"
+#include "ServerSocket.hpp"
+#include "ListeningSocket.hpp"
+#include "ClientSocket.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -16,7 +21,8 @@ int main(int argc, char *argv[])
     TokenConfig tokenConfig(strFile);
     tokenConfig.fillingDirectives();
     try{
-        Socket(AF_INET, SOCK_STREAM, 0, 8080, 10);
+        TestServer t(AF_INET, SOCK_STREAM, 0, 8080, INADDR_ANY, 10);
+        // Socket(AF_INET, SOCK_STREAM, 0, 8080, 10);
     }
     catch(std::runtime_error& e)
     {
