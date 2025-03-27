@@ -4,14 +4,14 @@ FileReader::FileReader(const std::string &fileName) : file(fileName.c_str())
 {
     if (!file || !file.is_open())
         throw FileReadingException("Coudn't open config file!");
-    std::cout<<"FileReader was created!\n";
+    // std::cout<<"FileReader was created!\n";
 }
 
 FileReader::~FileReader()
 {
     file.close();
     
-    std::cout<<"FileReader was destroyed!\n";
+    // std::cout<<"FileReader was destroyed!\n";
 }
 
 std::string FileReader::getFileStr() const
@@ -56,5 +56,6 @@ void FileReader::fileToStr()
 
         fileStr += line;//fileStr i mej celi fayly kpcnum enq mi stroki mej
     }
-    std::cout<<fileStr<<std::endl;
+    // std::cout<<fileStr<<std::endl;
+    Logger::printStatus("INFO", "Config file was successfully read!");
 }

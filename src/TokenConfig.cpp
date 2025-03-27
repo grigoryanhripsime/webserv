@@ -34,7 +34,6 @@ void TokenConfig::fillingDirectivesRec(std::stringstream &ss, Directive &directi
                 cnt += std::count(tmp.begin(), tmp.end(), '{');
                 block += tmp;
                 cnt--;
-
             }
             std::stringstream ss2(block);
             fillingDirectivesRec(ss2, *dir);
@@ -58,7 +57,8 @@ void TokenConfig::fillingDirectives()
 {
     std::stringstream ss(strFile);
     fillingDirectivesRec(ss, directives);
-    printDirective(directives, 0);
+    // printDirective(directives, 0);
+    Logger::printStatus("INFO", "Tokenization of directives was successfully done!");
 }
 
 void TokenConfig::printDirective(const Directive &directive, int indent) 

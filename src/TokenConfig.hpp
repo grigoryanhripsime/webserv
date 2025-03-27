@@ -5,6 +5,7 @@
 #include "Directive.hpp"
 #include <algorithm>
 #include "FileReader.hpp"
+#include "Logger.hpp"
 
 class TokenConfig
 {

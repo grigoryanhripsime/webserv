@@ -13,6 +13,7 @@ ServerSocket::ServerSocket(int domainIP, int service, int protocol, int port, un
 int ServerSocket::connectToNetwork()
 {
     struct sockaddr_in serverAddr = get_serverAddr();
+    std::cout<<serverFd<<std::endl;
     return (bind(serverFd, (struct sockaddr *)&serverAddr, sizeof(serverAddr)));
 }
 
@@ -21,4 +22,6 @@ int ServerSocket::get_serverFd() const
     return serverFd;
 }
 
-ServerSocket::~ServerSocket(){}
+ServerSocket::~ServerSocket(){
+    close(serverFd);
+}

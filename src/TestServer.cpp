@@ -12,13 +12,14 @@ void TestServer::accepter()
     newSocket = accept(get_ListeningSocket()->get_serverFd(), (struct sockaddr *)&address, (socklen_t*)&addrlen);
     if (newSocket < 0)
         throw std::runtime_error("Error:accept");
+    //TODO: poll()
     read(newSocket, buffer, 30000);
     std::cout << "buffer->" << buffer << std::endl;
 }
 
 void TestServer::responder()
 {
-    char hello[30] = "hello from server";
+    char hello[88] = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 15\n\nHEEZZllo WORLD!\n";
     write(newSocket, hello, strlen(hello));
     close(newSocket);
 }

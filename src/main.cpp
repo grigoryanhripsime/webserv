@@ -10,18 +10,20 @@
 
 int main(int argc, char *argv[])
 {
-    if (argc != 2)
+    std::string fileName = argc == 2 ? argv[1] : "configs/default.conf";
+    try 
     {
-        std::cerr<<"Invalid number of arguments!\n";
-        return 1;
+        FileReader fileReader(fileName);
+        fileReader.fileToStr();
+        std::string strFile = fileReader.getFileStr();
+        TokenConfig tokenConfig(strFile);
+        tokenConfig.fillingDirectives();
+    } catch(std::exception &e)
+    {
+        Logger::printStatus("ERROR", e.what());
     }
-    FileReader fileReader(argv[1]);
-    fileReader.fileToStr();
-    std::string strFile = fileReader.getFileStr();
-    TokenConfig tokenConfig(strFile);
-    tokenConfig.fillingDirectives();
     try{
-        TestServer t(AF_INET, SOCK_STREAM, 0, 8080, INADDR_ANY, 10);
+        TestServer t(AF_INET, SOCK_STREAM, 0, 8090, INADDR_ANY, 10);
         // Socket(AF_INET, SOCK_STREAM, 0, 8080, 10);
     }
     catch(std::runtime_error& e)

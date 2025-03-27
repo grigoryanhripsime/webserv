@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <fstream>
+#include "Logger.hpp"
 
 class FileReader
 {
