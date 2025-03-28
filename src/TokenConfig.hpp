@@ -18,6 +18,7 @@ class TokenConfig
         void fillingDirectives();
         void fillingDirectivesRec(std::stringstream &ss, Directive &directives);
         void printDirective(const Directive &directive, int indent);
+        const Directive &getDirectives() const;
         class TokenConfigException : public std::exception
         {
             private:
@@ -28,4 +29,5 @@ class TokenConfig
                 virtual ~TokenConfigException() throw();
                 const char* what() const throw();
         };
+        ~TokenConfig() {std::cout<<"sdfghjkjhgfgh\n";}
 };

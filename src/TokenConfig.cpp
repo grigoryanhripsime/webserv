@@ -2,6 +2,7 @@
 
 TokenConfig::TokenConfig(std::string strFile)
 {
+    this->directives = Directive();
     this->strFile = strFile;
 }
 
@@ -84,6 +85,10 @@ void TokenConfig::printDirective(const Directive &directive, int indent)
     }
 }
 
+const Directive& TokenConfig::getDirectives() const
+{
+    return directives;
+}
 
 TokenConfig::TokenConfigException::TokenConfigException(std::string err_msg)
 {

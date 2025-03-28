@@ -6,4 +6,5 @@ Directive::~Directive() {
         delete it->second;
     }
     blocks.clear();
+    std::cout<<"hehe\n";
 }

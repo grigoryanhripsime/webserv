@@ -16,4 +16,4 @@ class Server
         virtual ~Server();
         //getters
         ListeningSocket* get_ListeningSocket() const;
-};//inqy mihat tetser classa sarqe vory jarangela es Server classic,vori mejel accepter,responder funckcianery implementela,menq vaxy jokenq irar het inch class karlia stexcel u vonc implem=ntel dranq
+};
