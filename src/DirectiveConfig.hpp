@@ -10,7 +10,7 @@ class DirectiveConfig
         Directive directives;
         std::vector<Server> servers;
     public:
-        DirectiveConfig(const Directive& directives);
+        DirectiveConfig(const Directive directives);
         void directiveValidation();
         void fillServers();
 

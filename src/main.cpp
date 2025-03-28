@@ -21,11 +21,13 @@ int main(int argc, char *argv[])
         tokenConfig.fillingDirectives();
         DirectiveConfig dirConf(tokenConfig.getDirectives());
         dirConf.directiveValidation();
+        
     } catch(std::exception &e)
     {
         std::cout << "SIG\n";
         Logger::printStatus("ERROR", e.what());
     }
+    std::cout<<"ehe\n";
     // try{
     //     TestServer t(AF_INET, SOCK_STREAM, 0, 8091, INADDR_ANY, 10);
     //     // Socket(AF_INET, SOCK_STREAM, 0, 8080, 10);
