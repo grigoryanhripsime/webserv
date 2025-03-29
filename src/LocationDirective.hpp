@@ -8,7 +8,7 @@
 class LocationDirective : public ServerDirective
 {
     private:
-        std::string path;
+        std::string path;//example `location/api {?
         std::map<int, std::string> redirect;
 
 };

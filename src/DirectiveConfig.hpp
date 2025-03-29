@@ -8,9 +8,9 @@ class DirectiveConfig
 {
     private:
         Directive directives;
-        std::vector<Server> servers;
+        std::vector<Server> servers;//ne ponyl dlya chego
     public:
-        DirectiveConfig(const Directive directives);
+        DirectiveConfig(const Directive& directives);
         void directiveValidation();
         void fillServers();
 

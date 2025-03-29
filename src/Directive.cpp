@@ -1,13 +1,13 @@
 #include "Directive.hpp"
 
+Directive::Directive() {}
+
 Directive::Directive(const Directive& other) {
     values = other.values;
     for (std::multimap<std::string, Directive*>::const_iterator it = other.blocks.begin();
          it != other.blocks.end(); ++it) 
         blocks.insert(std::make_pair(it->first, new Directive(*(it->second))));
 }
-
-Directive::Directive() {}
 
 Directive::~Directive() {
     std::multimap<std::string, Directive*>::iterator it;
