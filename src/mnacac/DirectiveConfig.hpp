@@ -1,14 +1,15 @@
 #pragma once
 
+#include "AGeneralDirective.hpp"
+class ServerDirective;
 #include "Directive.hpp"
-#include "Server.hpp"
-#include <vector>
+class Directive;
 
 class DirectiveConfig
 {
     private:
         Directive directives;
-        std::vector<Server> servers;//ne ponyl dlya chego
+        std::vector<ServerDirective *> servers;
     public:
         DirectiveConfig(const Directive& directives);
         void directiveValidation();
