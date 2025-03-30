@@ -9,18 +9,25 @@ TokenConfig::TokenConfig(std::string strFile)
 void TokenConfig::fillingDirectivesRec(std::stringstream &ss, Directive &directives)
 {
     std::string key;
-    while (ss >> key)//esi key-i mej lcnelua minchev space-@?
-    {
-        while (std::isspace(ss.peek()))//Он смотрит на следующий символ в потоке , но не двигает курсор.
-            ss.get();//get() удаляет символ из потока и передвигает курсор вперёд.
+    while (ss >> key)
+    {        
+        std::vector<std::string> path(1);
+        if (key == "location" && (!(ss>>path[0]) || path[0].find("{") != std::string::npos))
+            throw TokenConfig::TokenConfigException("Missing path in location!");
+
+        while (std::isspace(ss.peek()))
+            ss.get();
 
         if (key.find(";") != std::string::npos)
-            throw TokenConfig::TokenConfigException("Error: ete value chi linum, gnum myus keyn el a vercnum!");
+            throw TokenConfig::TokenConfigException("Ete value chi linum, gnum myus keyn el a vercnum!");
         if (ss.peek() == '{')
         {
             ss.get();  // Consume '{'
             Directive *dir = new Directive();
             directives.blocks.insert(std::make_pair(key, dir));
+
+            if (key == "location")
+                dir->values.insert(std::make_pair("path", path));
 
             std::string block;
             if (ss.str().find('}') == std::string::npos || !std::getline(ss, block, '}')) // || block.length() < 2)
@@ -31,7 +38,7 @@ void TokenConfig::fillingDirectivesRec(std::stringstream &ss, Directive &directi
                 block += '}';
                 std::string tmp;
                 if (!std::getline(ss, tmp, '}'))
-                    throw TokenConfig::TokenConfigException("iran hamapatasxan pakox blocky chkar!!");
+                    throw TokenConfig::TokenConfigException("Iran hamapatasxan pakox blocky chkar!!");
                 cnt += std::count(tmp.begin(), tmp.end(), '{');
                 block += tmp;
                 cnt--;
@@ -42,12 +49,12 @@ void TokenConfig::fillingDirectivesRec(std::stringstream &ss, Directive &directi
         else // Key-value pair case
         {
             std::string values, value;
-            if (!std::getline(ss, values, ';') || values.empty())//inch case kara lini?
-            throw TokenConfig::TokenConfigException("Error: Invalid directive syntax");
+            if (!std::getline(ss, values, ';') || values.empty())
+                throw TokenConfig::TokenConfigException("Invalid directive syntax");
             std::stringstream ss2(values);
             std::vector<std::string> vals;
             while (ss2 >> value)
-            vals.push_back(value);
+                vals.push_back(value);
             directives.values.insert(std::make_pair(key, vals));
         }
     }  

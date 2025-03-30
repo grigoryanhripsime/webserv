@@ -35,6 +35,7 @@ $(OBJSPATH)/%.o: $(SRCSPATH)/%.cpp | create_obj_dirs
 # Ensure the necessary folders exist
 create_obj_dirs:
 	@mkdir -p $(OBJSPATH)/mnacac
+	@mkdir -p $(OBJSPATH)/Configs
 	@mkdir -p $(OBJSPATH)/Directives
 
 clean:
