@@ -1,13 +1,13 @@
 #pragma once
-
+#include <stdexcept>
 #include "AGeneralDirective.hpp"
 #include <vector>
 #include <map>
-
+#include <set>
 class LocationDirective : public AGeneralDirective
 {
 private:
-    std::string path;//example `location/api {? obizatelno
+    std::string path;//example `location /api {? obizatelno
     std::map<int, std::string> redirect;// return 301 http://google.com
     std::vector<std::string> allow_methods;//esi xi vectorov?,  default: GET (если не указано)
     bool autoindex;//deafult off(false)

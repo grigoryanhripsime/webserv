@@ -379,3 +379,65 @@ ya pravilno ponyl?
 Сервер обрабатывает запрос и отвечает клиенту с помощью send().
 
 Клиент делает recv(), чтобы получить ответ от сервера.
+
+
+
+
+
+
+///////////////URI and URL////////////////////////////
+Разница между URI и URL
+URL (Uniform Resource Locator) - Полный адрес ресурса:
+Copy
+https://example.com:8080/cgi-bin/script.py?param=value#section
+Составные части:
+
+https — протокол
+
+example.com — домен
+
+8080 — порт
+
+/cgi-bin/script.py — URI (см. ниже)
+
+?param=value — query-параметры
+
+#section — якорь
+
+URI (Uniform Resource Identifier) - Часть URL, идентифицирующая ресурс на сервере:
+Copy
+/cgi-bin/script.py
+Характеристики:
+
+Всегда начинается с /
+
+Соответствует структуре файлов на сервере
+
+Используется в директивах location в конфиге
+
+Пример для вашего веб-сервера
+Запрос клиента:
+
+Copy
+GET http://example.com:8080/cgi-bin/hello.py?name=John
+Обработка в сервере:
+
+URL разбивается на части:
+
+URI: /cgi-bin/hello.py
+
+Query: name=John
+
+Сервер ищет подходящий location:
+
+nginx
+Copy
+location /cgi-bin { ... }  # Этот блок будет обрабатывать запрос
+Проверка расширения:
+
+.py → запуск через /usr/bin/python3 hello.py?name=John
+
+Итоговые ответы:
+В location с CGI могут быть другие директивы (root, allow_methods и т.д.)
+
+URI — это часть URL (путь к ресурсу), который обрабатывает ваш location

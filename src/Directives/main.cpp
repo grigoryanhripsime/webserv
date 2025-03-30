@@ -18,6 +18,7 @@ int main(int argc, char *argv[])
         fileReader.fileToStr();
         std::string strFile = fileReader.getFileStr();
         TokenConfig tokenConfig(strFile);
+        std::cout << "file->" << strFile << std::endl;
         tokenConfig.fillingDirectives();
         
         DirectiveConfig dirConf(tokenConfig.getDirectives());

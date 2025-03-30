@@ -10,12 +10,13 @@ void TokenConfig::fillingDirectivesRec(std::stringstream &ss, Directive &directi
 {
     std::string key;
     while (ss >> key)
-    {        
+    {
+        std::cout << "key = " << key << std::endl;
         std::vector<std::string> path(1);
         if (key == "location" && (!(ss>>path[0]) || path[0].find("{") != std::string::npos))
-            throw TokenConfig::TokenConfigException("Missing path in location!");
-
-        while (std::isspace(ss.peek()))
+            throw TokenConfig::TokenConfigException("Missing path in location! OR path include '{'");//llocation /abc{
+        std::cout << "path->" << path[0] << std::endl;
+         while (std::isspace(ss.peek()))
             ss.get();
 
         if (key.find(";") != std::string::npos)
@@ -25,14 +26,16 @@ void TokenConfig::fillingDirectivesRec(std::stringstream &ss, Directive &directi
             ss.get();  // Consume '{'
             Directive *dir = new Directive();
             directives.blocks.insert(std::make_pair(key, dir));
-
+            std::cout << "blokayin e->" << key << std::endl;
             if (key == "location")
                 dir->values.insert(std::make_pair("path", path));
 
             std::string block;
+            std::cout << "shto eto->" << ss.str() << std::endl;
             if (ss.str().find('}') == std::string::npos || !std::getline(ss, block, '}')) // || block.length() < 2)
                 throw TokenConfig::TokenConfigException("Error: Invalid block structure");
-            int cnt = std::count(block.begin(), block.end(), '{');
+            std::cout << "block = " << block << std::endl;
+                int cnt = std::count(block.begin(), block.end(), '{');
             while (cnt)
             {
                 block += '}';
