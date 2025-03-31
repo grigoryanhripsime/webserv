@@ -5,8 +5,8 @@ DirectiveConfig::DirectiveConfig(const Directive& directives) : directives(direc
 }
 // void DirectiveConfig::directiveValidation()
 // {
-//     if (!directives.values.empty())//es nra hamara vor serveri skopkecqic durs sovorakan(key-value) directive chunenanq=>vor sax pti nerarvac linen server{<sra mej>}
-//         throw DirectiveConfigException("In config file can't be simple directives outside of any block!");
+//     if (!directives.simpleDir.empty())//es nra hamara vor serveri skopkecqic durs sovorakan(key-value) directive chunenanq=>vor sax pti nerarvac linen server{<sra mej>}
+//         throw DirectiveConfigException("In config file can't be simpleDir directives outside of any block!");
 //     if (directives.blocks.empty())//gone mek hatik server(blok directive) piti lini, stex karlia hashvel qani hat server server ka,vortev ete mihata servery kara anun(server_name) chunena, isk ete mekic avela u dranq unen nuyn ip-n ev port-@ PARTADIRA unenan server_name vorpisi karananq iranc tarberakel 
 //         throw DirectiveConfigException("In config file you need to have at least one server block!");
 //     std::multimap<std::string, Directive *>::iterator it = directives.blocks.begin();
@@ -32,7 +32,7 @@ DirectiveConfig::DirectiveConfig(const Directive& directives) : directives(direc
 void DirectiveConfig::directiveValidation()
 {
     // 1. Проверка, что нет простых директив вне блоков
-    if (!directives.values.empty()) {
+    if (!directives.simpleDir.empty()) {
         throw DirectiveConfigException("In config file can't be simple directives outside of any block!");
     }
 
@@ -51,10 +51,10 @@ void DirectiveConfig::directiveValidation()
         Directive* serverBlock = it->second;
         
         // 3.2. Проверка обязательных полей сервера
-        if (serverBlock->values.find("listen") == serverBlock->values.end()) {
+        if (serverBlock->simpleDir.find("listen") == serverBlock->simpleDir.end()) {
             throw DirectiveConfigException("Server directive must have 'listen' directive!");
         }
-        if (serverBlock->values.find("root") == serverBlock->values.end()) {
+        if (serverBlock->simpleDir.find("root") == serverBlock->simpleDir.end()) {
             throw DirectiveConfigException("Server directive must have 'root' directive!");
         }
 
@@ -69,7 +69,7 @@ void DirectiveConfig::directiveValidation()
             }
 
             // Проверка обязательного path у location
-            // if (itLoc->second->values.find("path") == itLoc->second->values.end()) {
+            // if (itLoc->second->simpleDir.find("path") == itLoc->second->simpleDir.end()) {
             //     throw DirectiveConfigException("Location directive must have 'path' specified!");
             // }
         }

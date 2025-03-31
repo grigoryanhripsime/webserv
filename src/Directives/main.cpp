@@ -8,7 +8,7 @@
 #include "ListeningSocket.hpp"
 #include "ClientSocket.hpp"
 #include "DirectiveConfig.hpp"
-
+#include "Directive.hpp"
 int main(int argc, char *argv[])
 {
     std::string fileName = argc == 2 ? argv[1] : "configs/default.conf";
@@ -17,10 +17,13 @@ int main(int argc, char *argv[])
         FileReader fileReader(fileName);
         fileReader.fileToStr();
         std::string strFile = fileReader.getFileStr();
+        
         TokenConfig tokenConfig(strFile);
         std::cout << "file->" << strFile << std::endl;
         tokenConfig.fillingDirectives();
-        
+        //printf the all directives`blocks and simple
+        std::cout << "sksesinq\n\n\n";
+        tokenConfig.printDirective(tokenConfig.getDirectives(), 0);
         DirectiveConfig dirConf(tokenConfig.getDirectives());
         dirConf.directiveValidation();
         

@@ -3,7 +3,7 @@
 Directive::Directive() {}
 
 Directive::Directive(const Directive& other) {
-    values = other.values;
+    simpleDir = other.simpleDir;
     for (std::multimap<std::string, Directive*>::const_iterator it = other.blocks.begin();
          it != other.blocks.end(); ++it) 
         blocks.insert(std::make_pair(it->first, new Directive(*(it->second))));

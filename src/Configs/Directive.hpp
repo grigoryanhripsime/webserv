@@ -6,7 +6,7 @@
 
 struct Directive 
 {
-    std::multimap<std::string, std::vector<std::string> > values;
+    std::multimap<std::string, std::vector<std::string> > simpleDir;
     std::multimap<std::string, Directive *> blocks;
     Directive(const Directive& other);
     Directive();
