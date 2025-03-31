@@ -1,6 +1,8 @@
 #pragma once
 
 #include "AGeneralDirective.hpp"
+#include "ServerDirective.hpp"
+#include "LocationDirective.hpp"
 class ServerDirective;
 #include "Directive.hpp"
 class Directive;
@@ -13,7 +15,9 @@ class DirectiveConfig
     public:
         DirectiveConfig(const Directive& directives);
         void directiveValidation();
-        void fillServers();
+        ServerDirective &fillServers(Directive *serverBlock);
+        LocationDirective &fillLocationsn(Directive *locationBlock);
+
 
         class DirectiveConfigException : public std::exception
         {

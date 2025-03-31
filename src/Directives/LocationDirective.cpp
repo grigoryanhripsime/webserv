@@ -10,10 +10,10 @@ LocationDirective::LocationDirective() :
     cgi_path("") {
 }
 
-LocationDirective::~LocationDirective() {
-}
+LocationDirective::~LocationDirective() {}
 
-void LocationDirective::validate() const{
+void LocationDirective::validate() const
+{
     // if (path.empty())
     //     throw std::runtime_error("Location: path cannot be empty");esi fillingDirectivesRec funkciayi mejenq nayum
     if (path[0] != '/')
@@ -23,16 +23,15 @@ void LocationDirective::validate() const{
     std::set<std::string> unique_methods;
     for (std::vector<std::string>::const_iterator it = allow_methods.begin(); it != allow_methods.end(); ++it)
     {
-       const std::string& method = *it;
-       if (method != "GET" && method != "POST" && method != "DELETE") {
-           throw std::runtime_error("Location: invalid HTTP method '" + method + "'");
-       }
-       if (!unique_methods.insert(method).second)
-        throw std::runtime_error("Duplicate HTTP method: " + method);
+        const std::string& method = *it;
+        if (method != "GET" && method != "POST" && method != "DELETE")
+            throw std::runtime_error("Location: invalid HTTP method '" + method + "'");
+        if (!unique_methods.insert(method).second)
+            throw std::runtime_error("Duplicate HTTP method: " + method);
    }
 
    // Проверка autoindex
-   if (autoindex != true && autoindex != false)
+    if (autoindex != true && autoindex != false)
         throw std::runtime_error("Location: autoindex must be 'on' or 'off'");
 
      // Проверка CGI конфигурации
