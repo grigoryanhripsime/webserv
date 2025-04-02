@@ -1,7 +1,9 @@
 #include "ServerDirective.hpp"
 
-ServerDirective::ServerDirective() : locdir(), listen(""), server_name("") 
+ServerDirective::ServerDirective()
 {
+    listen = "";
+    server_name = "";
 
 }
 
@@ -51,3 +53,47 @@ ServerDirective::~ServerDirective()
     for (std::vector<LocationDirective*>::iterator it = locdir.begin(); it != locdir.end(); ++it)
         delete *it;
 }
+
+
+/////////////setters//////////////
+void    ServerDirective::setListen(const std::string& port)
+{
+    std::stringstream ss(port);
+    size_t _port;
+    ss >> _port;
+    listen = _port;
+}
+
+void    ServerDirective::setServer_name(const std::string& name)
+{
+    server_name = name;
+}
+
+// void    ServerDirective::setIndex(const std::string& value)
+// {
+//     index = value;
+// }
+
+// void    ServerDirective::setClient_max_body_size(const std::string& size)
+// {
+//     std::stringstream ss(size);
+//     size_t sIze;
+//     ss >> sIze;
+//     client_max_body_size = sIze;
+// }
+
+// void    ServerDirective::setRoot(const std::string& rootPath)
+// {
+//     root = rootPath;
+// }
+
+// // void    ServerDirective::setError_pages(std::vecto<std::string> vec)
+// // {
+// //     int i = 0;
+// //     std::vector<std::string>::iterator it = vec.begin();
+// //     for(; it != vec.end(); ++it)
+// //     {
+// //         error_page.insert(std::make_pair(i, *it));
+// //         i++;
+// //     }
+// // }

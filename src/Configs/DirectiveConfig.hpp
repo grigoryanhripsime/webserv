@@ -15,8 +15,8 @@ class DirectiveConfig
     public:
         DirectiveConfig(const Directive& directives);
         void directiveValidation();
-        ServerDirective &fillServers(Directive *serverBlock);
-        LocationDirective &fillLocationsn(Directive *locationBlock);
+        ServerDirective fillServers(Directive *serverBlock);
+        LocationDirective fillLocationsn(Directive *locationBlock);
 
 
         class DirectiveConfigException : public std::exception

@@ -1,10 +1,10 @@
 #include"LocationDirective.hpp"
-
+#include <iostream>
 LocationDirective::LocationDirective() :
     path(""),
     redirect(),
     allow_methods(1, "GET"), // По умолчанию только GET
-    autoindex(false),
+    autoindex("off"),
     upload_dir(""),
     cgi_extension(""),
     cgi_path("") {
@@ -31,7 +31,7 @@ void LocationDirective::validate() const
    }
 
    // Проверка autoindex
-    if (autoindex != true && autoindex != false)
+    if (autoindex != "on" && autoindex != "off")
         throw std::runtime_error("Location: autoindex must be 'on' or 'off'");
 
      // Проверка CGI конфигурации
@@ -58,3 +58,117 @@ void LocationDirective::validate() const
 //     }
 //     return false;
 // }
+
+
+
+////////////////setters/////////////
+
+void    LocationDirective::setPath(const std::string& path)
+{
+    this->path = path;
+}
+
+void    LocationDirective::setAllow_methods(std::vector<std::string> methods)
+{
+    std::vector<std::string>::iterator it = methods.begin();
+    for(; it != methods.end(); ++it)
+    {
+        allow_methods.push_back(*it);
+    }
+}
+
+void    LocationDirective::setAutoindex(const std::string& off_or_on)
+{
+    autoindex = off_or_on;
+}
+
+
+////////////////////////////////////////
+
+void    LocationDirective::setRedirect(std::vector<std::string> red)
+{
+    if (red.size() != 2) {
+        throw std::runtime_error("Invalid return/redirect format. Use: 'CODE URL'");
+    }//redirect 302 http://temp.com;:CORRECT
+    //redirect 302 http://temp.com http://idk.com; # ОШИБКА!
+    //redirect 302 305 http://temp.com;  # ОШИБКА!,    mekel PARTADIRA vor URL-n`http://temp.com parunaki protocoly http
+    if (isAllDigits(red[0]))
+    {
+        std::stringstream ss(red[0]);
+        int ind;
+        ss >> ind;
+        redirect[ind] = red[1];
+        ss.clear();
+    }
+    else
+        std::cout << "qci indz exception:)\n";
+        ///exception qci vor red[0]-n parrtadir pti tiv ylni
+   
+}
+/////////////////////////////////////////////////
+
+void    LocationDirective::setUpload_dir(const std::string& upload_dir)
+{
+    this->upload_dir = upload_dir;
+}
+ 
+void    LocationDirective::setCgi_extension(const std::string& extension)
+{
+    cgi_extension = extension;
+}
+
+void    LocationDirective::setCgi_path(const std::string& cgi_path)
+{
+    this->cgi_path = cgi_path;
+}
+
+// void    LocationDirective::setIndex(const std::string& value)
+// {
+//     index = value;
+// }
+
+// void    LocationDirective::setClient_max_body_size(const std::string& size)
+// {
+//     std::stringstream ss(size);
+//     size_t sIze;
+//     ss >> sIze;
+//     client_max_body_size = sIze;
+// }
+
+// void    LocationDirective::setRoot(const std::string& rootPath)
+// {
+//     root = rootPath;
+// }
+
+// /////////////////////////////////////////////////////////////////
+// bool LocationDirective::isAllDigits(const std::string& str) {
+//     if (str.empty()) return false;
+    
+//     for (std::string::const_iterator it = str.begin(); it != str.end(); ++it) {
+//         if (!isdigit(static_cast<unsigned char>(*it)))
+//         return false;
+// }
+// return true;
+// }
+
+// void    LocationDirective::setError_pages(std::vector<std::string> pages)
+// {
+//     //hmi ste pti jokenq qanisn en tiv qansin enq string,orinak`error_pages 500 502 503 504 /50x.html;
+//     // map[500] = /50x.html;
+//     // map[502] = /50x.html;
+//     // map[503] = /50x.html;
+//     //....senc pti lini
+//     std::vector<std::string>::iterator it = pages.begin();
+//     for(; it != pages.end(); ++it)
+//     {
+//         // redirect.push_back(*it);
+//         std::stringstream ss(*it);
+//         int ind;
+//         if (isAllDigits(*it))
+//         {
+//             ss >> ind;
+//             redirect[ind] = pages[pages.size() - 1];
+//         }
+//     }
+// }
+// /////////////////////////////////////////////////////////////////

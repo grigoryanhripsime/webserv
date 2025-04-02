@@ -3,6 +3,8 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <sstream>
+
 class AGeneralDirective
 {
 protected:
@@ -11,12 +13,17 @@ protected:
  
     std::string root;//can be overridden in location, required dlya servera no mojet bit pustoy na locatione
     std::map<int, std::string> error_pages;//type-@ yst deepseeki ,  default: стандартные страницы ошибок сервера
-    // std::string error_page;
+public:
+    //////////setters////////////
+    bool isAllDigits(const std::string& str);
+    void    setIndex(const std::string& value);
+    void    setClient_max_body_size(const std::string& size);
+    void    setRoot(const std::string& value);
+    void    setError_pages(std::vector<std::string> pages);
 public:
     AGeneralDirective();
     virtual ~AGeneralDirective() = 0;//xi senc vor????
     virtual void validate() const = 0;  // для валидации значений
     const std::string& getRoot() const { return root; }
-    void setRoot(const std::string& r) { root = r; }
 
 };
