@@ -22,7 +22,7 @@ public:
         ~ServerDirective();
         virtual void validate() const;  // для валидации значений
        ///getter///
-       std::vector<LocationDirective*> get_locdir() const {return locdir;}
+       std::vector<LocationDirective*> getLocdir() const {return locdir;}
         std::string getListen() const {return listen;}
         std::string getServer_name() const {return server_name;}
 };
