@@ -82,9 +82,6 @@ void    LocationDirective::setAutoindex(const std::string& off_or_on)
     autoindex = off_or_on;
 }
 
-
-////////////////////////////////////////
-
 void    LocationDirective::setRedirect(std::vector<std::string> red)
 {
     if (red.size() != 2) {
@@ -105,7 +102,6 @@ void    LocationDirective::setRedirect(std::vector<std::string> red)
         ///exception qci vor red[0]-n parrtadir pti tiv ylni
    
 }
-/////////////////////////////////////////////////
 
 void    LocationDirective::setUpload_dir(const std::string& upload_dir)
 {
@@ -121,54 +117,3 @@ void    LocationDirective::setCgi_path(const std::string& cgi_path)
 {
     this->cgi_path = cgi_path;
 }
-
-// void    LocationDirective::setIndex(const std::string& value)
-// {
-//     index = value;
-// }
-
-// void    LocationDirective::setClient_max_body_size(const std::string& size)
-// {
-//     std::stringstream ss(size);
-//     size_t sIze;
-//     ss >> sIze;
-//     client_max_body_size = sIze;
-// }
-
-// void    LocationDirective::setRoot(const std::string& rootPath)
-// {
-//     root = rootPath;
-// }
-
-// /////////////////////////////////////////////////////////////////
-// bool LocationDirective::isAllDigits(const std::string& str) {
-//     if (str.empty()) return false;
-    
-//     for (std::string::const_iterator it = str.begin(); it != str.end(); ++it) {
-//         if (!isdigit(static_cast<unsigned char>(*it)))
-//         return false;
-// }
-// return true;
-// }
-
-// void    LocationDirective::setError_pages(std::vector<std::string> pages)
-// {
-//     //hmi ste pti jokenq qanisn en tiv qansin enq string,orinak`error_pages 500 502 503 504 /50x.html;
-//     // map[500] = /50x.html;
-//     // map[502] = /50x.html;
-//     // map[503] = /50x.html;
-//     //....senc pti lini
-//     std::vector<std::string>::iterator it = pages.begin();
-//     for(; it != pages.end(); ++it)
-//     {
-//         // redirect.push_back(*it);
-//         std::stringstream ss(*it);
-//         int ind;
-//         if (isAllDigits(*it))
-//         {
-//             ss >> ind;
-//             redirect[ind] = pages[pages.size() - 1];
-//         }
-//     }
-// }
-// /////////////////////////////////////////////////////////////////
