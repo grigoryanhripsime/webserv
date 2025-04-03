@@ -27,36 +27,50 @@ void DirectiveConfig::directiveValidation()
     if (serverBlock->simpleDir.find("listen") == serverBlock->simpleDir.end())
     throw DirectiveConfigException("Server directive must have 'listen' directive!");
 
-if (serverBlock->simpleDir.find("root") == serverBlock->simpleDir.end())
-throw DirectiveConfigException("Server directive must have 'root' directive!");
+    if (serverBlock->simpleDir.find("root") == serverBlock->simpleDir.end())
+    throw DirectiveConfigException("Server directive must have 'root' directive!");
 
-std::cout << "baste\n";
-ServerDirective serv = fillServers(serverBlock);//chem jokum inchnel lcnelu
-////////////////////////////////////////////////
-// 3.3. Проверка location блоков
-std::multimap<std::string, Directive*>::iterator itLoc = serverBlock->blocks.begin();
-for (; itLoc != serverBlock->blocks.end(); ++itLoc)
-{
-    if (itLoc->first != "location")
-    throw DirectiveConfigException("You can't have any other nested directive except for location!");
+    std::cout << "baste\n";
+    ServerDirective serv = fillServers(serverBlock);//chem jokum inchnel lcnelu
+    ////////////////////////////////////////////////
+    // 3.3. Проверка location блоков
+    std::multimap<std::string, Directive*>::iterator itLoc = serverBlock->blocks.begin();
+    for (; itLoc != serverBlock->blocks.end(); ++itLoc)
+    {
+        if (itLoc->first != "location")
+        throw DirectiveConfigException("You can't have any other nested directive except for location!");
 
-if (!itLoc->second->blocks.empty())
-throw DirectiveConfigException("location block can't have any block directives inside!");
+    if (!itLoc->second->blocks.empty())
+    throw DirectiveConfigException("location block can't have any block directives inside!");
 
-// Проверка обязательного path у location
-if (itLoc->second->simpleDir.find("path") == itLoc->second->simpleDir.end())
-throw DirectiveConfigException("Location directive must have 'path' specified!");
+    // Проверка обязательного path у location
+    if (itLoc->second->simpleDir.find("path") == itLoc->second->simpleDir.end())
+    throw DirectiveConfigException("Location directive must have 'path' specified!");
 
-LocationDirective loc = fillLocationsn(itLoc->second);
-serv.get_locdir().push_back(&loc);
-}
-std::vector<ServerDirective *>::iterator it = servers.begin();
-for(; it != servers.end(); ++it)
-{
-    std::cout << "listen = " << (*it)->getListen()<<std::endl;
-    std::cout << "server_name = " << (*it)->getServer_name() <<std::endl;
-}
-        servers.push_back(&serv);
+    LocationDirective loc = fillLocationsn(itLoc->second);
+    serv.getLocdir().push_back(&loc);
+    }
+    std::vector<ServerDirective *>::iterator it = servers.begin();
+    for(; it != servers.end(); ++it)
+    {
+        std::cout << "listen = " << (*it)->getListen()<<std::endl;
+        std::cout << "server_name = " << (*it)->getServer_name() <<std::endl;
+        std::vector<LocationDirective*> locdir = (*it)->getLocdir();
+        std::vector<LocationDirective*>::iterator ot = locdir.begin();
+        for(; ot != locdir.end(); ++ot)
+        {
+            std::cout << "path = " << (*ot)->getPath() << std::endl;
+            // 
+            // std::cout << "path = " << (*ot)->getPath() << std::endl;
+            std::cout << "autoindex = " << (*ot)->getAutoindex() << std::endl;
+            std::cout << "upload_dir = " << (*ot)->getUpload_dir() << std::endl;
+            std::cout << "cgi_extension = " << (*ot)->getCgi_extension() << std::endl;
+            std::cout << "cgi_path = " << (*ot)->getCgi_path() << std::endl;
+
+            
+        }
+    }
+            servers.push_back(&serv);
     }
 
     ///printf anenq serverdirectivy ev location directivy tenanq chishtenq grel setternery u vapshe es funkcian 

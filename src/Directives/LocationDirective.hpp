@@ -40,6 +40,7 @@ class LocationDirective : public AGeneralDirective
         // void    setUpload_dir(const std::string& upload_dir);
         // void    setCgi_extension(const std::string& extension);
         // void    setCgi_path(const std::string& cgi_path);
+>>>>>>> 59c25edd45c0b6e4241fbba9c520ad99ac192652
 
         // void    setIndex(const std::string& value);
         // void    setClient_max_body_size(const std::string& size);
