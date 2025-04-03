@@ -14,9 +14,11 @@ class DirectiveConfig
         std::vector<ServerDirective *> servers;
     public:
         DirectiveConfig(const Directive& directives);
+        ~DirectiveConfig();
         void directiveValidation();
-        ServerDirective fillServers(Directive *serverBlock);
-        LocationDirective fillLocationsn(Directive *locationBlock);
+        ServerDirective *fillServers(Directive *serverBlock);
+        LocationDirective *fillLocationsn(Directive *locationBlock);
+        void printServers();
 
 
         class DirectiveConfigException : public std::exception

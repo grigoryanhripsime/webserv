@@ -26,6 +26,7 @@ int main(int argc, char *argv[])
         DirectiveConfig dirConf(tokenConfig.getDirectives());
         std::cout << "sksesinq\n\n\n";
         dirConf.directiveValidation();
+        dirConf.printServers();
         
     } catch(std::exception &e)
     {

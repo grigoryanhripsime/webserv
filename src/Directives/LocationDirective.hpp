@@ -27,7 +27,7 @@ class LocationDirective : public AGeneralDirective
         void    setCgi_path(const std::string& cgi_path);
 
     public:
-        std::string validDirs[11] = {"path", "allow_methods","autoindex", "redirect", "upload_dir", "cgi_extension", "cgi_path" "index", "client_max_body_size", "root", "error_pages"};//khaneq private esi
+        std::string validDirs[11] = {"path", "allow_methods", "autoindex", "redirect", "upload_dir", "cgi_extension", "cgi_path", "index", "client_max_body_size", "root", "error_pages"};//khaneq private esi
         
         LocationDirective();
         ~LocationDirective();
@@ -46,8 +46,9 @@ class LocationDirective : public AGeneralDirective
         // void    setRoot(const std::string& value);
         // void    setError_pages(std::vector<std::string> pages);
 
-                //getters////
+        //getters////
         std::string getPath() const {return path;}
+        std::map<int, std::string> getRedirect() {return redirect;}
         std::string getAutoindex() const {return autoindex;}
         std::string getUpload_dir() const {return upload_dir;}
         std::string getCgi_extension() const {return cgi_extension;}

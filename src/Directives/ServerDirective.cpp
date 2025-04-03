@@ -1,5 +1,5 @@
 #include "ServerDirective.hpp"
-
+#include <iostream>
 ServerDirective::ServerDirective()
 {
     listen = "";
@@ -50,6 +50,7 @@ void ServerDirective::validate() const
 
 ServerDirective::~ServerDirective()
 {
+    std::cout<<"helloooo\n";
     for (std::vector<LocationDirective*>::iterator it = locdir.begin(); it != locdir.end(); ++it)
         delete *it;
 }
@@ -58,16 +59,25 @@ ServerDirective::~ServerDirective()
 /////////////setters//////////////
 void    ServerDirective::setListen(const std::string& port)
 {
-    std::stringstream ss(port);
-    size_t _port;
-    ss >> _port;
-    listen = _port;
+    std::cout << "ekav->" << port << std::endl;
+    // std::stringstream ss(port);
+    // size_t _port;
+    // ss >> _port;
+    listen = port;
+    std::cout << "listen is " << listen << std::endl;
+
 }
 
 void    ServerDirective::setServer_name(const std::string& name)
 {
     server_name = name;
 }
+
+void    ServerDirective::setLocDir(LocationDirective *loc)
+{
+    locdir.push_back(loc);
+}
+
 
 // void    ServerDirective::setIndex(const std::string& value)
 // {

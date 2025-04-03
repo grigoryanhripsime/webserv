@@ -65,6 +65,7 @@ void LocationDirective::validate() const
 
 void    LocationDirective::setPath(const std::string& path)
 {
+    std::cout<<path<<std::endl;
     this->path = path;
 }
 
@@ -79,6 +80,7 @@ void    LocationDirective::setAllow_methods(std::vector<std::string> methods)
 
 void    LocationDirective::setAutoindex(const std::string& off_or_on)
 {
+    std::cout<<off_or_on<<std::endl;
     autoindex = off_or_on;
 }
 
