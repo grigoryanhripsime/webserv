@@ -70,26 +70,26 @@ ServerDirective DirectiveConfig::fillServers(Directive *serverBlock)//&-@ maqrel
 
         switch (i)
         {
-        case 0:
-            serv.setListen(itSimpleDir->second[0]);//itSimpleDir->second[0]//erb setternery dnum em private sranq compile chi linum, karoxa vor es poxancvox parametrery getter ov poxancem dzvi??
-            break;
-        case 1:
-            serv.setServer_name(itSimpleDir->second[0]);
-            break;
-        case 2:
-            serv.setIndex(itSimpleDir->second[0]);
-            break;
-        case 3:
-            serv.setClient_max_body_size(itSimpleDir->second[0]);
-            break;
-        case 4:
-            serv.setRoot(itSimpleDir->second[0]);
-            break;
-        case 5:
-            serv.setError_pages(itSimpleDir->second);
-            break;
-        default:
-            throw std::runtime_error("Invalid directive for location");
+            case 0:
+                serv.setListen(itSimpleDir->second[0]);//itSimpleDir->second[0]//erb setternery dnum em private sranq compile chi linum, karoxa vor es poxancvox parametrery getter ov poxancem dzvi??
+                break;
+            case 1:
+                serv.setServer_name(itSimpleDir->second[0]);
+                break;
+            case 2:
+                serv.setIndex(itSimpleDir->second[0]);
+                break;
+            case 3:
+                serv.setClient_max_body_size(itSimpleDir->second[0]);
+                break;
+            case 4:
+                serv.setRoot(itSimpleDir->second[0]);
+                break;
+            case 5:
+                serv.setError_pages(itSimpleDir->second);
+                break;
+            default:
+                throw std::runtime_error("Invalid directive for server");
         }
     }
     return serv;
@@ -109,41 +109,41 @@ LocationDirective DirectiveConfig::fillLocationsn(Directive *locationBlock)
                 break ;
         switch (i)
         {
-        case 0:
-            loc.setPath(itSimpleDirLoc->second[0]);
-            break;
-        case 1:
-            loc.setAllow_methods(itSimpleDirLoc->second);//vectora dra hamar
-            break;
-        case 2:
-            loc.setAutoindex(itSimpleDirLoc->second[0]);
-            break;
-        case 3:
-            loc.setRedirect(itSimpleDirLoc->second);//qani vor vectora
-            break;
-        case 4:
-            loc.setUpload_dir(itSimpleDirLoc->second[0]);
-            break;
-        case 5:
-            loc.setCgi_extension(itSimpleDirLoc->second[0]);
-            break;
-        case 6:
-            loc.setCgi_path(itSimpleDirLoc->second[0]);
-            break;
-        case 7:
-            loc.setIndex(itSimpleDirLoc->second[0]);
-            break;                
-        case 8:
-            loc.setClient_max_body_size(itSimpleDirLoc->second[0]);
-            break;
-        case 9:
-            loc.setRoot(itSimpleDirLoc->second[0]);
-            break;
-        case 10:
-            loc.setError_pages(itSimpleDirLoc->second);//mapa,bayc chem patkeracnum vonca petq lcnel,kam vapshe karoxa map-@ poxenq vector?
-            break;
-        default:
-            throw std::runtime_error("Invalid directive for location");
+            case 0:
+                loc.setPath(itSimpleDirLoc->second[0]);
+                break;
+            case 1:
+                loc.setAllow_methods(itSimpleDirLoc->second);//vectora dra hamar
+                break;
+            case 2:
+                loc.setAutoindex(itSimpleDirLoc->second[0]);
+                break;
+            case 3:
+                loc.setRedirect(itSimpleDirLoc->second);//qani vor vectora
+                break;
+            case 4:
+                loc.setUpload_dir(itSimpleDirLoc->second[0]);
+                break;
+            case 5:
+                loc.setCgi_extension(itSimpleDirLoc->second[0]);
+                break;
+            case 6:
+                loc.setCgi_path(itSimpleDirLoc->second[0]);
+                break;
+            case 7:
+                loc.setIndex(itSimpleDirLoc->second[0]);
+                break;                
+            case 8:
+                loc.setClient_max_body_size(itSimpleDirLoc->second[0]);
+                break;
+            case 9:
+                loc.setRoot(itSimpleDirLoc->second[0]);
+                break;
+            case 10:
+                loc.setError_pages(itSimpleDirLoc->second);//mapa,bayc chem patkeracnum vonca petq lcnel,kam vapshe karoxa map-@ poxenq vector?
+                break;
+            default:
+                throw std::runtime_error("Invalid directive for location");
         }
     }
     return loc;
