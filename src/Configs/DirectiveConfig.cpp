@@ -69,18 +69,12 @@ ServerDirective DirectiveConfig::fillServers(Directive *serverBlock)//&-@ maqrel
     std::multimap<std::string, std::vector<std::string>>::iterator itSimpleDir = serverBlock->simpleDir.begin();
     for (; itSimpleDir != serverBlock->simpleDir.end(); ++itSimpleDir)
     {
-        std::cout << "amot\n";
         // if (itSimpleDir->first != "allow_methods" && itSimpleDir->first != "return" && itSimpleDir->second.size() != 1)
         //     throw std::runtime_error("There are more than one value for " + itSimpleDir->first);
         int i = 0;
         for (; i < 6; i++)
-        {
             if (itSimpleDir->first == serv.validDirs[i])
-            {
                 break ;
-            }
-            std::cout << "hres->" << itSimpleDir->first << std::endl;
-        }
 
         switch (i)
         {
@@ -115,12 +109,13 @@ LocationDirective DirectiveConfig::fillLocationsn(Directive *locationBlock)
     LocationDirective loc;
     for (; itSimpleDirLoc != locationBlock->simpleDir.end(); ++itSimpleDirLoc)
     {
-        // if (itSimpleDirLoc->first != "allow_methods" && itSimpleDirLoc->first != "return" && itSimpleDirLoc->second.size() != 1)
-        //     throw std::runtime_error("There are more than one value for " + itSimpleDirLoc->first);
+        if (itSimpleDirLoc->first != "allow_methods" && itSimpleDirLoc->first != "return" && itSimpleDirLoc->second.size() != 1)
+            throw std::runtime_error("There are more than one value for " + itSimpleDirLoc->first);
         int i = 0;
         for (; i < 11; i++)
             if (itSimpleDirLoc->first == loc.validDirs[i])
                 break ;
+        std::cout<<"hello -> "<<itSimpleDirLoc->first<<" "<<i<<" "<<std::endl;
         switch (i)
         {
             case 0:
