@@ -22,9 +22,9 @@ int main(int argc, char *argv[])
         std::cout << "file->" << strFile << std::endl;
         tokenConfig.fillingDirectives();
         //printf the all directives`blocks and simple
-        std::cout << "sksesinq\n\n\n";
         tokenConfig.printDirective(tokenConfig.getDirectives(), 0);
         DirectiveConfig dirConf(tokenConfig.getDirectives());
+        std::cout << "sksesinq\n\n\n";
         dirConf.directiveValidation();
         
     } catch(std::exception &e)
