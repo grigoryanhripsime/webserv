@@ -30,7 +30,6 @@ int main(int argc, char *argv[])
         
     } catch(std::exception &e)
     {
-        std::cout << "SIG\n";
         Logger::printStatus("ERROR", e.what());
     }
     std::cout<<"thn\n";

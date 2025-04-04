@@ -66,7 +66,7 @@ void DirectiveConfig::directiveValidation()
 ServerDirective *DirectiveConfig::fillServers(Directive *serverBlock)//&-@ maqrelem,local popoxakani reference veradardznely etqany xelaci ban chi:)
 {
     ServerDirective *serv = new ServerDirective();
-    std::multimap<std::string, std::vector<std::string>>::iterator itSimpleDir = serverBlock->simpleDir.begin();
+    std::multimap<std::string, std::vector<std::string> >::iterator itSimpleDir = serverBlock->simpleDir.begin();
     for (; itSimpleDir != serverBlock->simpleDir.end(); ++itSimpleDir)
     {
         // if (itSimpleDir->first != "allow_methods" && itSimpleDir->first != "return" && itSimpleDir->second.size() != 1)
@@ -105,7 +105,7 @@ ServerDirective *DirectiveConfig::fillServers(Directive *serverBlock)//&-@ maqre
 
 LocationDirective *DirectiveConfig::fillLocationsn(Directive *locationBlock)
 {
-    std::multimap<std::string, std::vector<std::string>>::iterator itSimpleDirLoc = locationBlock->simpleDir.begin();
+    std::multimap<std::string, std::vector<std::string> >::iterator itSimpleDirLoc = locationBlock->simpleDir.begin();
     LocationDirective *loc = new LocationDirective();
     for (; itSimpleDirLoc != locationBlock->simpleDir.end(); ++itSimpleDirLoc)
     {

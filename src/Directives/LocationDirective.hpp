@@ -27,25 +27,12 @@ class LocationDirective : public AGeneralDirective
         void    setCgi_path(const std::string& cgi_path);
 
     public:
-        std::string validDirs[11] = {"path", "allow_methods", "autoindex", "redirect", "upload_dir", "cgi_extension", "cgi_path", "index", "client_max_body_size", "root", "error_pages"};//khaneq private esi
+        std::string validDirs[11];
         
         LocationDirective();
         ~LocationDirective();
         virtual void validate() const;  // для валидации значений
-        // /////////setters//////////
-        // void    setPath(const std::string& path);
-        // void    setAllow_methods(std::vector<std::string> methods);
-        // void    setAutoindex(const std::string& off_or_on);
-        // void    setRedirect(std::vector<std::string> red);
-        // void    setUpload_dir(const std::string& upload_dir);
-        // void    setCgi_extension(const std::string& extension);
-        // void    setCgi_path(const std::string& cgi_path);
-
-        // void    setIndex(const std::string& value);
-        // void    setClient_max_body_size(const std::string& size);
-        // void    setRoot(const std::string& value);
-        // void    setError_pages(std::vector<std::string> pages);
-
+        
         //getters////
         std::string getPath() const {return path;}
         std::map<int, std::string> getRedirect() {return redirect;}

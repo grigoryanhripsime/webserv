@@ -3,7 +3,7 @@ GREEN   = \033[1;32m
 YELLOW  = \033[1;33m
 RESET   = \033[0;37m
 
-CPP     = c++ -std=c++11 -g3 -fsanitize=address
+CPP     = c++ -std=c++98 -g3 -fsanitize=address
 CFLAGS  = -Wall -Wextra -Werror
 
 SRCSPATH = src

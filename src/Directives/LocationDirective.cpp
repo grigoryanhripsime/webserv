@@ -3,11 +3,23 @@
 LocationDirective::LocationDirective() :
     path(""),
     redirect(),
-    allow_methods(1, "GET"), // По умолчанию только GET
+    allow_methods(1, "GET"),
     autoindex("off"),
     upload_dir(""),
     cgi_extension(""),
     cgi_path("") {
+
+        validDirs[0] = "path";
+        validDirs[1] = "allow_methods";
+        validDirs[2] = "autoindex";
+        validDirs[3] = "redirect";
+        validDirs[4] = "upload_dir";
+        validDirs[5] = "cgi_extension";
+        validDirs[6] = "cgi_path";
+        validDirs[7] = "index";
+        validDirs[8] = "client_max_body_size";
+        validDirs[9] = "root";
+        validDirs[10] = "error_pages";
 }
 
 LocationDirective::~LocationDirective() {}

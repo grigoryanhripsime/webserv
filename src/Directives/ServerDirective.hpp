@@ -6,24 +6,32 @@
 #include <sstream>
 #include "LocationDirective.hpp"
 class LocationDirective;
-class ServerDirective : public AGeneralDirective{
+class ServerDirective : public AGeneralDirective
+{
     private:
-        std::string listen;//no default=>REQUIRE,   Must define port (no default)
+        // std::string listen;//no default=>REQUIRE,   Must define port (no default)
+        std::pair<std::string, int> listen;
         std::string server_name;//allow but not required
         std::vector<LocationDirective*> locdir;
     public:
         //setters
-        void    setListen(const std::string& port);
+        void    setListen(const std::string& ipAndPort);
         void    setServer_name(const std::string& name);
         void    setLocDir(LocationDirective *loc);
+        std::string validDirs[6];
     public:
-        // std::string validDirs[10] = {"path", "root", "allow_methods", "index", "autoindex", "return", "upload_dir", "client_max_body_size", "cgi_extension", "cgi_path"};
-        std::string validDirs[6] = {"listen", "server_name", "index", "client_max_body_size", "root", "error_page"};
         ServerDirective();
         ~ServerDirective();
         virtual void validate() const;  // для валидации значений
-       ///getter///
-       std::vector<LocationDirective*> getLocdir() const {return locdir;}
-        std::string getListen() const {return listen;}
+
+        ///getter///
+        std::vector<LocationDirective*> getLocdir() const {return locdir;}
+        std::pair<std::string, int> getListen() const {return listen;}
         std::string getServer_name() const {return server_name;}
+
+        //validation//
+        void listenValidation();
+
+
+
 };

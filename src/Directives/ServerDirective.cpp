@@ -2,42 +2,60 @@
 #include <iostream>
 ServerDirective::ServerDirective()
 {
-    listen = "";
+    listen.first = "0.0.0.0";
+    listen.second = -1;
     server_name = "";
 
+    validDirs[0] = "listen";
+    validDirs[1] = "server_name";
+    validDirs[2] = "index";
+    validDirs[3] = "client_max_body_size";
+    validDirs[4] = "root";
+    validDirs[5] = "error_page";
+
+}
+
+void ServerDirective::listenValidation()
+{
+    // int port;
+    // if (listen.size() == 4)
+    // {
+    //     std::stringstream ss(listen);
+
+    // }
 }
 
 void ServerDirective::validate() const
 {
-    if (listen.empty())
-        throw std::runtime_error("Server must have listen directive");
+    // if (listen.empty())
+    //     throw std::runtime_error("Server must have listen directive");
 
-    if (root.empty())
-        throw std::runtime_error("Server must have root directive");
+    // if (root.empty())
+    //     throw std::runtime_error("Server must have root directive");
 
-    //port validacia
-     bool port_valid = true;
-     int port = 0;
+    // //port validacia
+    //  bool port_valid = true;
+    //  int port = 0;
      
-    // Проверка что все символы - цифры
-    for (std::string::const_iterator it = listen.begin(); it != listen.end(); ++it)
-        if (!isdigit(*it))
-        {
-            port_valid = false;
-            break;
-        }
+    // // Проверка что все символы - цифры
+    // for (std::string::const_iterator it = listen.begin(); it != listen.end(); ++it)
+    //     if (!isdigit(*it))
+    //     {
+    //         port_valid = false;
+    //         break;
+    //     }
      
-     // Конвертация и проверка диапазона
-    if (port_valid)
-    {
-        std::stringstream ss(listen);
-        ss >> port;
-        if (port <= 0 || port > 65535)
-            port_valid = false;
-    }
+    //  // Конвертация и проверка диапазона
+    // if (port_valid)
+    // {
+    //     std::stringstream ss(listen);
+    //     ss >> port;
+    //     if (port <= 0 || port > 65535)
+    //         port_valid = false;
+    // }
      
-    if (!port_valid)
-        throw std::runtime_error("Server: listen must be a valid port (1-65535)");
+    // if (!port_valid)
+    //     throw std::runtime_error("Server: listen must be a valid port (1-65535)");
 
     // Проверка всех location
     for (std::vector<LocationDirective*>::const_iterator it = locdir.begin(); it != locdir.end(); ++it) 
@@ -57,14 +75,23 @@ ServerDirective::~ServerDirective()
 
 
 /////////////setters//////////////
-void    ServerDirective::setListen(const std::string& port)
+void    ServerDirective::setListen(const std::string& ipAndPort)
 {
-    std::cout << "ekav->" << port << std::endl;
+    // std::cout << "ekav->" << port << std::endl;
     // std::stringstream ss(port);
     // size_t _port;
     // ss >> _port;
-    listen = port;
-    std::cout << "listen is " << listen << std::endl;
+
+    // listen = port;
+    // std::cout << "listen is " << listen << std::endl;
+    
+    size_t indexOfVerjaket = ipAndPort.find(":");
+    if (indexOfVerjaket != std::string::npos)
+        listen.first = ipAndPort.substr(0, indexOfVerjaket);
+
+    
+
+
 
 }
 
