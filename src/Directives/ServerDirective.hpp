@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <sstream>
 #include "LocationDirective.hpp"
+#include <algorithm>
 class LocationDirective;
 class ServerDirective : public AGeneralDirective
 {
@@ -25,13 +26,12 @@ class ServerDirective : public AGeneralDirective
         virtual void validate() const;  // для валидации значений
 
         ///getter///
-        std::vector<LocationDirective*> getLocdir() const {return locdir;}
+        std::vector<LocationDirective*>& getLocdir() {return locdir;}
         std::pair<std::string, int> getListen() const {return listen;}
         std::string getServer_name() const {return server_name;}
 
-        //validation//
-        void listenValidation();
-
-
-
+    ////listen validacia//////////
+    void    check_and_set_port(const std::string& ipAndPort, size_t& indexOfVerjaket, bool flag);
+    int     ip_part_contain_correct_integers(std::string ip_part);
+    ///////////////////////////////
 };

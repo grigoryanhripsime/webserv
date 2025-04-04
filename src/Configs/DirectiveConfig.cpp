@@ -5,13 +5,18 @@ DirectiveConfig::DirectiveConfig(const Directive& directives) : directives(direc
 DirectiveConfig::~DirectiveConfig()
 {
     for (std::vector<ServerDirective*>::iterator it = servers.begin(); it != servers.end(); ++it)
+    {
+        // std::vector<LocationDirective*>& loc = (*it)->getLocdir();
+        // std::vector<LocationDirective*>::iterator itloc = loc.begin();
+        // for(; itloc != loc.end(); ++itloc)
+        //     delete *itloc;
         delete *it;
+    }
 }
 
 void DirectiveConfig::directiveValidation()
 {
     ServerDirective *serv;
-    std::cout << "eee\n";
     // 1. Проверка, что нет простых директив вне блоков
     if (!directives.simpleDir.empty())
         throw DirectiveConfigException("In config file can't be simple directives outside of any block!");
@@ -26,18 +31,17 @@ void DirectiveConfig::directiveValidation()
     {
         // 3.1. Проверка, что блок именно server
         if (it->first != "server")
-        throw DirectiveConfigException("You can't have any other main directive except for server!");
+            throw DirectiveConfigException("You can't have any other main directive except for server!");
         
         Directive* serverBlock = it->second;//es serverBlock-nel uni simpleDir u blocks
         
         // 3.2. Проверка обязательных полей сервера
         if (serverBlock->simpleDir.find("listen") == serverBlock->simpleDir.end())
-        throw DirectiveConfigException("Server directive must have 'listen' directive!");
+            throw DirectiveConfigException("Server directive must have 'listen' directive!");
 
         if (serverBlock->simpleDir.find("root") == serverBlock->simpleDir.end())
-        throw DirectiveConfigException("Server directive must have 'root' directive!");
+            throw DirectiveConfigException("Server directive must have 'root' directive!");
 
-        std::cout << "baste\n";
         serv = fillServers(serverBlock);//chem jokum inchnel lcnelu
         ////////////////////////////////////////////////
         // 3.3. Проверка location блоков
@@ -45,14 +49,14 @@ void DirectiveConfig::directiveValidation()
         for (; itLoc != serverBlock->blocks.end(); ++itLoc)
         {
             if (itLoc->first != "location")
-            throw DirectiveConfigException("You can't have any other nested directive except for location!");
+                throw DirectiveConfigException("You can't have any other nested directive except for location!");
 
             if (!itLoc->second->blocks.empty())
-            throw DirectiveConfigException("location block can't have any block directives inside!");
+                throw DirectiveConfigException("location block can't have any block directives inside!");
 
             // Проверка обязательного path у location
             if (itLoc->second->simpleDir.find("path") == itLoc->second->simpleDir.end())
-            throw DirectiveConfigException("Location directive must have 'path' specified!");
+                throw DirectiveConfigException("Location directive must have 'path' specified!");
 
             LocationDirective *loc = fillLocationsn(itLoc->second);
             serv->setLocDir(loc);
@@ -66,41 +70,48 @@ void DirectiveConfig::directiveValidation()
 ServerDirective *DirectiveConfig::fillServers(Directive *serverBlock)//&-@ maqrelem,local popoxakani reference veradardznely etqany xelaci ban chi:)
 {
     ServerDirective *serv = new ServerDirective();
-    std::multimap<std::string, std::vector<std::string> >::iterator itSimpleDir = serverBlock->simpleDir.begin();
-    for (; itSimpleDir != serverBlock->simpleDir.end(); ++itSimpleDir)
-    {
-        // if (itSimpleDir->first != "allow_methods" && itSimpleDir->first != "return" && itSimpleDir->second.size() != 1)
-        //     throw std::runtime_error("There are more than one value for " + itSimpleDir->first);
-        int i = 0;
-        for (; i < 6; i++)
-            if (itSimpleDir->first == serv->validDirs[i])
-                break ;
-
-        switch (i)
+    try{
+        std::multimap<std::string, std::vector<std::string> >::iterator itSimpleDir = serverBlock->simpleDir.begin();
+        for (; itSimpleDir != serverBlock->simpleDir.end(); ++itSimpleDir)
         {
-            case 0:
-                serv->setListen(itSimpleDir->second[0]);//itSimpleDir->second[0]
-                break;
-            case 1:
-                serv->setServer_name(itSimpleDir->second[0]);
-                break;
-            case 2:
-                serv->setIndex(itSimpleDir->second[0]);
-                break;
-            case 3:
-                serv->setClient_max_body_size(itSimpleDir->second[0]);
-                break;
-            case 4:
-                serv->setRoot(itSimpleDir->second[0]);
-                break;
-            case 5:
-                serv->setError_pages(itSimpleDir->second);
-                break;
-            default:
-                throw std::runtime_error("Invalid directive for server");
+            if (itSimpleDir->first != "error_page" && itSimpleDir->second.size() != 1)
+                throw std::runtime_error("There are more than one value for " + itSimpleDir->first);
+            int i = 0;
+            for (; i < 6; i++)
+                if (itSimpleDir->first == serv->validDirs[i])
+                    break ;
+
+            switch (i)
+            {
+                case 0:
+                    serv->setListen(itSimpleDir->second[0]);//itSimpleDir->second[0]
+                    break;
+                case 1:
+                    serv->setServer_name(itSimpleDir->second[0]);
+                    break;
+                case 2:
+                    serv->setIndex(itSimpleDir->second[0]);
+                    break;
+                case 3:
+                    serv->setClient_max_body_size(itSimpleDir->second[0]);
+                    break;
+                case 4:
+                    serv->setRoot(itSimpleDir->second[0]);
+                    break;
+                case 5:
+                    serv->setError_pages(itSimpleDir->second);
+                    break;
+                default:
+                    throw std::runtime_error("Invalid directive for server");
+            }
         }
+        return serv;
     }
-    return serv;
+    catch(...)
+    {
+        delete serv;
+        throw ;
+    }
 }
 
 LocationDirective *DirectiveConfig::fillLocationsn(Directive *locationBlock)
@@ -109,7 +120,7 @@ LocationDirective *DirectiveConfig::fillLocationsn(Directive *locationBlock)
     LocationDirective *loc = new LocationDirective();
     for (; itSimpleDirLoc != locationBlock->simpleDir.end(); ++itSimpleDirLoc)
     {
-        if (itSimpleDirLoc->first != "allow_methods" && itSimpleDirLoc->first != "return" && itSimpleDirLoc->second.size() != 1)
+        if (itSimpleDirLoc->first != "error_page" && itSimpleDirLoc->first != "allow_methods" && itSimpleDirLoc->first != "return" && itSimpleDirLoc->second.size() != 1)
             throw std::runtime_error("There are more than one value for " + itSimpleDirLoc->first);
         int i = 0;
         for (; i < 11; i++)
@@ -176,8 +187,10 @@ void DirectiveConfig::printServers()
     std::vector<ServerDirective *>::iterator it = servers.begin();
     for(; it != servers.end(); ++it)
     {
-        std::cout << "vateq\n" << *it << std::endl;
-        std::cout << "listen = " << (*it)->getListen()<<std::endl;
+        std::pair<std::string, int> par =  (*it)->getListen();
+        std::cout << "listen-i ip = " <<par.first<<std::endl;
+        std::cout << "listen-i port = " <<par.second<<std::endl;
+
         std::cout << "server_name = " << (*it)->getServer_name() <<std::endl;
         std::map<int, std::string> err  = (*it)->getError_page();
         std::map<int, std::string>::iterator it1 = err.begin();

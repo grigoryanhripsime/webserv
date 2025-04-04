@@ -15,16 +15,6 @@ ServerDirective::ServerDirective()
 
 }
 
-void ServerDirective::listenValidation()
-{
-    // int port;
-    // if (listen.size() == 4)
-    // {
-    //     std::stringstream ss(listen);
-
-    // }
-}
-
 void ServerDirective::validate() const
 {
     // if (listen.empty())
@@ -32,31 +22,7 @@ void ServerDirective::validate() const
 
     // if (root.empty())
     //     throw std::runtime_error("Server must have root directive");
-
-    // //port validacia
-    //  bool port_valid = true;
-    //  int port = 0;
      
-    // // Проверка что все символы - цифры
-    // for (std::string::const_iterator it = listen.begin(); it != listen.end(); ++it)
-    //     if (!isdigit(*it))
-    //     {
-    //         port_valid = false;
-    //         break;
-    //     }
-     
-    //  // Конвертация и проверка диапазона
-    // if (port_valid)
-    // {
-    //     std::stringstream ss(listen);
-    //     ss >> port;
-    //     if (port <= 0 || port > 65535)
-    //         port_valid = false;
-    // }
-     
-    // if (!port_valid)
-    //     throw std::runtime_error("Server: listen must be a valid port (1-65535)");
-
     // Проверка всех location
     for (std::vector<LocationDirective*>::const_iterator it = locdir.begin(); it != locdir.end(); ++it) 
     {
@@ -75,26 +41,73 @@ ServerDirective::~ServerDirective()
 
 
 /////////////setters//////////////
-void    ServerDirective::setListen(const std::string& ipAndPort)
+////////////////listen validacia/////////
+int     ServerDirective::ip_part_contain_correct_integers(std::string ip_part)
 {
-    // std::cout << "ekav->" << port << std::endl;
-    // std::stringstream ss(port);
-    // size_t _port;
-    // ss >> _port;
-
-    // listen = port;
-    // std::cout << "listen is " << listen << std::endl;
-    
+    ip_part.insert(ip_part.end(), '.');//127.33.222.1000.(es verji kety avelacnum em)
+    size_t ind_of_dot;
+    while(!ip_part.empty())
+    {
+        ind_of_dot = ip_part.find('.');
+        if (ind_of_dot == std::string::npos)
+            return 1;
+        std::string cur_part = ip_part.substr(0, ind_of_dot);
+        if (cur_part.empty())
+            throw std::runtime_error("something wrong in ip_part dots");
+        std::stringstream ss(cur_part);
+        int octet = 0;
+        ss >> octet;
+        if (!(octet >= 0 && octet <= 255))
+            return -1;
+        ip_part.erase(0, ind_of_dot + 1);
+    }
+    return 1;
+}
+void    ServerDirective::check_and_set_port(const std::string& ipAndPort, size_t& indexOfVerjaket, bool flag)
+{
+    if (flag)
+    {
+        std::string port = ipAndPort.substr(indexOfVerjaket + 1, ipAndPort.size());
+        if (isAllDigits(port))
+        {
+            std::stringstream ss(port);
+            size_t value;
+            ss >> value;
+            if (value <= 0 || value > 65535)
+                throw std::runtime_error("port value must be in range (0,65535]");
+            listen.second = value;
+        }
+    }
+    else
+    {
+        if (isAllDigits(ipAndPort))
+        {
+            std::stringstream ss(ipAndPort);
+            size_t value;
+            ss >> value;
+            if (value <= 0 || value > 65535)
+                throw std::runtime_error("port value must be in range (0,65535]");
+            listen.second = value;
+        }
+    }
+}
+void    ServerDirective::setListen(const std::string& ipAndPort)
+{   
     size_t indexOfVerjaket = ipAndPort.find(":");
     if (indexOfVerjaket != std::string::npos)
-        listen.first = ipAndPort.substr(0, indexOfVerjaket);
-
-    
-
-
-
+    {
+        std::string ip_part = ipAndPort.substr(0, indexOfVerjaket);
+        if(std::count(ip_part.begin(), ip_part.end(), '.') != 3)
+            throw std::runtime_error("in ip . must be 3hat");
+        if (ip_part_contain_correct_integers(ip_part) < 0)
+            throw std::runtime_error("ip octets is not range [0-255]");
+        listen.first = ip_part;
+        check_and_set_port(ipAndPort, indexOfVerjaket, true);
+    }
+    else
+        check_and_set_port(ipAndPort, indexOfVerjaket, false);
 }
-
+/////////////done losten validaca////////////////
 void    ServerDirective::setServer_name(const std::string& name)
 {
     server_name = name;
@@ -104,33 +117,3 @@ void    ServerDirective::setLocDir(LocationDirective *loc)
 {
     locdir.push_back(loc);
 }
-
-
-// void    ServerDirective::setIndex(const std::string& value)
-// {
-//     index = value;
-// }
-
-// void    ServerDirective::setClient_max_body_size(const std::string& size)
-// {
-//     std::stringstream ss(size);
-//     size_t sIze;
-//     ss >> sIze;
-//     client_max_body_size = sIze;
-// }
-
-// void    ServerDirective::setRoot(const std::string& rootPath)
-// {
-//     root = rootPath;
-// }
-
-// // void    ServerDirective::setError_pages(std::vecto<std::string> vec)
-// // {
-// //     int i = 0;
-// //     std::vector<std::string>::iterator it = vec.begin();
-// //     for(; it != vec.end(); ++it)
-// //     {
-// //         error_page.insert(std::make_pair(i, *it));
-// //         i++;
-// //     }
-// // }
