@@ -22,7 +22,7 @@ LocationDirective::LocationDirective() :
         validDirs[10] = "error_pages";
 }
 
-LocationDirective::~LocationDirective() {}
+LocationDirective::~LocationDirective() {std::cout << "LocationDirective dtor\n";}
 
 void LocationDirective::validate() const
 {
@@ -74,10 +74,28 @@ void LocationDirective::validate() const
 
 
 ////////////////setters/////////////
+bool LocationDirective::isValidLocationPath(const std::string& path) {
+    if (path.empty() || path[0] != '/')
+        return false;//partadir petqa path lini u sksvi '/'-ov
+
+    for (std::string::size_type i = 1; i < path.size(); ++i)
+    {
+        char c = path[i];
+        if (c == '/' && path[i - 1] == '/')
+            return false;//  "/not//valid"
+        if (!std::isalnum(c) && c != '/' && c != '-' && c != '_' &&
+            c != '.' && c != '?' && c != '=' && c != '&')
+            return false;
+    }
+
+    return true;
+}
 
 void    LocationDirective::setPath(const std::string& path)
 {
     std::cout<<path<<std::endl;
+    if (!isValidLocationPath(path))
+        throw std::runtime_error("path conatin unnecessary simnbol");
     this->path = path;
 }
 

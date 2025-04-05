@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 #include <set>
+#include <cctype>
 class LocationDirective : public AGeneralDirective
 {
     private:
@@ -38,4 +39,6 @@ class LocationDirective : public AGeneralDirective
         std::string getUpload_dir() const {return upload_dir;}
         std::string getCgi_extension() const {return cgi_extension;}
         std::string getCgi_path() const {return cgi_path;}
+        ///////path validacia
+        bool isValidLocationPath(const std::string& path);
 };

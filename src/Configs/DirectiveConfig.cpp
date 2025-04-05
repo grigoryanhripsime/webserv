@@ -9,8 +9,8 @@ DirectiveConfig::~DirectiveConfig()
         // std::vector<LocationDirective*>& loc = (*it)->getLocdir();
         // std::vector<LocationDirective*>::iterator itloc = loc.begin();
         // for(; itloc != loc.end(); ++itloc)
-        //     delete *itloc;
-        delete *it;
+        //     delete *itloc;//esi el petq chi vortev serverdirection-i dtorum menq locationdirectivnery free enq anum!
+        delete *it;//sra shnorhiv kanchvuma
     }
 }
 
@@ -74,7 +74,7 @@ ServerDirective *DirectiveConfig::fillServers(Directive *serverBlock)//&-@ maqre
         std::multimap<std::string, std::vector<std::string> >::iterator itSimpleDir = serverBlock->simpleDir.begin();
         for (; itSimpleDir != serverBlock->simpleDir.end(); ++itSimpleDir)
         {
-            if (itSimpleDir->first != "error_page" && itSimpleDir->second.size() != 1)
+            if (itSimpleDir->first != "index" && itSimpleDir->first != "error_page" && itSimpleDir->second.size() != 1)
                 throw std::runtime_error("There are more than one value for " + itSimpleDir->first);
             int i = 0;
             for (; i < 6; i++)
@@ -90,7 +90,7 @@ ServerDirective *DirectiveConfig::fillServers(Directive *serverBlock)//&-@ maqre
                     serv->setServer_name(itSimpleDir->second[0]);
                     break;
                 case 2:
-                    serv->setIndex(itSimpleDir->second[0]);
+                    serv->setIndex(itSimpleDir->second);
                     break;
                 case 3:
                     serv->setClient_max_body_size(itSimpleDir->second[0]);
@@ -120,7 +120,7 @@ LocationDirective *DirectiveConfig::fillLocationsn(Directive *locationBlock)
     LocationDirective *loc = new LocationDirective();
     for (; itSimpleDirLoc != locationBlock->simpleDir.end(); ++itSimpleDirLoc)
     {
-        if (itSimpleDirLoc->first != "error_page" && itSimpleDirLoc->first != "allow_methods" && itSimpleDirLoc->first != "return" && itSimpleDirLoc->second.size() != 1)
+        if (itSimpleDirLoc->first != "index" && itSimpleDirLoc->first != "error_page" && itSimpleDirLoc->first != "allow_methods" && itSimpleDirLoc->first != "return" && itSimpleDirLoc->second.size() != 1)
             throw std::runtime_error("There are more than one value for " + itSimpleDirLoc->first);
         int i = 0;
         for (; i < 11; i++)
@@ -150,7 +150,7 @@ LocationDirective *DirectiveConfig::fillLocationsn(Directive *locationBlock)
                 loc->setCgi_path(itSimpleDirLoc->second[0]);
                 break;
             case 7:
-                loc->setIndex(itSimpleDirLoc->second[0]);
+                loc->setIndex(itSimpleDirLoc->second);
                 break;                
             case 8:
                 loc->setClient_max_body_size(itSimpleDirLoc->second[0]);
@@ -187,10 +187,11 @@ void DirectiveConfig::printServers()
     std::vector<ServerDirective *>::iterator it = servers.begin();
     for(; it != servers.end(); ++it)
     {
+        std::cout << "body size = " << (*it)->getBodySize() << std::endl;
         std::pair<std::string, int> par =  (*it)->getListen();
         std::cout << "listen-i ip = " <<par.first<<std::endl;
         std::cout << "listen-i port = " <<par.second<<std::endl;
-
+        
         std::cout << "server_name = " << (*it)->getServer_name() <<std::endl;
         std::map<int, std::string> err  = (*it)->getError_page();
         std::map<int, std::string>::iterator it1 = err.begin();
@@ -202,6 +203,10 @@ void DirectiveConfig::printServers()
         std::vector<LocationDirective*>::iterator ot = locdir.begin();
         for(; ot != locdir.end(); ++ot)
         {
+            for(std::vector<std::string>::iterator ott = (*ot)->getIndex().begin(); ott != (*ot)->getIndex().end(); ++ott)
+            {
+                std::cout << "index = " << *ott << std::endl;
+            }
             std::cout << "path = " << (*ot)->getPath() << std::endl;
             ////////
             std::map<int, std::string> red  = (*ot)->getRedirect();
