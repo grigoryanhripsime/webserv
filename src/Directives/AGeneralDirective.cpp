@@ -13,18 +13,21 @@ AGeneralDirective::~AGeneralDirective(){}
 /////////////index/////////////////
 bool AGeneralDirective::is_valid_index_value(std::string value)
 {
-    // std::cout << "elav = "
-    if (value.empty() || value[0] == '/' || value[value.size() - 1] == '/'
+    std::cout << "elav = " << value << std::endl;
+    {
+        unsigned int ind = value.find('.');
+        if (value[0] == '.' || (ind != std::string::npos && !is_all_letters(value.substr(ind + 1, value.size()))))
+            throw std::runtime_error("Innvalid value(poxir message-@)");
+    }
+    if (isAllDigits(value) || value.empty() || value[0] == '/' || value[value.size() - 1] == '/'
         || value.find("//") != std::string::npos)
         return false;
     for (unsigned int i = 0; i < value.size(); ++i)
     {
         if (!(isalpha(value[i]) || isdigit(value[i]) || 
              value[i] == '.' || value[i] == '-' || 
-             value[i] == '_' || value[i] == '/')) {
-                std::cout << "vaaaaaaaaaaaaaaaaaaaaa\n";
+             value[i] == '_' || value[i] == '/'))
             return false;
-        }
     }
     return true;
 }
@@ -121,6 +124,18 @@ bool AGeneralDirective::isAllDigits(const std::string& str) {
 return true;
 }
 
+bool AGeneralDirective::is_all_letters(const std::string& str) {
+    if (str.empty()) return false;  // пустая строка — невалидна
+
+    for (std::string::const_iterator it = str.begin(); it != str.end(); ++it) {
+        if (!isalpha(static_cast<unsigned char>(*it))) {
+            return false;  // нашли не-букву
+        }
+    }
+    return true;  // все символы — буквы
+}
+///////////////////////
+
 void    AGeneralDirective::setError_pages(std::vector<std::string> pages)
 {
     //hmi ste pti jokenq qanisn en tiv qansin enq string,orinak`error_pages 500 502 503 504 /50x.html;
@@ -130,16 +145,16 @@ void    AGeneralDirective::setError_pages(std::vector<std::string> pages)
     //....senc pti lini
     std::vector<std::string>::iterator it = pages.begin();
     std::cout << "gres-?" << *(pages.end() - 1) << std::endl;
-    if (!is_valid_index_value(*(pages.end() - 1)))
+    if (is_valid_index_value(*(pages.end() - 1)) == false)
         throw std::runtime_error("Invalid last value(path) of error_page");
     for(; it != pages.end() - 1; ++it)
     {
-        // redirect.push_back(*it);
         std::stringstream ss(*it);
         int ind;
         if (isAllDigits(*it))
         {
             ss >> ind;
+            //stugel indexi hamar vor error page-eri tverina patkanum te che
             error_pages[ind] = pages[pages.size() - 1];
         }
         else
