@@ -3,7 +3,6 @@
 LocationDirective::LocationDirective() :
     path(""),
     redirect(),
-    allow_methods(1, "GET"),
     autoindex("off"),
     upload_dir(""),
     cgi_extension(""),
@@ -77,7 +76,8 @@ void LocationDirective::validate() const
 
 void    LocationDirective::setPath(const std::string& path)
 {
-    std::cout<<path<<std::endl;
+    if (path[0] != '/')
+        throw std::runtime_error("Invalid path " + path);
     this->path = path;
 }
 
@@ -92,42 +92,75 @@ void    LocationDirective::setAllow_methods(std::vector<std::string> methods)
 
 void    LocationDirective::setAutoindex(const std::string& off_or_on)
 {
-    std::cout<<off_or_on<<std::endl;
+    if (off_or_on != "on" && off_or_on != "off")
+        throw std::runtime_error("Autoindex must be 'on' or 'off'");
     autoindex = off_or_on;
 }
 
+int LocationDirective::validateRedirect(std::string codeStr, std::string url)
+{
+    if (codeStr.find_first_not_of("0123456789") != std::string::npos)
+        throw std::runtime_error("Invalid HTTP code " + codeStr);
+    std::stringstream ss(codeStr);
+    int code;
+    if (ss >> code)
+        throw std::runtime_error("Invalid HTTP code " + codeStr);
+    if (code < 100 || code >= 600)
+        throw std::runtime_error("Status code must be 1xx-5xx.");
+    if (code >= 300 && code < 400) {
+        if (url.empty())
+            throw std::runtime_error("Redirect requires a URL (e.g., 'return 301 /new').");
+        if (url[0] != '/' && !(url.find("http://") == 0 || url.find("https://") == 0))
+            throw std::runtime_error("URL must start with '/' or 'http'.");
+    }
+    if ((code < 300 || code >= 400) && (url.empty() && url.size() > 1024))
+            throw std::runtime_error("Custom response text too long (max 1KB).");    
+    return true;   
+}
+        
 void    LocationDirective::setRedirect(std::vector<std::string> red)
 {
-    if (red.size() != 2) {
-        throw std::runtime_error("Invalid return/redirect format. Use: 'CODE URL'");
-    }//redirect 302 http://temp.com;:CORRECT
-    //redirect 302 http://temp.com http://idk.com; # ОШИБКА!
-    //redirect 302 305 http://temp.com;  # ОШИБКА!,    mekel PARTADIRA vor URL-n`http://temp.com parunaki protocoly http
-    if (isAllDigits(red[0]))
-    {
-        std::stringstream ss(red[0]);
-        int ind;
-        ss >> ind;
-        redirect[ind] = red[1];
-        ss.clear();
-    }
-    else
-        std::cout << "qci indz exception:)\n";
-        ///exception qci vor red[0]-n parrtadir pti tiv ylni
-   
+    if (red.size() != 2)
+        throw std::runtime_error("Invalid return format. Use: 'CODE URL'");        
+    this->redirect.insert(std::pair<int, std::string>(this->validateRedirect(red[0], red[1]), red[1]));
 }
 
 void    LocationDirective::setUpload_dir(const std::string& upload_dir)
 {
+    struct stat info;
+
+    if (upload_dir.size() > 1 && upload_dir[upload_dir.size() - 1] == '/')
+        throw std::runtime_error("Upload dir must not have / at the end.");
+    if (stat(upload_dir.c_str(), &info) != 0)
+        throw std::runtime_error("Directory does not exist.");
+    if (!(info.st_mode & S_IFDIR))
+        throw std::runtime_error("Path is not a directory.");
+    if (access(upload_dir.c_str(), W_OK) != 0)
+        throw std::runtime_error("Directory is not writable.");
+        
     this->upload_dir = upload_dir;
 }
  
 void    LocationDirective::setCgi_extension(const std::string& extension)
 {
+    if (extension.size() < 2 || extension[0] != '.')
+        throw std::runtime_error("CGI extension must start with '.'");
+    if (extension.find_first_of(" \t\n*?$&|;<>(){}[]'\"\\") != std::string::npos || isdigit(extension[1]))
+        throw std::runtime_error("CGI extension has invalid char in it.");
     cgi_extension = extension;
 }
 
 void    LocationDirective::setCgi_path(const std::string& cgi_path)
 {
+    struct stat info;
+
+    if (cgi_path.size() < 2 || cgi_path[0] != '/')
+        throw std::runtime_error("CGI path must start with '//'");
+    if (stat(upload_dir.c_str(), &info) != 0)
+        throw std::runtime_error("File does not exist.");
+    if (!(info.st_mode & S_IFREG))
+        throw std::runtime_error("Path is not a file.");
+    if (access(cgi_path.c_str(), X_OK) != 0)
+        throw std::runtime_error("File is not executable.");
     this->cgi_path = cgi_path;
 }

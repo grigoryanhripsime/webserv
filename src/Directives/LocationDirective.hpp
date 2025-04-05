@@ -4,17 +4,20 @@
 #include <vector>
 #include <map>
 #include <set>
+#include <sys/stat.h>
+#include <unistd.h>
+
 class LocationDirective : public AGeneralDirective
 {
     private:
         std::string path;//example `location /api {? obizatelno
         std::map<int, std::string> redirect;// return 301 http://google.com
-        // std::vector<std::string> redirect;
         std::vector<std::string> allow_methods;//esi xi vectorov?,  default: GET (если не указано)
         std::string autoindex;//deafult off(false)
         std::string upload_dir;//default: "" (загрузка файлов отключена)
         std::string cgi_extension;//default: "" (CGI отключено)
         std::string cgi_path;//default: ""
+        
         /////////setters//////////
     public:
         void    setPath(const std::string& path);
@@ -38,4 +41,8 @@ class LocationDirective : public AGeneralDirective
         std::string getUpload_dir() const {return upload_dir;}
         std::string getCgi_extension() const {return cgi_extension;}
         std::string getCgi_path() const {return cgi_path;}
+
+
+        int validateRedirect(std::string codeStr, std::string url);
+
 };
