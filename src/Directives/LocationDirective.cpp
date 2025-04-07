@@ -8,6 +8,7 @@ LocationDirective::LocationDirective() :
     cgi_extension(""),
     cgi_path("") {
 
+        allow_methods.push_back("GET");//arajarkum em esi toxenq,vortev ete allow metod configi mej chlni lselem vor default pti GET lini
         validDirs[0] = "path";
         validDirs[1] = "allow_methods";
         validDirs[2] = "autoindex";
@@ -103,7 +104,7 @@ void    LocationDirective::setAllow_methods(std::vector<std::string> methods)
     std::vector<std::string>::iterator it = methods.begin();
     for(; it != methods.end(); ++it)
     {
-        allow_methods.push_back(*it);
+        allow_methods.push_back(*it);///ste xienq aranc check anelu push anum?
     }
 }
 
@@ -154,10 +155,25 @@ void    LocationDirective::setUpload_dir(const std::string& upload_dir)
         throw std::runtime_error("Path is not a directory.");
     if (access(upload_dir.c_str(), W_OK) != 0)
         throw std::runtime_error("Directory is not writable.");
-        
     this->upload_dir = upload_dir;
 }
  
+
+void    LocationDirective::setCgi_path(const std::string& cgi_path)
+{
+    struct stat info;
+    
+    if (cgi_path.size() < 2 || cgi_path[0] != '/')
+        throw std::runtime_error("CGI path must start with '//'");
+    if (stat(upload_dir.c_str(), &info) != 0)
+        throw std::runtime_error("File does not exist.");
+    if (!(info.st_mode & S_IFREG))
+        throw std::runtime_error("Path is not a file.");///stex partadir pti fayl lini,upload_dir-umel direktoria pti lini(partadir)???????
+    if (access(cgi_path.c_str(), X_OK) != 0)
+        throw std::runtime_error("File is not executable.");
+    this->cgi_path = cgi_path;
+}
+
 void    LocationDirective::setCgi_extension(const std::string& extension)
 {
     if (extension.size() < 2 || extension[0] != '.')
@@ -165,19 +181,4 @@ void    LocationDirective::setCgi_extension(const std::string& extension)
     if (extension.find_first_of(" \t\n*?$&|;<>(){}[]'\"\\") != std::string::npos || isdigit(extension[1]))
         throw std::runtime_error("CGI extension has invalid char in it.");
     cgi_extension = extension;
-}
-
-void    LocationDirective::setCgi_path(const std::string& cgi_path)
-{
-    struct stat info;
-
-    if (cgi_path.size() < 2 || cgi_path[0] != '/')
-        throw std::runtime_error("CGI path must start with '//'");
-    if (stat(upload_dir.c_str(), &info) != 0)
-        throw std::runtime_error("File does not exist.");
-    if (!(info.st_mode & S_IFREG))
-        throw std::runtime_error("Path is not a file.");
-    if (access(cgi_path.c_str(), X_OK) != 0)
-        throw std::runtime_error("File is not executable.");
-    this->cgi_path = cgi_path;
 }

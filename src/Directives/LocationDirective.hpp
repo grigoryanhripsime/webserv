@@ -12,7 +12,6 @@ class LocationDirective : public AGeneralDirective
     private:
         std::string path;//example `location /api {? obizatelno
         std::map<int, std::string> redirect;// return 301 http://google.com
-        // std::vector<std::string> redirect;
         std::vector<std::string> allow_methods;//esi xi vectorov?,  default: GET (если не указано)
         std::string autoindex;//deafult off(false)
         std::string upload_dir;//default: "" (загрузка файлов отключена)

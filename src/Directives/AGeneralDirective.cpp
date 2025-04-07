@@ -1,9 +1,9 @@
 #include "AGeneralDirective.hpp"
 #include<iostream>
 //1048576 == 1MB
-AGeneralDirective::AGeneralDirective() : client_max_body_size(1048576), root(""), error_pages()
+AGeneralDirective::AGeneralDirective() : client_max_body_size(1048576), root(""), error_pages()//error_pages()senc grenq hena vor chgrenq meka nuyn datarki ahy chi?asacs enq jnjenq eta
 {
-    index.push_back("index.html");
+    index.push_back("index.html");//vor default talis enq u en setteri mej vor push_back enq anum,es default arjeqy chem jnjum zut vric(1-rd indexic) avelacnum em,uje himnakan procesi jmk stigel ete vec-i size-@ meca 1ic toist baci defaultic config fayli mej arjeqa tvac exe,ignorenq et deafult arjeqy u 2rd elemntic(1-rd indexic) sksenq man gal faylery
     // error_pages[400] = "error_pages/400.html";
     // error_pages[404] = "error_pages/404.html";
     // error_pages[500] = "error_pages/500.html";//yani defaultov menq karanq unenanq vor errorin inch eja hamapatasxan
