@@ -111,7 +111,7 @@ void    LocationDirective::setAllow_methods(std::vector<std::string> methods)
 void    LocationDirective::setAutoindex(const std::string& off_or_on)
 {
     if (off_or_on != "on" && off_or_on != "off")
-        throw std::runtime_error("Autoindex must be 'on' or 'off'");
+        throw std::runtime_error("Autoindex must be 'on' or 'off'" + off_or_on);
     autoindex = off_or_on;
 }
 
@@ -148,9 +148,9 @@ void    LocationDirective::setUpload_dir(const std::string& upload_dir)
     struct stat info;
 
     if (upload_dir.size() > 1 && upload_dir[upload_dir.size() - 1] == '/')
-        throw std::runtime_error("Upload dir must not have / at the end.");
+        throw std::runtime_error("Upload dir must not have / at the end." + upload_dir);
     if (stat(upload_dir.c_str(), &info) != 0)
-        throw std::runtime_error("Directory does not exist.");
+        throw std::runtime_error("Directory does not exist." + upload_dir);
     if (!(info.st_mode & S_IFDIR))
         throw std::runtime_error("Path is not a directory.");
     if (access(upload_dir.c_str(), W_OK) != 0)
@@ -164,7 +164,7 @@ void    LocationDirective::setCgi_path(const std::string& cgi_path)
     struct stat info;
     
     if (cgi_path.size() < 2 || cgi_path[0] != '/')
-        throw std::runtime_error("CGI path must start with '//'");
+        throw std::runtime_error("CGI path must start with '//'" + cgi_path);
     if (stat(upload_dir.c_str(), &info) != 0)
         throw std::runtime_error("File does not exist.");
     if (!(info.st_mode & S_IFREG))
@@ -177,8 +177,8 @@ void    LocationDirective::setCgi_path(const std::string& cgi_path)
 void    LocationDirective::setCgi_extension(const std::string& extension)
 {
     if (extension.size() < 2 || extension[0] != '.')
-        throw std::runtime_error("CGI extension must start with '.'");
+        throw std::runtime_error("CGI extension must start with '.'" + extension);
     if (extension.find_first_of(" \t\n*?$&|;<>(){}[]'\"\\") != std::string::npos || isdigit(extension[1]))
-        throw std::runtime_error("CGI extension has invalid char in it.");
+        throw std::runtime_error("CGI extension has invalid char in it." + extension);
     cgi_extension = extension;
 }

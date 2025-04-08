@@ -53,7 +53,7 @@ int     ServerDirective::ip_part_contain_correct_integers(std::string ip_part)
             return 1;
         std::string cur_part = ip_part.substr(0, ind_of_dot);
         if (cur_part.empty())
-            throw std::runtime_error("something wrong in ip_part dots");
+            throw std::runtime_error("something wrong in ip_part dots" + cur_part);
         std::stringstream ss(cur_part);
         int octet = 0;
         ss >> octet;
@@ -98,9 +98,9 @@ void    ServerDirective::setListen(const std::string& ipAndPort)
     {
         std::string ip_part = ipAndPort.substr(0, indexOfVerjaket);
         if(std::count(ip_part.begin(), ip_part.end(), '.') != 3)
-            throw std::runtime_error("in ip . must be 3hat");
+            throw std::runtime_error("in ip . must be 3hat" + ip_part);
         if (ip_part_contain_correct_integers(ip_part) < 0)
-            throw std::runtime_error("ip octets is not range [0-255]");
+            throw std::runtime_error("ip octets is not range [0-255]" + ip_part);
         listen.first = ip_part;
         check_and_set_port(ipAndPort, indexOfVerjaket, true);
     }

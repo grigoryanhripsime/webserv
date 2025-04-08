@@ -17,7 +17,7 @@ bool AGeneralDirective::is_valid_index_value(std::string value)
     {
         unsigned int ind = value.find('.');
         if (value[0] == '.' || (ind != std::string::npos && !is_all_letters(value.substr(ind + 1, value.size()))))
-            throw std::runtime_error("Innvalid value(poxir message-@)");
+            throw std::runtime_error("Innvalid value(poxir message-@)" + value);
     }
     if (isAllDigits(value) || value.empty() || value[0] == '/' || value[value.size() - 1] == '/'
         || value.find("//") != std::string::npos)
@@ -82,7 +82,7 @@ size_t AGeneralDirective::parse_size_to_bytes(const std::string& value)
 void    AGeneralDirective::setClient_max_body_size(const std::string& size)
 {
     if (!is_valid_client_max_body_size(size))
-        throw std::runtime_error("invalid body size");
+        throw std::runtime_error("invalid body size" + size);
     client_max_body_size = parse_size_to_bytes(size);
 
 }
@@ -107,7 +107,7 @@ bool AGeneralDirective::is_valid_root(const std::string& rootPath)
 void    AGeneralDirective::setRoot(const std::string& rootPath)
 {
     if (!is_valid_root(rootPath))
-        throw std::runtime_error("invalid root");
+        throw std::runtime_error("invalid root" + rootPath);
     root = rootPath;
 }
 
@@ -146,16 +146,21 @@ void    AGeneralDirective::setError_pages(std::vector<std::string> pages)
     std::vector<std::string>::iterator it = pages.begin();
     std::cout << "gres-?" << *(pages.end() - 1) << std::endl;
     if (is_valid_index_value(*(pages.end() - 1)) == false)
-        throw std::runtime_error("Invalid last value(path) of error_page");
+        throw std::runtime_error("Invalid last value(path) of error_page" + (*(pages.end() - 1)));
     for(; it != pages.end() - 1; ++it)
     {
+        if ((*it).find_first_not_of("0123456789") != std::string::npos)
+            throw std::runtime_error("Error page number contain other simbols except digits` " + (*it));
         std::stringstream ss(*it);
         int ind;
         if (isAllDigits(*it))
         {
             ss >> ind;
             //stugel indexi hamar vor error page-eri tverina patkanum te che
+            if (ind < 300 || ind >= 600)//коды 1xx и 2xx обычно не перенаправляются на error_page).
+                throw std::runtime_error("part of error page number is incorrect");
             error_pages[ind] = pages[pages.size() - 1];
+            ss.clear();
         }
         else
             throw std::runtime_error("error_page values must be only digits except last");
