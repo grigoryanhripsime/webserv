@@ -33,12 +33,12 @@ int main(int argc, char *argv[])
         Logger::printStatus("ERROR", e.what());
     }
     std::cout<<"thn\n";
-    // try{
-    //     TestServer t(AF_INET, SOCK_STREAM, 0, 8091, INADDR_ANY, 10);
-    //     // Socket(AF_INET, SOCK_STREAM, 0, 8080, 10);
-    // }
-    // catch(std::runtime_error& e)
-    // {
-    //     Logger::printStatus("ERROR", e.what());
-    // }
+    try{
+        TestServer t(AF_INET, SOCK_STREAM, 0, 8091, INADDR_ANY, 10);
+        // Socket(AF_INET, SOCK_STREAM, 0, 8080, 10);
+    }
+    catch(std::runtime_error& e)
+    {
+        Logger::printStatus("ERROR", e.what());
+    }
 }

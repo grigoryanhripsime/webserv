@@ -1,13 +1,14 @@
 #pragma once
 #include "ListeningSocket.hpp"
+
 class Server
 {
     private:
-        // ServerSocket servSock;//
-                            //es sencem mtacum
-        // ClientSocket clientSock;//
-        //bayc videoyum senca
-        ListeningSocket *lisSock;
+        // // ServerSocket servSock;//
+        //                     //es sencem mtacum
+        // // ClientSocket clientSock;//
+        // //bayc videoyum senca
+        // ListeningSocket *lisSock;
         virtual void accepter() = 0;
         virtual void responder() = 0;
     public:

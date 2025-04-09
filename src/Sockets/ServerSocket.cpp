@@ -5,7 +5,9 @@ ServerSocket::ServerSocket(int domainIP, int service, int protocol, int port, un
     serverFd = socket(domainIP, service, protocol);
     if (serverFd == -1) 
         throw std::runtime_error("Creating socket failed!");
-    connection = connectToNetwork();//for the server this function will be call bind system call
+    int opt = 1;
+    setsockopt(serverFd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+    connection = connectToNetwork();
     if (connection < 0)
         throw std::runtime_error("Error: bind");
 }

@@ -7,44 +7,7 @@ Socket::Socket(int domainIP, int port, unsigned long interface)
     serverAddr.sin_family = domainIP;
     serverAddr.sin_port = htons(port); //This function is used to convert the unsigned int from machine byte order to network byte order.
     serverAddr.sin_addr.s_addr = htonl(interface); //It is used when we don't want to bind our socket to any particular IP and instead make it listen to all the available IPs.
-    
-
-
-
-    // Establish socket
-    // sockFd = socket(domainIP, service, protocol);
-    // if (sockFd == -1) 
-    //     throw std::runtime_error("Creating socket failed!");//esi pakenq stexic u anenq clientSocketi u serverSocketi ctorum (hamapatasaxabar serverFd = socket(...), clientFd = socket(...)),kam tekuz arancindzin funkciayi mej
-
-// NKATEEEEEEEEEEEEEEEEEEEEEQ
-
-
-
-
-// // Establish network connection
-    // // connection = connect_to_network();
-    // if (bind(sockFd, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) == -1)
-    // {
-    //     close(sockFd);
-    //     throw std::runtime_error("Bind failed!");
-    // }
-    // if (listen(sockFd, 10) < 0)
-    //     throw std::runtime_error("Listen failed!");
-    // while(1)
-    // {
-    //     std::cout<<"\n+++++++ Waiting for new connection ++++++++\n\n";
-    //     int new_socket = accept(sockFd, (struct sockaddr *)&serverAddr, (socklen_t*)&serverAddr);
-    //     if (new_socket < 0)
-    //         throw std::runtime_error("Accept failed!");
-    //     char buffer[30000] = {0};
-    //     long valread = read( new_socket , buffer, 30000);
-    //     std::cout<<buffer;
-    //     write(new_socket, "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!", 74);
-    //     printf("------------------Hello message sent-------------------");
-    //     close(new_socket);
-    // }
 }
-
 
 struct sockaddr_in Socket::get_serverAddr() const
 {

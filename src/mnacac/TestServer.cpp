@@ -19,7 +19,7 @@ void TestServer::accepter()
 
 void TestServer::responder()
 {
-    char hello[88] = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 15\n\nHEEZZllo WORLD!\n";
+    char hello[88] = "HTTP/1.1 404 KO\nContent-Type: text/plain\nContent-Length: 15\n\nHEEZZllo WORLD!\n";
     write(newSocket, hello, strlen(hello));
     close(newSocket);
 }
@@ -41,4 +41,4 @@ int TestServer::get_newSocket() const
     return newSocket;
 }
 
-TestServer::~TestServer(){}
+TestServer::~TestServer() {}
