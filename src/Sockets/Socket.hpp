@@ -9,13 +9,16 @@
 #include <stdexcept>
 class Socket
 {
-    private:
+    protected:
+        int sockfd;//vor el dublikat chunenanq,serversoketum` server_fd, clientsoketum`client_fd
         struct sockaddr_in serverAddr;
     public:
-        Socket(int domainIP, int port, unsigned long interface);
+        Socket(int domainIP, int service, int protocol, int port, std::string ipAddress);
         virtual ~Socket();
         virtual int connectToNetwork() = 0;
         //getters
+        int get_socket() const;
         struct sockaddr_in get_serverAddr() const;
+
 }; 
 

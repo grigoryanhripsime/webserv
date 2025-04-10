@@ -2,10 +2,8 @@
 #include "FileReader.hpp"
 #include "TokenConfig.hpp"
 #include "Socket.hpp"
-#include "TestServer.hpp"
 #include "Server.hpp"
 #include "ServerSocket.hpp"
-#include "ListeningSocket.hpp"
 #include "ClientSocket.hpp"
 #include "DirectiveConfig.hpp"
 #include "Directive.hpp"
@@ -27,14 +25,15 @@ int main(int argc, char *argv[])
         std::cout << "sksesinq\n\n\n";
         dirConf.directiveValidation();
         dirConf.printServers();
-        
+        ////////////
+        Server obj(dirConf);
     } catch(std::exception &e)
     {
         Logger::printStatus("ERROR", e.what());
     }
     std::cout<<"thn\n";
     try{
-        TestServer t(AF_INET, SOCK_STREAM, 0, 8091, INADDR_ANY, 10);
+        // TestServer t(AF_INET, SOCK_STREAM, 0, 8091, INADDR_ANY, 10);
         // Socket(AF_INET, SOCK_STREAM, 0, 8080, 10);
     }
     catch(std::runtime_error& e)

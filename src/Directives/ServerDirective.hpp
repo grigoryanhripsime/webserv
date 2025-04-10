@@ -11,7 +11,7 @@ class ServerDirective : public AGeneralDirective
 {
     private:
         // std::string listen;//no default=>REQUIRE,   Must define port (no default)
-        std::pair<std::string, int> listen;
+        std::pair<std::string, int> listen;//<ipAdress, port>
         std::string server_name;//allow but not required
         std::vector<LocationDirective*> locdir;
     public:

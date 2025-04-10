@@ -1,20 +1,22 @@
 #pragma once
-#include "ListeningSocket.hpp"
-
+#include "ClientSocket.hpp"
+#include "ServerSocket.hpp"
+#include <sys/epoll.h>
+#include "DirectiveConfig.hpp"
+#include <cstring>
+#define MAX_EVENTS 10
 class Server
 {
     private:
-        // // ServerSocket servSock;//
-        //                     //es sencem mtacum
-        // // ClientSocket clientSock;//
-        // //bayc videoyum senca
-        // ListeningSocket *lisSock;
-        virtual void accepter() = 0;
-        virtual void responder() = 0;
+        DirectiveConfig *config;
+        std::vector<ServerSocket> servSock;//eto server soket(bind,listen),a ne resultat accepta
+        // std::vector<ClientSocket> clientSock;//a eto clinet soket(soket dlya connecta),bayc arden che
+        int epfd;
     public:
-        Server(int domainIP, int service, int protocol, int port, unsigned long interface, int backlog);
-        virtual void launch() = 0;
-        virtual ~Server();
-        //getters
-        ListeningSocket* get_ListeningSocket() const;
+        Server(DirectiveConfig &dirConf);
+        void setupEpoll();
+        void runLoop();
+        void acceptClient(int server_fd);
+        void handleClientRequest(int client_fd);
+        ~Server();
 };
