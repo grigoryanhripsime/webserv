@@ -33,6 +33,7 @@ class LocationDirective : public AGeneralDirective
         LocationDirective();
         ~LocationDirective();
         virtual void validate() const;  // для валидации значений
+        
         //getters////
         std::string getPath() const {return path;}
         std::map<int, std::string> getRedirect() {return redirect;}

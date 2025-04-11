@@ -17,9 +17,9 @@ Server::Server(DirectiveConfig &dirConf)
 }
 
 void Server::setupEpoll() {
-    epfd = epoll_create1(0);//создаёт новый epoll instance (дескриптор). Он нужен, чтобы отслеживать события на сокетах (например, кто-то подключился).
+    epfd = epoll_create(1);//создаёт новый epoll instance (дескриптор). Он нужен, чтобы отслеживать события на сокетах (например, кто-то подключился).
     if (epfd == -1)
-        throw std::runtime_error("epoll_create1 failed");
+        throw std::runtime_error("epoll_create failed");
     std::cout << "epfd = " << epfd << std::endl;
     // Регистрируем каждый server socket в epoll
     for (size_t i = 0; i < servSock.size(); ++i) {
@@ -34,6 +34,43 @@ void Server::setupEpoll() {
             throw std::runtime_error("epoll_ctl ADD failed");
         }
         std::cout << "Registered server socket fd: " << fd << std::endl;
+    }
+}
+
+void Server::runLoop()
+{
+    struct epoll_event events[MAX_EVENTS];
+
+    while (true)
+    {
+        int n = epoll_wait(epfd, events, MAX_EVENTS, -1);
+        if (n == -1)
+            throw std::runtime_error("epoll_wait failed");
+        for (int i = 0; i < n; ++i)
+        {
+            int sockfd = events[i].data.fd;
+            if (events[i].events & EPOLLIN)
+            {
+                bool isServer = false;
+                for (size_t j = 0; j < servSock.size(); ++j)
+                {
+                    if (sockfd == servSock[j].get_socket())
+                    {
+                        acceptClient(sockfd);
+                        isServer = true;
+                        break;
+                    }
+                }
+                if (!isServer)
+                    handleClientRequest(sockfd);
+            }
+            else if (events[i].events & EPOLLERR || events[i].events & EPOLLHUP)
+            {
+                epoll_ctl(epfd, EPOLL_CTL_DEL, sockfd, NULL);
+                close(sockfd);
+                throw std::runtime_error("Error or hangup detected on socket " + sockfd);
+            }
+        }
     }
 }
 
@@ -81,47 +118,37 @@ void Server::handleClientRequest(int client_fd) {
     // Здесь ты можешь обработать запрос клиента
     std::cout << "Received request: " << std::string(buffer, bytesRead) << std::endl;
     
+    // std::cout<<config->get_servers()[0]->getLocdir()[0]->getIndex()[1].c_str()<<std::endl;
+
+    std::string filePath = config->get_servers()[0]->getRoot() + config->get_servers()[0]->getLocdir()[0]->getPath() + "/" + config->get_servers()[0]->getLocdir()[0]->getIndex()[1];
+
+    // std::cout<<filePath<<std::endl;
+
+    std::ifstream file(filePath.c_str());
+    if (!file)
+        std::cerr << "Failed to open file" << std::endl;
+
+    std::stringstream ss;
+    ss << file.rdbuf(); // read entire content
+
+    
     // После обработки можешь отправить ответ:
-    const char *response = "HTTP/1.1 200 OK\r\nContent-Length: 15\r\n\r\nBarev, Ashxarh!";
+
+    std::string header = "HTTP/1.1 200 OK\r\nContent-Length: ";
+    
+    std::string whiteSpaces = "\r\n\r\n";
+    
+    std::stringstream ss1;
+    ss1 << ss.str().size();
+
+    std::string res = header + ss1.str() + whiteSpaces + ss.str();
+    std::cout<<"-----------------------------------------\n";
+    std::cout<<res<<std::endl;
+    std::cout<<"-----------------------------------------\n";
+    const char *response = res.c_str();
     send(client_fd, response, strlen(response), 0);
 }
 
-void Server::runLoop()
-{
-    struct epoll_event events[MAX_EVENTS];
-
-    while (true)
-    {
-        int n = epoll_wait(epfd, events, MAX_EVENTS, -1);
-        if (n == -1)
-            throw std::runtime_error("epoll_wait failed");
-        for (int i = 0; i < n; ++i)
-        {
-            int sockfd = events[i].data.fd;
-            if (events[i].events & EPOLLIN)
-            {
-                bool isServer = false;
-                for (size_t j = 0; j < servSock.size(); ++j)
-                {
-                    if (sockfd == servSock[j].get_socket())
-                    {
-                        acceptClient(sockfd);
-                        isServer = true;
-                        break;
-                    }
-                }
-                if (!isServer)
-                    handleClientRequest(sockfd);
-            }
-            else if (events[i].events & EPOLLERR || events[i].events & EPOLLHUP)
-            {
-                std::cerr << "Error or hangup detected on socket " << sockfd << std::endl;
-                epoll_ctl(epfd, EPOLL_CTL_DEL, sockfd, NULL);
-                close(sockfd);
-            }
-        }
-    }
-}
 
 Server::~Server(){}
 

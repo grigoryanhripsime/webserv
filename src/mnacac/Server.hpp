@@ -4,7 +4,11 @@
 #include <sys/epoll.h>
 #include "DirectiveConfig.hpp"
 #include <cstring>
+#include <sstream>
+#include <fstream>
+
 #define MAX_EVENTS 10
+
 class Server
 {
     private:

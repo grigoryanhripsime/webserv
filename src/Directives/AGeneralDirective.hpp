@@ -27,7 +27,8 @@ public:
     virtual ~AGeneralDirective() = 0;//xi senc vor????
     virtual void validate() const = 0;  // для валидации значений
     const std::string& getRoot() const { return root; }
-    /////getters////
+
+        /////getters////
     std::map<int, std::string> getError_page() {return error_pages;}
     std::vector<std::string>& getIndex() {return index;} 
     size_t  getBodySize(){return client_max_body_size;}

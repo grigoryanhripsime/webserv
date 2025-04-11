@@ -19,7 +19,7 @@ class DirectiveConfig
         ServerDirective *fillServers(Directive *serverBlock);
         LocationDirective *fillLocationsn(Directive *locationBlock);
         void printServers();
-        std::vector<ServerDirective *> get_servers() const {return servers;}
+        std::vector<ServerDirective *> get_servers() const {return servers;} //TODO: move this to cpp
 
         class DirectiveConfigException : public std::exception
         {
