@@ -115,12 +115,25 @@ int Server::getServerThatWeConnectTo(std::string buffer)
     std::vector<ServerDirective *> servers = config->get_servers();
 
     for (size_t i = 0; i < servers.size(); i++)
-        if (servers[i]->getServer_name() == serverName
-            || serverName == servers[i]->getListen().first)
+    {
+        if (servers[i]->getServer_name() == serverName)
+        //    || serverName == servers[i]->getListen().first)
         {
             std::cout << "chishta Vrds\n";
             return i;
         }
+    }
+    for (size_t i = 0; i < servers.size(); i++)
+    {
+        // if (servers[i]->getServer_name() == serverName)
+        if (serverName == servers[i]->getListen().first)
+        {
+            std::cout << "chishta Vrds\n";
+            return i;
+        }
+    }//arandzin for-erov em grel nra hamar vortev`
+    //ete unenq nuyn ip-ov ev port-ov serverner bayc tvelenq server_name apa zaprosty etalua et name-ov serverin
+    //bayc ete unenq nuyn ip-ov ev port-ov serverner bayc chenq tvel server_name apa zaprosty etalua arajin et ip-ov u prot-ov serverin
     std::cout << "en vat depqna\n";
     return 0;
 }
