@@ -16,6 +16,7 @@ class Server
         std::vector<ServerSocket> servSock;//eto server soket(bind,listen),a ne resultat accepta
         // std::vector<ClientSocket> clientSock;//a eto clinet soket(soket dlya connecta),bayc arden che
         int epfd;
+        std::string location;//kara ev heto jnjvi
     public:
         Server(DirectiveConfig &dirConf);
         void setupEpoll();
@@ -23,4 +24,6 @@ class Server
         void acceptClient(int server_fd);
         void handleClientRequest(int client_fd);
         ~Server();
+        //utils///
+        std::string get_location(char *buffer);
 };

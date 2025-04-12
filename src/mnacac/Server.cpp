@@ -117,20 +117,22 @@ void Server::handleClientRequest(int client_fd) {
 
     // Здесь ты можешь обработать запрос клиента
     std::cout << "Received request: " << std::string(buffer, bytesRead) << std::endl;
-    
+    location = get_location(buffer);
+    // have_this_location_in_our_config(location);
+    ////////////////////////////////////
     // std::cout<<config->get_servers()[0]->getLocdir()[0]->getIndex()[1].c_str()<<std::endl;
-
+    
     std::string filePath = config->get_servers()[0]->getRoot() + config->get_servers()[0]->getLocdir()[0]->getPath() + "/" + config->get_servers()[0]->getLocdir()[0]->getIndex()[1];
-
+    
     // std::cout<<filePath<<std::endl;
 
     std::ifstream file(filePath.c_str());
     if (!file)
         std::cerr << "Failed to open file" << std::endl;
-
+    
     std::stringstream ss;
     ss << file.rdbuf(); // read entire content
-
+    
     
     // После обработки можешь отправить ответ:
 
@@ -149,6 +151,19 @@ void Server::handleClientRequest(int client_fd) {
     send(client_fd, response, strlen(response), 0);
 }
 
+std::string Server::get_location(char *buffer)
+{
+    std::string strbuffer(buffer);
+    size_t pos = strbuffer.find('\n');
+    std::string firstLineInBuffer = strbuffer.substr(0, pos - 1);
+    std::cout << "harcum-> " << firstLineInBuffer << std::endl;
+    // std::string location = get_location(firstLineInBuffer);
+    size_t pos_slash = firstLineInBuffer.find(' ');
+    firstLineInBuffer.erase(0,pos_slash + 1);
+    size_t pos_loc_end = firstLineInBuffer.find(' ');
+    std::string location = firstLineInBuffer.substr(0, pos_loc_end);
+    return location;
+}
 
 Server::~Server(){}
 

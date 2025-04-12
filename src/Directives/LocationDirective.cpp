@@ -95,7 +95,7 @@ void    LocationDirective::setPath(const std::string& path)
 {
     std::cout<<path<<std::endl;
     if (!isValidLocationPath(path))
-        throw std::runtime_error("path conatin unnecessary simnbol");
+        throw std::runtime_error("path conatin unnecessary symbol");
     this->path = path;
 }
 
