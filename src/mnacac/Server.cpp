@@ -63,7 +63,7 @@ void Server::runLoop()
                     }
                 }
                 if (!isServer)
-                    handleClientRequest(sockfd, j);
+                    handleClientRequest(sockfd);
             }
             else if (events[i].events & EPOLLERR || events[i].events & EPOLLHUP)
             {
@@ -99,7 +99,28 @@ void Server::acceptClient(int server_fd)
     }
 }
 
-void Server::handleClientRequest(int client_fd, int serverInd) {
+
+int Server::getServerThatWeConnectTo(std::string buffer)
+{
+    std::stringstream ss(buffer);
+    std::string line;
+    while (std::getline(ss, line) && line.find("Host: ") == std::string::npos)
+        continue;
+    std::cout<<"yoohooooo        "<<line<<std::endl; 
+    
+    std::string serverName = line.substr(6);
+    serverName = serverName.substr(0, serverName.find(":"));
+    std::cout<<"⛵️⛵️⛵️⛵️"<<serverName<<std::endl;
+
+    std::vector<ServerDirective *> servers = config->get_servers();
+
+    for (size_t i = 0; i < servers.size(); i++)
+        if (servers[i]->getServer_name() == serverName)
+            return i;
+    return 0;
+}
+
+void Server::handleClientRequest(int client_fd) {
     char buffer[1024];
     ssize_t bytesRead = read(client_fd, buffer, sizeof(buffer));
 
@@ -118,9 +139,12 @@ void Server::handleClientRequest(int client_fd, int serverInd) {
 
     // Здесь ты можешь обработать запрос клиента
     std::cout << "Received request: " << std::string(buffer, bytesRead) << std::endl;
+
+    int servIndex = getServerThatWeConnectTo(buffer);
+
     location = get_location(buffer);
     std::cout << "vatara->" << location << std::endl;
-    if (!have_this_location_in_our_config(serverInd - 1))
+    if (!have_this_location_in_our_config(servIndex))
         std::cout << "error page pti bacvi browser-um" << std::endl;
     ////////////////////////////////////
     // std::cout<<config->get_servers()[0]->getLocdir()[0]->getIndex()[1].c_str()<<std::endl;

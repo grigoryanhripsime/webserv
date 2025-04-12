@@ -22,10 +22,12 @@ class Server
         void setupEpoll();
         void runLoop();
         void acceptClient(int server_fd);
-        void handleClientRequest(int client_fd, int serverInd);
+        void handleClientRequest(int client_fd);
         ~Server();
         //utils///
         std::string get_location(char *buffer);
         int have_this_location_in_our_config(int serverInd);
         
+
+        int getServerThatWeConnectTo(std::string buffer);
 };
