@@ -40,7 +40,7 @@ void Server::setupEpoll() {
 void Server::runLoop()
 {
     struct epoll_event events[MAX_EVENTS];
-
+    size_t j;
     while (true)
     {
         int n = epoll_wait(epfd, events, MAX_EVENTS, -1);
@@ -52,17 +52,18 @@ void Server::runLoop()
             if (events[i].events & EPOLLIN)
             {
                 bool isServer = false;
-                for (size_t j = 0; j < servSock.size(); ++j)
+                for (j = 0; j < servSock.size(); ++j)
                 {
                     if (sockfd == servSock[j].get_socket())
                     {
+                        std::cout << "vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv\n";
                         acceptClient(sockfd);
                         isServer = true;
                         break;
                     }
                 }
                 if (!isServer)
-                    handleClientRequest(sockfd);
+                    handleClientRequest(sockfd, j);
             }
             else if (events[i].events & EPOLLERR || events[i].events & EPOLLHUP)
             {
@@ -98,7 +99,7 @@ void Server::acceptClient(int server_fd)
     }
 }
 
-void Server::handleClientRequest(int client_fd) {
+void Server::handleClientRequest(int client_fd, int serverInd) {
     char buffer[1024];
     ssize_t bytesRead = read(client_fd, buffer, sizeof(buffer));
 
@@ -118,7 +119,9 @@ void Server::handleClientRequest(int client_fd) {
     // Здесь ты можешь обработать запрос клиента
     std::cout << "Received request: " << std::string(buffer, bytesRead) << std::endl;
     location = get_location(buffer);
-    // have_this_location_in_our_config(location);
+    std::cout << "vatara->" << location << std::endl;
+    if (!have_this_location_in_our_config(serverInd - 1))
+        std::cout << "error page pti bacvi browser-um" << std::endl;
     ////////////////////////////////////
     // std::cout<<config->get_servers()[0]->getLocdir()[0]->getIndex()[1].c_str()<<std::endl;
     
@@ -164,6 +167,21 @@ std::string Server::get_location(char *buffer)
     std::string location = firstLineInBuffer.substr(0, pos_loc_end);
     return location;
 }
+
+int Server::have_this_location_in_our_config(int serverInd)
+{
+    std::cout << "serverInd->" << serverInd << std::endl;
+    std::vector<LocationDirective*> vec_locations = config->get_servers()[serverInd]->getLocdir();
+    std::vector<LocationDirective*>::iterator it  = vec_locations.begin();
+
+    for(; it != vec_locations.end(); ++it)
+    {
+        if (location == (*it)->getPath())
+            return 1;
+    }
+    return -1;
+}
+
 
 Server::~Server(){}
 
