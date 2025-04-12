@@ -26,7 +26,7 @@ class Server
         ~Server();
         //utils///
         std::string get_location(char *buffer);
-        int have_this_location_in_our_config(int serverInd);
+        int have_this_location_in_our_current_server(int serverInd);
         
 
         int getServerThatWeConnectTo(std::string buffer);

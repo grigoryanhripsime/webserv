@@ -115,8 +115,13 @@ int Server::getServerThatWeConnectTo(std::string buffer)
     std::vector<ServerDirective *> servers = config->get_servers();
 
     for (size_t i = 0; i < servers.size(); i++)
-        if (servers[i]->getServer_name() == serverName)
+        if (servers[i]->getServer_name() == serverName
+            || serverName == servers[i]->getListen().first)
+        {
+            std::cout << "chishta Vrds\n";
             return i;
+        }
+    std::cout << "en vat depqna\n";
     return 0;
 }
 
@@ -144,7 +149,7 @@ void Server::handleClientRequest(int client_fd) {
 
     location = get_location(buffer);
     std::cout << "vatara->" << location << std::endl;
-    if (!have_this_location_in_our_config(servIndex))
+    if (have_this_location_in_our_current_server(servIndex) < 0)
         std::cout << "error page pti bacvi browser-um" << std::endl;
     ////////////////////////////////////
     // std::cout<<config->get_servers()[0]->getLocdir()[0]->getIndex()[1].c_str()<<std::endl;
@@ -192,7 +197,7 @@ std::string Server::get_location(char *buffer)
     return location;
 }
 
-int Server::have_this_location_in_our_config(int serverInd)
+int Server::have_this_location_in_our_current_server(int serverInd)
 {
     std::cout << "serverInd->" << serverInd << std::endl;
     std::vector<LocationDirective*> vec_locations = config->get_servers()[serverInd]->getLocdir();
@@ -200,9 +205,14 @@ int Server::have_this_location_in_our_config(int serverInd)
 
     for(; it != vec_locations.end(); ++it)
     {
+        std::cout << "----" << (*it)->getPath()<< std::endl;
         if (location == (*it)->getPath())
+        {
+            std::cout << "molodecccc\n\n\n\n";
             return 1;
+        }
     }
+    std::cout << "stexic\n\n\n";
     return -1;
 }
 
