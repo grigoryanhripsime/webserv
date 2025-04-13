@@ -1,5 +1,6 @@
 #include "ServerDirective.hpp"
 #include <iostream>
+
 ServerDirective::ServerDirective()
 {
     listen.first = "0.0.0.0";
