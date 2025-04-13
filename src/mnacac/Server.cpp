@@ -7,11 +7,27 @@ Server::Server(DirectiveConfig &dirConf)
     std::map<std::pair<std::string, int>, std::vector<int> > unique_listens = config->get_unique_listens();
     std::map<std::pair<std::string, int>, std::vector<int> >::iterator it  = unique_listens.begin();
 
+    std::cout<<"🦔🦔🦔 "<<unique_listens.size()<<std::endl;
     for(; it != unique_listens.end(); ++it)
     {
         ServerSocket sock = ServerSocket(AF_INET, SOCK_STREAM, 0, (it)->first.second, (it)->first.first, 10);
-        servSock.push_back(sock);
+        // servSock.push_back(sock);
+
+        for (size_t i = 0; i < it->second.size(); i++)
+        {
+            config->get_servers()[i]->setServSock(sock);
+        }
     }
+
+
+
+    //ensuring that everything is right
+    for (size_t k = 0; k < config->get_servers().size(); k++)
+    {
+        std::cout<<"☀️☀️☀️   "<<config->get_servers()[k]->getServSock().get_socket()<<std::endl;
+    }
+
+
     setupEpoll();
     runLoop();
 }
@@ -56,7 +72,6 @@ void Server::runLoop()
                 {
                     if (sockfd == servSock[j].get_socket())
                     {
-                        std::cout << "vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv\n";
                         acceptClient(sockfd);
                         isServer = true;
                         break;
