@@ -15,7 +15,8 @@ Server::Server(DirectiveConfig &dirConf)
 
         for (size_t i = 0; i < it->second.size(); i++)
         {
-            config->get_servers()[i]->setServSock(sock);
+            std::cout<<"🦝🦝🦝  "<<i<<std::endl;
+            config->get_servers()[it->second[i]]->setServSock(sock);
         }
     }
 

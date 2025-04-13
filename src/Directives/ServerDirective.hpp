@@ -5,7 +5,9 @@
 #include <stdexcept>
 #include <sstream>
 #include "LocationDirective.hpp"
+#include "ServerSocket.hpp"
 #include <algorithm>
+
 class LocationDirective;
 class ServerDirective : public AGeneralDirective
 {
