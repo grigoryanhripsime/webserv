@@ -1,21 +1,51 @@
 #include "Server.hpp"
 
+// Server::Server(DirectiveConfig &dirConf)
+// {
+//     std::cout << "Server ctor is called\n";
+//     config = &dirConf;
+//     std::map<std::pair<std::string, int>, std::vector<int> > unique_listens = config->get_unique_listens();
+//     std::map<std::pair<std::string, int>, std::vector<int> >::iterator it  = unique_listens.begin();
+
+//     for(; it != unique_listens.end(); ++it)
+//     {
+//         ServerSocket sock = ServerSocket(AF_INET, SOCK_STREAM, 0, (it)->first.second, (it)->first.first, 10);
+//         servSock.push_back(sock);
+//     }
+//     setupEpoll();
+//     runLoop();
+// }
+
 Server::Server(DirectiveConfig &dirConf)
 {
     std::cout << "Server ctor is called\n";
     config = &dirConf;
+
+    std::vector<ServerSocket *> helper(config->get_servers().size(), NULL);
+    servSock = helper;
+
+
     std::map<std::pair<std::string, int>, std::vector<int> > unique_listens = config->get_unique_listens();
     std::map<std::pair<std::string, int>, std::vector<int> >::iterator it  = unique_listens.begin();
-
     for(; it != unique_listens.end(); ++it)
     {
-        ServerSocket sock = ServerSocket(AF_INET, SOCK_STREAM, 0, (it)->first.second, (it)->first.first, 10);
-        servSock.push_back(sock);
+        // std::cout <<"iran->"<< servSock[it->second[0]] << std::endl;
+        ServerSocket* sock = new ServerSocket(AF_INET, SOCK_STREAM, 0, (it)->first.second, (it)->first.first, 10);
+        // servSock.push_back(sock);
+
+        for (size_t i = 0; i <  it->second.size(); i++)
+            servSock[it->second[i]] = sock;
     }
+
+std::cout << "nayeeeq axjikner jann 🧟‍♂️🧟‍♂️🧟‍♂️🧟‍♂️🧟‍♂️🧟‍♂️🧟‍♂️🧟‍♂️🧟‍♂️\n\n\n\n\n\n";
+    for (size_t j = 0; j < servSock.size(); j++)
+    {
+        std::cout<<servSock[j]->get_socket()<<std::endl;
+    }
+
     setupEpoll();
     runLoop();
 }
-
 void Server::setupEpoll() {
     epfd = epoll_create(1);//создаёт новый epoll instance (дескриптор). Он нужен, чтобы отслеживать события на сокетах (например, кто-то подключился).
     if (epfd == -1)
@@ -23,7 +53,7 @@ void Server::setupEpoll() {
     std::cout << "epfd = " << epfd << std::endl;
     // Регистрируем каждый server socket в epoll
     for (size_t i = 0; i < servSock.size(); ++i) {
-        int fd = servSock[i].get_socket(); // Получаем сокет server_fd
+        int fd = servSock[i]->get_socket(); // Получаем сокет server_fd
         std::cout << "fd = " << fd  << std::endl;
         struct epoll_event ev;// Создаём epoll_event, чтобы указать, какие события мы хотим слушать.
         ev.events = EPOLLIN;// мы хотим знать, когда на сокете появятся входящие данные (например, клиент хочет подключиться).
@@ -54,7 +84,7 @@ void Server::runLoop()
                 bool isServer = false;
                 for (j = 0; j < servSock.size(); ++j)
                 {
-                    if (sockfd == servSock[j].get_socket())
+                    if (sockfd == servSock[j]->get_socket())
                     {
                         std::cout << "vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv\n";
                         acceptClient(sockfd);

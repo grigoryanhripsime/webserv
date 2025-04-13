@@ -13,7 +13,7 @@ class Server
 {
     private:
         DirectiveConfig *config;
-        std::vector<ServerSocket> servSock;//eto server soket(bind,listen),a ne resultat accepta
+        std::vector<ServerSocket*> servSock;//eto server soket(bind,listen),a ne resultat accepta
         // std::vector<ClientSocket> clientSock;//a eto clinet soket(soket dlya connecta),bayc arden che
         int epfd;
         std::string location;//kara ev heto jnjvi
