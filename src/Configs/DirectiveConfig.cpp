@@ -64,7 +64,56 @@ void DirectiveConfig::directiveValidation()
         servers.push_back(serv);
 
     }
+    std::cout << "axpeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeer\n";
+    if (servers.size() > 1)
+        if_config_has_more_servers__whether_each_server_has_name_when_they_have_the_same_ip_and_port(servers);
+    else
+        std::cout << "axpeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeer\n";
+
 }
+
+
+
+// bool DirectiveConfig::isIndexAlreadyIncluded(const std::map<std::pair<std::string, int>, std::vector<int> >& result, int index)
+// {
+//     std::map<std::pair<std::string, int>, std::vector<int> >::iterator itMap = result.begin();
+//     for (; itMap != result.end(); ++itMap) {
+//         for (size_t j = 0; j < itMap.second().size(); ++j) {
+//             if (itMap.second().[j] == index)
+//                 return true;
+//         }
+//     }
+//     return false;
+// }
+
+// std::vector<std::vector<int>> DirectiveConfig::if_config_has_more_servers__whether_each_server_has_name_when_they_have_the_same_ip_and_port(std::vector<ServerDirective *> servers) {
+void DirectiveConfig::if_config_has_more_servers__whether_each_server_has_name_when_they_have_the_same_ip_and_port(std::vector<ServerDirective *> servers)
+{
+    for (size_t i = 0; i < servers.size(); ++i)
+    {
+        std::map<std::pair<std::string, int>, std::vector<int> >::iterator itMap = unique_listens.find(servers[i]->getListen());
+        if (itMap == unique_listens.end())
+        {
+            std::vector<int> indexes;
+            indexes.push_back(i);
+            unique_listens.insert(std::make_pair<std::pair<std::string, int>, std::vector<int> >(servers[i]->getListen(), indexes));
+        }
+        else
+            itMap->second.push_back(i);
+    }
+
+    std::map<std::pair<std::string, int>, std::vector<int> >::iterator pr = unique_listens.begin();
+    for (; pr != unique_listens.end(); ++pr)
+    {
+        std::cout << "ip and port->" << (*pr).first.first << " " << (*pr).first.second << std::endl;
+        std::vector<int> vec = (*pr).second;
+        std::cout << "krknvox ip ev porteri indexnery->";
+        for(size_t i = 0; i < vec.size(); ++i)
+            std::cout << vec[i] << " ";
+        std::cout << std::endl;
+    }
+}
+
 
 
 ServerDirective *DirectiveConfig::fillServers(Directive *serverBlock)//&-@ maqrelem,local popoxakani reference veradardznely etqany xelaci ban chi:)

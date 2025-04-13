@@ -4,12 +4,12 @@ Server::Server(DirectiveConfig &dirConf)
 {
     std::cout << "Server ctor is called\n";
     config = &dirConf;
-    std::vector<ServerDirective*> vec_servers = config->get_servers();
-    std::vector<ServerDirective*>::iterator it  = vec_servers.begin();
+    std::map<std::pair<std::string, int>, std::vector<int> > unique_listens = config->get_unique_listens();
+    std::map<std::pair<std::string, int>, std::vector<int> >::iterator it  = unique_listens.begin();
 
-    for(; it != vec_servers.end(); ++it)
+    for(; it != unique_listens.end(); ++it)
     {
-        ServerSocket sock = ServerSocket(AF_INET, SOCK_STREAM, 0, (*it)->getListen().second, (*it)->getListen().first, 10);
+        ServerSocket sock = ServerSocket(AF_INET, SOCK_STREAM, 0, (it)->first.second, (it)->first.first, 10);
         servSock.push_back(sock);
     }
     setupEpoll();

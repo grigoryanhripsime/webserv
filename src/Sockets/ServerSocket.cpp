@@ -7,7 +7,7 @@ ServerSocket::ServerSocket(int domainIP, int service, int protocol, int port, st
     setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
     connection = connectToNetwork();
     if (connection < 0)
-        throw std::runtime_error("Error: bind");
+        throw std::runtime_error("Error: binddd");
     //listen
     max_count_people_in_queue = queueCount;
     status = listen(get_socket(), max_count_people_in_queue);
