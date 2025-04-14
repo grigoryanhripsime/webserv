@@ -2,7 +2,7 @@
 #include "FileReader.hpp"
 #include "TokenConfig.hpp"
 #include "Socket.hpp"
-#include "Server.hpp"
+#include "Servers.hpp"
 #include "ServerSocket.hpp"
 #include "ClientSocket.hpp"
 #include "DirectiveConfig.hpp"
@@ -26,7 +26,18 @@ int main(int argc, char *argv[])
         dirConf.directiveValidation();
         dirConf.printServers();
         ////////////
-        Server obj(dirConf);
+        std::cout << "ahavoran\n\n\n\n\n";
+    //     std::map<std::pair<std::string, int>, std::vector<int> >::iterator pr = dirConf.get_unique_listens().begin();
+    // for (; pr != dirConf.get_unique_listens().end(); ++pr)
+    // {
+    //     std::cout << "ip and port->" << (*pr).first.first << " " << (*pr).first.second << std::endl;
+    //     std::vector<int> vec = (*pr).second;
+    //     std::cout << "krknvox ip ev porteri indexnery->";
+    //     for(size_t i = 0; i < vec.size(); ++i)
+    //         std::cout << vec[i] << " ";
+    //     std::cout << std::endl;
+    // }
+        Servers obj(dirConf);
     } catch(std::exception &e)
     {
         Logger::printStatus("ERROR", e.what());

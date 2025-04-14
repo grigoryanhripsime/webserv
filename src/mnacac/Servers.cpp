@@ -1,29 +1,12 @@
-#include "Server.hpp"
+#include "Servers.hpp"
 
-// Server::Server(DirectiveConfig &dirConf)
-// {
-//     std::cout << "Server ctor is called\n";
-//     config = &dirConf;
-//     std::map<std::pair<std::string, int>, std::vector<int> > unique_listens = config->get_unique_listens();
-//     std::map<std::pair<std::string, int>, std::vector<int> >::iterator it  = unique_listens.begin();
-
-//     for(; it != unique_listens.end(); ++it)
-//     {
-//         ServerSocket sock = ServerSocket(AF_INET, SOCK_STREAM, 0, (it)->first.second, (it)->first.first, 10);
-//         servSock.push_back(sock);
-//     }
-//     setupEpoll();
-//     runLoop();
-// }
-
-Server::Server(DirectiveConfig &dirConf)
+Servers::Servers(DirectiveConfig &dirConf)
 {
     std::cout << "Server ctor is called\n";
     config = &dirConf;
 
-    std::vector<ServerSocket *> helper(config->get_servers().size(), NULL);
-    servSock = helper;
-
+    std::vector<ServerSocket> helper(config->get_servers().size(), ServerSocket());
+    servSock = helper;//helpery zut datark vektora mer serverni qanakov, mez petqer vor fiqsvac serverni qanakov vektor sarqeinq vor el insert,erase chaneinq zut et null-i vra arjeqavoreinq
 
     std::map<std::pair<std::string, int>, std::vector<int> > unique_listens = config->get_unique_listens();
     std::map<std::pair<std::string, int>, std::vector<int> >::iterator it  = unique_listens.begin();
@@ -32,35 +15,35 @@ Server::Server(DirectiveConfig &dirConf)
     for(; it != unique_listens.end(); ++it)
     {
         ServerSocket sock = ServerSocket(AF_INET, SOCK_STREAM, 0, (it)->first.second, (it)->first.first, 10);
-        // servSock.push_back(sock);
-
         for (size_t i = 0; i < it->second.size(); i++)
         {
-            std::cout<<"🦝🦝🦝  "<<i<<std::endl;
-            config->get_servers()[it->second[i]]->setServSock(sock);
+            std::cout<<"🦝🦝🦝  "<<i<< " " << it->second[i] <<std::endl;
+            servSock[it->second[i]] = sock;
         }
     }
 
-
-
     //ensuring that everything is right
-    for (size_t k = 0; k < config->get_servers().size(); k++)
+    for (size_t k = 0; k < servSock.size(); k++)
     {
-        std::cout<<"☀️☀️☀️   "<<config->get_servers()[k]->getServSock().get_socket()<<std::endl;
+        std::cout<<"☀️☀️☀️   "<<servSock[k].get_socket()<<std::endl;
     }
 
     setupEpoll();
     runLoop();
 }
-void Server::setupEpoll() {
+void Servers::setupEpoll() {
     epfd = epoll_create(1);//создаёт новый epoll instance (дескриптор). Он нужен, чтобы отслеживать события на сокетах (например, кто-то подключился).
     if (epfd == -1)
         throw std::runtime_error("epoll_create failed");
     std::cout << "epfd = " << epfd << std::endl;
     // Регистрируем каждый server socket в epoll
-    for (size_t i = 0; i < servSock.size(); ++i) {
-        int fd = servSock[i]->get_socket(); // Получаем сокет server_fd
-        std::cout << "fd = " << fd  << std::endl;
+    std::map<std::pair<std::string, int>, std::vector<int> > unique_listens = config->get_unique_listens();
+    std::map<std::pair<std::string, int>, std::vector<int> >::iterator it = unique_listens.begin();
+    for (; it != unique_listens.end(); ++it)
+    {
+        int fd = it->second[0];// Получаем сокет server_fd
+        std::cout << "fdddddddddddd = " << fd << std::endl;
+
         struct epoll_event ev;// Создаём epoll_event, чтобы указать, какие события мы хотим слушать.
         ev.events = EPOLLIN;// мы хотим знать, когда на сокете появятся входящие данные (например, клиент хочет подключиться).
         ev.data.fd = fd;// сохраняем сам сокет, чтобы потом понять, на каком сокете произошло событие.
@@ -73,7 +56,7 @@ void Server::setupEpoll() {
     }
 }
 
-void Server::runLoop()
+void Servers::runLoop()
 {
     struct epoll_event events[MAX_EVENTS];
     size_t j;
@@ -90,7 +73,7 @@ void Server::runLoop()
                 bool isServer = false;
                 for (j = 0; j < servSock.size(); ++j)
                 {
-                    if (sockfd == servSock[j]->get_socket())
+                    if (sockfd == servSock[j].get_socket())
                     {
                         acceptClient(sockfd);
                         isServer = true;
@@ -110,7 +93,7 @@ void Server::runLoop()
     }
 }
 
-void Server::acceptClient(int server_fd)
+void Servers::acceptClient(int server_fd)
 {
     struct sockaddr_in clientAddr;
     socklen_t clientLen = sizeof(clientAddr);
@@ -135,13 +118,12 @@ void Server::acceptClient(int server_fd)
 }
 
 
-int Server::getServerThatWeConnectTo(std::string buffer)
+int Servers::getServerThatWeConnectTo(std::string buffer)
 {
     std::stringstream ss(buffer);
     std::string line;
     while (std::getline(ss, line) && line.find("Host: ") == std::string::npos)
         continue;
-    std::cout<<"yoohooooo        "<<line<<std::endl; 
     
     std::string serverName = line.substr(6);
     serverName = serverName.substr(0, serverName.find(":"));
@@ -160,12 +142,8 @@ int Server::getServerThatWeConnectTo(std::string buffer)
     }
     for (size_t i = 0; i < servers.size(); i++)
     {
-        // if (servers[i]->getServer_name() == serverName)
         if (serverName == servers[i]->getListen().first)
-        {
-            std::cout << "chishta Vrds\n";
             return i;
-        }
     }//arandzin for-erov em grel nra hamar vortev`
     //ete unenq nuyn ip-ov ev port-ov serverner bayc tvelenq server_name apa zaprosty etalua et name-ov serverin
     //bayc ete unenq nuyn ip-ov ev port-ov serverner bayc chenq tvel server_name apa zaprosty etalua arajin et ip-ov u prot-ov serverin
@@ -173,7 +151,7 @@ int Server::getServerThatWeConnectTo(std::string buffer)
     return 0;
 }
 
-void Server::handleClientRequest(int client_fd) {
+void Servers::handleClientRequest(int client_fd) {
     char buffer[1024];
     ssize_t bytesRead = read(client_fd, buffer, sizeof(buffer));
 
@@ -199,12 +177,8 @@ void Server::handleClientRequest(int client_fd) {
     std::cout << "vatara->" << location << std::endl;
     if (have_this_location_in_our_current_server(servIndex) < 0)
         std::cout << "error page pti bacvi browser-um" << std::endl;
-    ////////////////////////////////////
-    // std::cout<<config->get_servers()[0]->getLocdir()[0]->getIndex()[1].c_str()<<std::endl;
-    
+    ////////////////////////////////////    
     std::string filePath = config->get_servers()[0]->getRoot() + config->get_servers()[0]->getLocdir()[0]->getPath() + "/" + config->get_servers()[0]->getLocdir()[0]->getIndex()[1];
-    
-    // std::cout<<filePath<<std::endl;
 
     std::ifstream file(filePath.c_str());
     if (!file)
@@ -231,13 +205,12 @@ void Server::handleClientRequest(int client_fd) {
     send(client_fd, response, strlen(response), 0);
 }
 
-std::string Server::get_location(char *buffer)
+std::string Servers::get_location(char *buffer)
 {
     std::string strbuffer(buffer);
     size_t pos = strbuffer.find('\n');
     std::string firstLineInBuffer = strbuffer.substr(0, pos - 1);
     std::cout << "harcum-> " << firstLineInBuffer << std::endl;
-    // std::string location = get_location(firstLineInBuffer);
     size_t pos_slash = firstLineInBuffer.find(' ');
     firstLineInBuffer.erase(0,pos_slash + 1);
     size_t pos_loc_end = firstLineInBuffer.find(' ');
@@ -245,7 +218,7 @@ std::string Server::get_location(char *buffer)
     return location;
 }
 
-int Server::have_this_location_in_our_current_server(int serverInd)
+int Servers::have_this_location_in_our_current_server(int serverInd)
 {
     std::cout << "serverInd->" << serverInd << std::endl;
     std::vector<LocationDirective*> vec_locations = config->get_servers()[serverInd]->getLocdir();
@@ -265,7 +238,7 @@ int Server::have_this_location_in_our_current_server(int serverInd)
 }
 
 
-Server::~Server(){}
+Servers::~Servers(){}
 
 
 

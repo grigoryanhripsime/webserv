@@ -9,21 +9,20 @@
 
 #define MAX_EVENTS 10
 
-class Server
+class Servers
 {
     private:
         DirectiveConfig *config;
-        std::vector<ServerSocket*> servSock;//eto server soket(bind,listen),a ne resultat accepta
-        // std::vector<ClientSocket> clientSock;//a eto clinet soket(soket dlya connecta),bayc arden che
+        std::vector<ServerSocket> servSock;//eto server soket(bind,listen),a ne resultat accepta
         int epfd;
         std::string location;//kara ev heto jnjvi
     public:
-        Server(DirectiveConfig &dirConf);
+        Servers(DirectiveConfig &dirConf);
         void setupEpoll();
         void runLoop();
         void acceptClient(int server_fd);
         void handleClientRequest(int client_fd);
-        ~Server();
+        ~Servers();
         //utils///
         std::string get_location(char *buffer);
         int have_this_location_in_our_current_server(int serverInd);

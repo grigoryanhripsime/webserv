@@ -69,29 +69,16 @@ void DirectiveConfig::directiveValidation()
         if_config_has_more_servers__whether_each_server_has_name_when_they_have_the_same_ip_and_port(servers);
     else
         std::cout << "axpeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeer\n";
-
+///////////////sharunakeli
 }
 
 
-
-// bool DirectiveConfig::isIndexAlreadyIncluded(const std::map<std::pair<std::string, int>, std::vector<int> >& result, int index)
-// {
-//     std::map<std::pair<std::string, int>, std::vector<int> >::iterator itMap = result.begin();
-//     for (; itMap != result.end(); ++itMap) {
-//         for (size_t j = 0; j < itMap.second().size(); ++j) {
-//             if (itMap.second().[j] == index)
-//                 return true;
-//         }
-//     }
-//     return false;
-// }
-
-// std::vector<std::vector<int>> DirectiveConfig::if_config_has_more_servers__whether_each_server_has_name_when_they_have_the_same_ip_and_port(std::vector<ServerDirective *> servers) {
 void DirectiveConfig::if_config_has_more_servers__whether_each_server_has_name_when_they_have_the_same_ip_and_port(std::vector<ServerDirective *> servers)
 {
     for (size_t i = 0; i < servers.size(); ++i)
     {
-        std::map<std::pair<std::string, int>, std::vector<int> >::iterator itMap = unique_listens.find(servers[i]->getListen());
+        std::map<std::pair<std::string, int>, std::vector<int> >::iterator itMap;
+        itMap = unique_listens.find(servers[i]->getListen());
         if (itMap == unique_listens.end())
         {
             std::vector<int> indexes;
@@ -101,7 +88,9 @@ void DirectiveConfig::if_config_has_more_servers__whether_each_server_has_name_w
         else
             itMap->second.push_back(i);
     }
-
+    // 127.0.0.1:8080         0 2 3
+    // 172.19.183.204:8089    1 4
+ 
     std::map<std::pair<std::string, int>, std::vector<int> >::iterator pr = unique_listens.begin();
     for (; pr != unique_listens.end(); ++pr)
     {

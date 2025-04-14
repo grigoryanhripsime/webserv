@@ -2,7 +2,6 @@
 
 ClientSocket::ClientSocket(int domainIP, int service, int protocol, int port, std::string ipAddress) : Socket(domainIP, service, protocol, port, ipAddress)
 {
-    // (void)domainIP;
     (void)service;
     (void)protocol;
     (void)port;
@@ -17,10 +16,5 @@ int ClientSocket::connectToNetwork()
     struct sockaddr_in serverAddr = get_serverAddr();
     return (connect(sockfd, (struct sockaddr *)&serverAddr, sizeof(serverAddr)));
 }
-
-// int ClientSocket::get_clientFd() const
-// {
-//     return clientFd;
-// }
 
 ClientSocket::~ClientSocket(){}

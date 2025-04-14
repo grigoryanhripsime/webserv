@@ -10,6 +10,5 @@ class   ServerSocket : public Socket
     public:
         ServerSocket() : Socket() {}
         ServerSocket(int domainIP, int service, int protocol, int port, std::string ipAddress, int queueCount);
-        // int get_serverFd() const;
         virtual ~ServerSocket();
 };
