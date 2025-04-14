@@ -41,7 +41,7 @@ void Servers::setupEpoll() {
     std::map<std::pair<std::string, int>, std::vector<int> >::iterator it = unique_listens.begin();
     for (; it != unique_listens.end(); ++it)
     {
-        int fd = it->second[0];// Получаем сокет server_fd
+        int fd = servSock[it->second[0]].get_socket();// Получаем сокет server_fd
         std::cout << "fdddddddddddd = " << fd << std::endl;
 
         struct epoll_event ev;// Создаём epoll_event, чтобы указать, какие события мы хотим слушать.
