@@ -134,7 +134,7 @@ int Servers::getServerThatWeConnectTo(std::string buffer)
     while (std::getline(ss, line) && line.find("Host: ") == std::string::npos)
         continue;
     
-    std::string serverName = line.substr(6);
+    std::string serverName = line.substr(6);//karevor atributa, requesti meji Host: -i dimaci grvacna(minchev porty(:8080))
     serverName = serverName.substr(0, serverName.find(":"));
     std::cout<<"⛵️⛵️⛵️⛵️"<<serverName<<std::endl;
 

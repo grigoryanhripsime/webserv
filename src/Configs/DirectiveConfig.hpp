@@ -37,7 +37,10 @@ class DirectiveConfig
         
         ////
         void if_config_has_more_servers__whether_each_server_has_name_when_they_have_the_same_ip_and_port(std::vector<ServerDirective *> servers);
-        bool isIndexAlreadyIncluded(const std::vector<std::vector<int> >& result, int index);
+        int server_names_with_duplicate_IPs_must_be_different(std::map<std::pair<std::string, int>, std::vector<int> > unique_listens);
         
+        ///utils//
+        int checkDuplicates(const std::vector<int> values);
+
 
 };

@@ -66,10 +66,41 @@ void DirectiveConfig::directiveValidation()
     }
     std::cout << "axpeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeer\n";
     if (servers.size() > 1)
+    {
         if_config_has_more_servers__whether_each_server_has_name_when_they_have_the_same_ip_and_port(servers);
+        if (server_names_with_duplicate_IPs_must_be_different(unique_listens) < 0)
+            throw std::runtime_error("Server names with duplicate IPs must be different.");
+        //stugum enq vor unique listensi secondi`toist int-eri vectori(voronq irancic nerkayacnum enq serverneri indeqsnery voronc ip:port-ery nuynn en, iranc server_name-ery ampayman tarber linen,hakarak depqum karanq exception qcenq)
+    }
     else
         std::cout << "axpeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeer\n";
 ///////////////sharunakeli
+
+}
+
+int DirectiveConfig::server_names_with_duplicate_IPs_must_be_different(std::map<std::pair<std::string, int>, std::vector<int> > unique_listens)
+{
+    std::map<std::pair<std::string, int>, std::vector<int> >::iterator it = unique_listens.begin();
+    for(; it != unique_listens.end(); ++it)
+    {
+        if (checkDuplicates(it->second) < 0)
+            return -1;
+    }
+    return 1;
+}
+
+int DirectiveConfig::checkDuplicates(std::vector<int> values)
+{
+    std::set<std::string> seen;
+
+    for (size_t i = 0; i < values.size(); ++i)
+    {
+        // servers[*it]->getServer_name();
+        if (seen.find(servers[i]->getServer_name()) != seen.end())
+            return -1;
+        seen.insert(servers[i]->getServer_name());
+    }
+    return 1;
 }
 
 
