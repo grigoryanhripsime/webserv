@@ -5,12 +5,21 @@ Servers::Servers(DirectiveConfig &dirConf)
     std::cout << "Server ctor is called\n";
     config = &dirConf;
 
+    connectingServerToSocket();
+
+    runningProcess();
+
+}
+
+void Servers::connectingServerToSocket()
+{
+    
     std::vector<ServerSocket> helper(config->get_servers().size(), ServerSocket());
     servSock = helper;//helpery zut datark vektora mer serverni qanakov, mez petqer vor fiqsvac serverni qanakov vektor sarqeinq vor el insert,erase chaneinq zut et null-i vra arjeqavoreinq
 
+
     std::map<std::pair<std::string, int>, std::vector<int> > unique_listens = config->get_unique_listens();
     std::map<std::pair<std::string, int>, std::vector<int> >::iterator it  = unique_listens.begin();
-
     std::cout<<"🦔🦔🦔 "<<unique_listens.size()<<std::endl;
     for(; it != unique_listens.end(); ++it)
     {
@@ -27,11 +36,19 @@ Servers::Servers(DirectiveConfig &dirConf)
     {
         std::cout<<"☀️☀️☀️   "<<servSock[k].get_socket()<<std::endl;
     }
+}
 
+
+void Servers::runningProcess()
+{
     setupEpoll();
     runLoop();
 }
-void Servers::setupEpoll() {
+
+
+
+void Servers::setupEpoll()
+{
     epfd = epoll_create(1);//создаёт новый epoll instance (дескриптор). Он нужен, чтобы отслеживать события на сокетах (например, кто-то подключился).
     if (epfd == -1)
         throw std::runtime_error("epoll_create failed");
@@ -180,10 +197,33 @@ void Servers::handleClientRequest(int client_fd) {
     // Здесь ты можешь обработать запрос клиента
     std::cout << "Received request: " << std::string(buffer, bytesRead) << std::endl;
     
+    //checking if http request header is correct
     if_received_request_valid(buffer);
     ////////////////////////////////////    
-    std::string filePath = config->get_servers()[0]->getRoot() + config->get_servers()[0]->getLocdir()[0]->getPath() + "/" + config->get_servers()[0]->getLocdir()[0]->getIndex()[1];
+    // std::string filePath = config->get_servers()[0]->getRoot() + config->get_servers()[0]->getLocdir()[0]->getPath() + "/" + config->get_servers()[0]->getLocdir()[0]->getIndex()[1];
+    
+    std::string filePath = constructingFilePath();
+    
+    std::string res = constructingResponce(filePath);
+    const char *response = res.c_str();
+    send(client_fd, response, strlen(response), 0);
+}
 
+std::string Servers::constructingFilePath()
+{
+    std::string path = config->get_servers()[servIndex]->getRoot() + location + "/" + config->get_servers()[servIndex]->
+
+    std::cout<<"👻root = "<<<<std::endl;
+    std::cout<<"👻Server Index = "<<servIndex<<std::endl;
+    std::cout<<"👻Location Index = "<<locIndex<<std::endl;
+    std::cout<<"👻Location = "<<location<<std::endl;
+
+    return "";
+}
+
+
+std::string Servers::constructingResponce(std::string filePath)
+{
     std::ifstream file(filePath.c_str());
     if (!file)
         std::cerr << "Failed to open file" << std::endl;
@@ -201,13 +241,9 @@ void Servers::handleClientRequest(int client_fd) {
     std::stringstream ss1;
     ss1 << ss.str().size();
 
-    std::string res = header + ss1.str() + whiteSpaces + ss.str();
-    std::cout<<"-----------------------------------------\n";
-    std::cout<<res<<std::endl;
-    std::cout<<"-----------------------------------------\n";
-    const char *response = res.c_str();
-    send(client_fd, response, strlen(response), 0);
+    return header + ss1.str() + whiteSpaces + ss.str();
 }
+
 
 std::string Servers::get_location(char *buffer)
 {
@@ -246,6 +282,7 @@ int Servers::have_this_location_in_our_current_server(int servIndex)
 void    Servers::if_received_request_valid(char *c_buffer)
 {
     validation_of_the_first_line(c_buffer);
+    //TODO: add other lines
 }
 
 void    Servers::validation_of_the_first_line(char *c_buffer)
@@ -255,8 +292,8 @@ void    Servers::validation_of_the_first_line(char *c_buffer)
     location = get_location(c_buffer);
     std::cout << "vatara->" << location << std::endl;
     std::cout << "servIndex = " << servIndex << std::endl;
-    int which_location = have_this_location_in_our_current_server(servIndex);//esi arajin toxi locationi masi pahna
-    if (which_location < 0)
+    locIndex = have_this_location_in_our_current_server(servIndex);//esi arajin toxi locationi masi pahna
+    if (locIndex < 0)
     {
         std::cout << "yavni bacaskaanaaaaaa\n";
         throw std::runtime_error("error page pti bacvi browser-um");//es hmi exception em qcum vor segfault chta,bayc heto pti zut error page-@ bacenq
@@ -268,7 +305,7 @@ void    Servers::validation_of_the_first_line(char *c_buffer)
     std::string first_line;
     getline(ss, first_line);
     std::cout << "firts->" << first_line  <<std::endl;
-    if (method_is_valid(first_line, which_location))
+    if (method_is_valid(first_line, locIndex))
         std::cout << "first line of request is valid, can continue\n";
     else
         std::cout << "first line is not valid\n";

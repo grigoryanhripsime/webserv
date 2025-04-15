@@ -17,6 +17,7 @@ class Servers
         int epfd;
         std::string location;//kara ev heto jnjvi
         int servIndex;
+        int locIndex;
     public:
         Servers(DirectiveConfig &dirConf);
         void setupEpoll();
@@ -36,5 +37,13 @@ class Servers
         int method_is_valid(std::string first_line, int which_location);
         int check_this_metdod_has_in_appropriate_server(std::string method, int which_location);
         void    validation_of_the_first_line(char *c_buffer);
+
+        void runningProcess();
+        void connectingServerToSocket();
+        std::string constructingResponce(std::string filePath);
+        std::string constructingFilePath();
+
+
+
 
 };
