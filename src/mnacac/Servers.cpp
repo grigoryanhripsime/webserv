@@ -88,7 +88,6 @@ void Servers::runLoop()
                     }
                     catch(std::exception& e)
                     {
-                        std::cout << "chi mtnummmmmmmmmmmmmmmmmmmmmmm????????????\n";
                         std::cout << "EXception: " << e.what() << std::endl;
                     }
                 }
@@ -181,22 +180,7 @@ void Servers::handleClientRequest(int client_fd) {
     // Здесь ты можешь обработать запрос клиента
     std::cout << "Received request: " << std::string(buffer, bytesRead) << std::endl;
     
-    
-    servIndex = getServerThatWeConnectTo(buffer);//esi unenq vor serverna
-    
-    location = get_location(buffer);
-    std::cout << "vatara->" << location << std::endl;
-    std::cout << "servindex = " << servIndex << std::endl;
-    int which_location = have_this_location_in_our_current_server(servIndex);//esi arajin toxi locationi masi pahna
-    if (which_location < 0)
-    {
-        std::cout << "yavni bacaskaanaaaaaa\n";
-        throw std::runtime_error("error page pti bacvi browser-um");//es hmi exception em qcum vor segfault chta,bayc heto pti zut error page-@ bacenq
-    }
-    ///ete else depqna uremn requesti meji location-@ gtel enq mer yntacik serveri mej:toist serveri meji locationneri patheric meky hamynkela et requesti locationi het    
-   
-    ////validaton of Received request:`buffer
-    if_received_request_valid(buffer, which_location);
+    if_received_request_valid(buffer);
     ////////////////////////////////////    
     std::string filePath = config->get_servers()[0]->getRoot() + config->get_servers()[0]->getLocdir()[0]->getPath() + "/" + config->get_servers()[0]->getLocdir()[0]->getIndex()[1];
 
@@ -250,32 +234,49 @@ int Servers::have_this_location_in_our_current_server(int servIndex)
         std::cout << "----" << (*it)->getPath()<< std::endl;
         if (location == (*it)->getPath())
         {
-            std::cout << "molodecccc\n\n\n\n";
+            std::cout << "find location path->" << (*it)->getPath() << std::endl;
             return which_location;
         }
         which_location++;
     }
-    std::cout << "stexic\n\n\n";
+    std::cout << "CHfind location path\n\n\n";
     return -1;
 }
 
-
-
-void    Servers::if_received_request_valid(char *c_buffer, int which_location)
+void    Servers::if_received_request_valid(char *c_buffer)
 {
+    validation_of_the_first_line(c_buffer);
+}
+
+void    Servers::validation_of_the_first_line(char *c_buffer)
+{
+    servIndex = getServerThatWeConnectTo(c_buffer);//esi unenq vor serverna
+    //////////////////////////////
+    location = get_location(c_buffer);
+    std::cout << "vatara->" << location << std::endl;
+    std::cout << "servIndex = " << servIndex << std::endl;
+    int which_location = have_this_location_in_our_current_server(servIndex);//esi arajin toxi locationi masi pahna
+    if (which_location < 0)
+    {
+        std::cout << "yavni bacaskaanaaaaaa\n";
+        throw std::runtime_error("error page pti bacvi browser-um");//es hmi exception em qcum vor segfault chta,bayc heto pti zut error page-@ bacenq
+    }
+    //////////////////////////////
+    
+    ///////////////////////////////
     std::stringstream ss(c_buffer);
     std::string first_line;
     getline(ss, first_line);
     std::cout << "firts->" << first_line  <<std::endl;
-    if (validation_of_first_line(first_line, which_location))
+    if (method_is_valid(first_line, which_location))
         std::cout << "first line of request is valid, can continue\n";
     else
         std::cout << "first line is not valid\n";
-    
-
+    ////////////////////////////////////////
 }
 
-int Servers::validation_of_first_line(std::string first_line, int which_location)
+
+int Servers::method_is_valid(std::string first_line, int which_location)
 {
     std::stringstream ss(first_line);
     std::string method;
@@ -283,7 +284,8 @@ int Servers::validation_of_first_line(std::string first_line, int which_location
     std::cout << "method->" << method  <<std::endl;
     if (check_this_metdod_has_in_appropriate_server(method, which_location) < 0)
         std::cout << "senc method chunenq mer allow_methods-um-> 405 Method Not Allowed.\n";
-    //mnac arajin toxi hamar nayel vor http1-a
+    else
+        std::cout << "unenq senc method\n";
     std::string http_version;
     ss >> http_version;
     ss >> http_version;
@@ -300,7 +302,7 @@ int Servers::check_this_metdod_has_in_appropriate_server(std::string method, int
 {
     LocationDirective* locdir;
     std::cout << "hasav stxe\n";
-    std::cout << "servIndex = " << which_location << std::endl;
+    std::cout << "which_location = " << which_location << std::endl;
     locdir = config->get_servers()[servIndex]->getLocdir()[which_location];
     (void)locdir;
     (void)method;
@@ -308,6 +310,7 @@ int Servers::check_this_metdod_has_in_appropriate_server(std::string method, int
     std::vector<std::string> allow_methods = locdir->getAllow_methods();
     for(size_t i = 0; i < allow_methods.size(); ++i)
     {
+        std::cout << "curent metodne->" << allow_methods[i] << std::endl;
         if (allow_methods[i] == method)
             return 1;//ka
     }

@@ -32,8 +32,9 @@ class Servers
         int getServerThatWeConnectTo(std::string buffer);
 
         ///validation buffer
-        void    if_received_request_valid(char *c_buffer, int which_location);
-        int validation_of_first_line(std::string first_line, int which_location);
+        void    if_received_request_valid(char *c_buffer);
+        int method_is_valid(std::string first_line, int which_location);
         int check_this_metdod_has_in_appropriate_server(std::string method, int which_location);
+        void    validation_of_the_first_line(char *c_buffer);
 
 };
