@@ -16,6 +16,7 @@ class Servers
         std::vector<ServerSocket> servSock;//eto server soket(bind,listen),a ne resultat accepta
         int epfd;
         std::string location;//kara ev heto jnjvi
+        int servIndex;
     public:
         Servers(DirectiveConfig &dirConf);
         void setupEpoll();
@@ -29,4 +30,10 @@ class Servers
         
 
         int getServerThatWeConnectTo(std::string buffer);
+
+        ///validation buffer
+        void    if_received_request_valid(char *c_buffer, int which_location);
+        int validation_of_first_line(std::string first_line, int which_location);
+        int check_this_metdod_has_in_appropriate_server(std::string method, int which_location);
+
 };

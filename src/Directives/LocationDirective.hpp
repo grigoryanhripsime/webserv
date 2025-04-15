@@ -36,6 +36,7 @@ class LocationDirective : public AGeneralDirective
         
         //getters////
         std::string getPath() const {return path;}
+        std::vector<std::string> getAllow_methods() const {return allow_methods;}
         std::map<int, std::string> getRedirect() {return redirect;}
         std::string getAutoindex() const {return autoindex;}
         std::string getUpload_dir() const {return upload_dir;}

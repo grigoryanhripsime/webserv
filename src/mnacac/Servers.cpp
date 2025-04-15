@@ -81,7 +81,17 @@ void Servers::runLoop()
                     }
                 }
                 if (!isServer)
-                    handleClientRequest(sockfd);
+                {
+                    try{
+                        std::cout << "kanchvav" << std::endl;
+                        handleClientRequest(sockfd);
+                    }
+                    catch(std::exception& e)
+                    {
+                        std::cout << "chi mtnummmmmmmmmmmmmmmmmmmmmmm????????????\n";
+                        std::cout << "EXception: " << e.what() << std::endl;
+                    }
+                }
             }
             else if (events[i].events & EPOLLERR || events[i].events & EPOLLHUP)
             {
@@ -170,13 +180,23 @@ void Servers::handleClientRequest(int client_fd) {
 
     // Здесь ты можешь обработать запрос клиента
     std::cout << "Received request: " << std::string(buffer, bytesRead) << std::endl;
-
-    int servIndex = getServerThatWeConnectTo(buffer);
-
+    
+    
+    servIndex = getServerThatWeConnectTo(buffer);//esi unenq vor serverna
+    
     location = get_location(buffer);
     std::cout << "vatara->" << location << std::endl;
-    if (have_this_location_in_our_current_server(servIndex) < 0)
-        std::cout << "error page pti bacvi browser-um" << std::endl;
+    std::cout << "servindex = " << servIndex << std::endl;
+    int which_location = have_this_location_in_our_current_server(servIndex);//esi arajin toxi locationi masi pahna
+    if (which_location < 0)
+    {
+        std::cout << "yavni bacaskaanaaaaaa\n";
+        throw std::runtime_error("error page pti bacvi browser-um");//es hmi exception em qcum vor segfault chta,bayc heto pti zut error page-@ bacenq
+    }
+    ///ete else depqna uremn requesti meji location-@ gtel enq mer yntacik serveri mej:toist serveri meji locationneri patheric meky hamynkela et requesti locationi het    
+   
+    ////validaton of Received request:`buffer
+    if_received_request_valid(buffer, which_location);
     ////////////////////////////////////    
     std::string filePath = config->get_servers()[0]->getRoot() + config->get_servers()[0]->getLocdir()[0]->getPath() + "/" + config->get_servers()[0]->getLocdir()[0]->getIndex()[1];
 
@@ -218,23 +238,80 @@ std::string Servers::get_location(char *buffer)
     return location;
 }
 
-int Servers::have_this_location_in_our_current_server(int serverInd)
+int Servers::have_this_location_in_our_current_server(int servIndex)
 {
-    std::cout << "serverInd->" << serverInd << std::endl;
-    std::vector<LocationDirective*> vec_locations = config->get_servers()[serverInd]->getLocdir();
+    std::cout << "servIndex->" << servIndex << std::endl;
+    std::cout << "location = " << location << std::endl;
+    std::vector<LocationDirective*> vec_locations = config->get_servers()[servIndex]->getLocdir();
     std::vector<LocationDirective*>::iterator it  = vec_locations.begin();
-
+    int which_location = 0;
     for(; it != vec_locations.end(); ++it)
     {
         std::cout << "----" << (*it)->getPath()<< std::endl;
         if (location == (*it)->getPath())
         {
             std::cout << "molodecccc\n\n\n\n";
-            return 1;
+            return which_location;
         }
+        which_location++;
     }
     std::cout << "stexic\n\n\n";
     return -1;
+}
+
+
+
+void    Servers::if_received_request_valid(char *c_buffer, int which_location)
+{
+    std::stringstream ss(c_buffer);
+    std::string first_line;
+    getline(ss, first_line);
+    std::cout << "firts->" << first_line  <<std::endl;
+    if (validation_of_first_line(first_line, which_location))
+        std::cout << "first line of request is valid, can continue\n";
+    else
+        std::cout << "first line is not valid\n";
+    
+
+}
+
+int Servers::validation_of_first_line(std::string first_line, int which_location)
+{
+    std::stringstream ss(first_line);
+    std::string method;
+    ss >> method;
+    std::cout << "method->" << method  <<std::endl;
+    if (check_this_metdod_has_in_appropriate_server(method, which_location) < 0)
+        std::cout << "senc method chunenq mer allow_methods-um-> 405 Method Not Allowed.\n";
+    //mnac arajin toxi hamar nayel vor http1-a
+    std::string http_version;
+    ss >> http_version;
+    ss >> http_version;
+    //В HTTP/1.1 он обязателен.
+    // Если отсутствует — 400 Bad Request.senc bana asum gpt-n mihat stugel ete nenc request kara ga vor bacakayi et http1-@ lracnenq et masy
+    std::cout << "hmis stex pti http_version lini http->" << http_version << std::endl;
+    if (http_version != "HTTP/1.1")
+        std::cout << "505 HTTP Version Not Supported.\n";
+    return 777;
+
+}
+
+int Servers::check_this_metdod_has_in_appropriate_server(std::string method, int which_location)
+{
+    LocationDirective* locdir;
+    std::cout << "hasav stxe\n";
+    std::cout << "servIndex = " << which_location << std::endl;
+    locdir = config->get_servers()[servIndex]->getLocdir()[which_location];
+    (void)locdir;
+    (void)method;
+    std::cout << "tvyal locdir" << locdir->getPath() << std::endl;
+    std::vector<std::string> allow_methods = locdir->getAllow_methods();
+    for(size_t i = 0; i < allow_methods.size(); ++i)
+    {
+        if (allow_methods[i] == method)
+            return 1;//ka
+    }
+    return -1;//chkar tenc metod
 }
 
 
