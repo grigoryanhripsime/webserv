@@ -16,13 +16,14 @@ class ServerDirective : public AGeneralDirective
         std::pair<std::string, int> listen;//<ipAdress, port>
         std::string server_name;//allow but not required
         std::vector<LocationDirective*> locdir;
-        // ServerSocket sock;//Sorry Zipcik jan bayc esi hanelem,segfault uneinq(((
+        int locIndex;
 
     public:
         //setters
         void    setListen(const std::string& ipAndPort);
         void    setServer_name(const std::string& name);
         void    setLocDir(LocationDirective *loc);
+        void    setLocIndex(int ind) {locIndex = ind;}
         std::string validDirs[6];
     public:
         ServerDirective();
@@ -33,7 +34,7 @@ class ServerDirective : public AGeneralDirective
         std::vector<LocationDirective*>& getLocdir() {return locdir;}
         std::pair<std::string, int> getListen() const {return listen;}
         std::string getServer_name() const {return server_name;}
-
+        int get_locIndex() const {return locIndex;}
     ////listen validacia//////////
     void    check_and_set_port(const std::string& ipAndPort, size_t& indexOfVerjaket, bool flag);
     int     ip_part_contain_correct_integers(std::string ip_part);
