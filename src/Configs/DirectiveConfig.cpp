@@ -186,7 +186,7 @@ ServerDirective *DirectiveConfig::fillServers(Directive *serverBlock)//&-@ maqre
 LocationDirective *DirectiveConfig::fillLocationsn(Directive *locationBlock)
 {
     std::multimap<std::string, std::vector<std::string> >::iterator itSimpleDirLoc = locationBlock->simpleDir.begin();
-    LocationDirective *loc = new LocationDirective();
+    LocationDirective *loc = new LocationDirective(); //TODO: leaks
     for (; itSimpleDirLoc != locationBlock->simpleDir.end(); ++itSimpleDirLoc)
     {
         if (itSimpleDirLoc->first != "index" && itSimpleDirLoc->first != "error_page" && itSimpleDirLoc->first != "allow_methods" && itSimpleDirLoc->first != "return" && itSimpleDirLoc->second.size() != 1)

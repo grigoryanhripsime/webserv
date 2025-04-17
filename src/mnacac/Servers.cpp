@@ -46,8 +46,6 @@ void Servers::runningProcess()
     runLoop();
 }
 
-
-
 void Servers::setupEpoll()
 {
     epfd = epoll_create(1);//создаёт новый epoll instance (дескриптор). Он нужен, чтобы отслеживать события на сокетах (например, кто-то подключился).
@@ -208,6 +206,9 @@ void Servers::handleClientRequest(int client_fd) {
     {
         std::string filePath = config->get_servers()[servIndex]->getRoot() + uri;
         std::string res = constructingResponce(filePath);
+        std::cout<<"-----------------------------------\n";
+        std::cout<<res;
+        std::cout<<"-----------------------------------\n";
         const char *response = res.c_str();
         send(client_fd, response, strlen(response), 0);
     }
@@ -215,137 +216,85 @@ void Servers::handleClientRequest(int client_fd) {
         std::cout<< "chka heton\n";
 }
 
+std::string Servers::uri_is_file(std::string filePath)
+{
+    std::vector<LocationDirective*> locdir = config->get_servers()[servIndex]->getLocdir();
+    int locIndex = config->get_servers()[servIndex]->get_locIndex();    
+    std::string str = config->get_servers()[servIndex]->getRoot() + locdir[locIndex]->getPath();
+    std::cout << "strse havasraaaaa->>>>>>>" << str << std::endl;
+    size_t i = 0;
+    for (; i < filePath.size() && i < str.size() && filePath[i] == str[i]; ++i)
+        i++;
+    if (i != str.size())
+        i--;
+    std::cout << "i ===== " << i << std::endl;
+    std::string left_part_of_filePath = filePath.substr(i);
+    if (left_part_of_filePath[0] == '/')
+        left_part_of_filePath.erase(0,1);
+    std::cout << "------------------------------>" << left_part_of_filePath << std::endl;
+    if (find_in_index_vectors_this_string(left_part_of_filePath, locdir[locIndex]->getIndex()) < 0)
+    {
+        std::cout << "error page???????\n";
+        filePath = config->get_servers()[servIndex]->getRoot() + "/web/error404.html";
+    }
+    //////////
+    std::cout << "ete esi tpvela uremn jokela vor fayla\n";
+    return get_need_string_that_we_must_be_pass_send_system_call(filePath);
+}
+
+std::string Servers::uri_is_directory(std::string filePath)
+{
+    std::cout << "direktoriayi vaxt filepathy ekela->" << filePath << std::endl;
+    std::cout << "ete esi tpvela uremn jokela vor DIREKTORIAya\n";
+    if (filePath[filePath.size() - 1] != '/')
+    filePath += '/';
+    ////////krknvouma 
+    std::vector<LocationDirective*> locdir = config->get_servers()[servIndex]->getLocdir();
+    int locIndex = config->get_servers()[servIndex]->get_locIndex();
+    // int locIndex = config->get_servers()[servIndex]->get_locIndex();    
+    std::string str = config->get_servers()[servIndex]->getRoot() + locdir[locIndex]->getPath();
+    // size_t i = 0;
+    if (str[str.size() - 1] != '/')
+        str += '/';
+    std::cout << "fiiiiiiiiiiiiiile->" << filePath << std::endl;
+    std::cout << "strne senc mometa->" << str << std::endl;
+    ////////////////
+    if (filePath == str && getFilesInDirectory(filePath) != "NULL")
+    {
+        if (filePath[filePath.size() - 1] != '/')
+            filePath += '/' + getFilesInDirectory(filePath);
+        else
+        filePath += getFilesInDirectory(filePath);
+            
+        std::cout << "/ enq morace hastat->" << filePath << std::endl;
+        return get_need_string_that_we_must_be_pass_send_system_call(filePath);
+    }
+    std::cout << "ba incha->" << locdir[locIndex]->getAutoindex() << std::endl;
+    if (locdir[locIndex]->getAutoindex() == "off")
+    {
+        filePath = config->get_servers()[servIndex]->getRoot() + "/web/error403.html";
+        return get_need_string_that_we_must_be_pass_send_system_call(filePath);
+    }
+    
+    return "";
+}
+
 
 std::string Servers::constructingResponce(std::string filePath)
 {
-    std::vector<LocationDirective*> locdir = config->get_servers()[servIndex]->getLocdir();
-    int locIndex = config->get_servers()[servIndex]->get_locIndex();
-
 
     std::cout << "filepath === " << filePath << std::endl;
     if (pathExists(filePath) == false)
         throw std::runtime_error(" путь не существует или нет прав на доступ(файл/директория)");
-    if (isFile(filePath))//Если ты проверяешь путь и он:❌ не существует — верни ошибку 404 Not Found
+    if (isFile(filePath)) //Если ты проверяешь путь и он:❌ не существует — верни ошибку 404 Not Found
     {
         //stex pti stugenq ardyoq mer locationi index i valuneri mej ka tvyal fayly te che
         //////////
-        std::vector<LocationDirective*> locdir = config->get_servers()[servIndex]->getLocdir();
-        int locIndex = config->get_servers()[servIndex]->get_locIndex();    
-        std::string str = config->get_servers()[servIndex]->getRoot() + locdir[locIndex]->getPath();
-        std::cout << "strse havasraaaaa->>>>>>>" << str << std::endl;
-        size_t i = 0;
-        for (; i < filePath.size() && i < str.size() && filePath[i] == str[i]; ++i)
-            i++;
-        if (i != str.size())
-            i--;
-        std::cout << "i ===== " << i << std::endl;
-        std::string left_part_of_filePath = filePath.substr(i);
-        if (left_part_of_filePath[0] == '/')
-            left_part_of_filePath.erase(0,1);
-        std::cout << "------------------------------>" << left_part_of_filePath << std::endl;
-        if (find_in_index_vectors_this_string(left_part_of_filePath, locdir[locIndex]->getIndex()) < 0)
-        {
-            std::cout << "error page???????\n";
-            filePath = config->get_servers()[servIndex]->getRoot() + "/web/error404.html";
-        }
-        //////////
-        std::cout << "ete esi tpvela uremn jokela vor fayla\n";
-        return get_need_string_that_we_must_be_pass_send_system_call(filePath);
-        // std::ifstream file(filePath.c_str());
-        // if (!file)
-        //     std::cerr << "Failed to open file" << std::endl;
-
-        // std::stringstream ss;
-        // ss << file.rdbuf(); // read entire content
-
-
-        // // После обработки можешь отправить ответ:
-
-        // std::string header = "HTTP/1.1 200 OK\r\nContent-Length: ";
-
-        // std::string whiteSpaces = "\r\n\r\n";
-
-        // std::stringstream ss1;
-        // ss1 << ss.str().size();
-
-        // return header + ss1.str() + whiteSpaces + ss.str();
+        return uri_is_file(filePath);
     }
-
     else if (isDirectory(filePath))
-    {
-        std::cout << "direktoriayi vaxt filepathy ekela->" << filePath << std::endl;
-        std::cout << "ete esi tpvela uremn jokela vor DIREKTORIAya\n";
-        if (filePath[filePath.size() - 1] != '/')
-            filePath += '/';
-        ////////krknvouma 
-        // std::vector<LocationDirective*> locdir = config->get_servers()[servIndex]->getLocdir();
-        // int locIndex = config->get_servers()[servIndex]->get_locIndex();    
-        std::string str = config->get_servers()[servIndex]->getRoot() + locdir[locIndex]->getPath();
-        // size_t i = 0;
-        if (str[str.size() - 1] != '/')
-            str += '/';
-        std::cout << "fiiiiiiiiiiiiiile->" << filePath << std::endl;
-        std::cout << "strne senc mometa->" << str << std::endl;
-        // for (; i < filePath.size() && i < str.size() && filePath[i] == str[i]; ++i)
-        //     i++;
-        // // std::cout << "lav stexel tpem i-n = " << i << std::endl;
-        // std::cout << "size  =" << str.size() << std::endl;
-        // if (i == str.size() - 1)
-        // {
-        //     std::cout << "lav stexel tpem i-n = " << i << std::endl;
-        //     i--;
-        //     filePath = filePath.substr(0, i);
-
-        // }
-        // else
-        // {
-        //     std::cout << "ayooyottttttttttttttttttttttttttttttttttttttttttttttttttt\n";
-        //     filePath = filePath.substr(0, i + 1);
-        // }
-        std::cout << "do filePath = "<< filePath << std::endl;
-        ////////////////
-        if (filePath == str && getFilesInDirectory(filePath) != "NULL")
-        {
-            if (filePath[filePath.size() - 1] != '/')
-                filePath += '/' + getFilesInDirectory(filePath);
-            else
-            filePath += getFilesInDirectory(filePath);
-                
-            std::cout << "/ enq morace hastat->" << filePath << std::endl;
-            return get_need_string_that_we_must_be_pass_send_system_call(filePath);
-        }
-        else
-        {
-            std::cout << "ba incha->" << locdir[locIndex]->getAutoindex() << std::endl;
-            if (locdir[locIndex]->getAutoindex() == "off")
-            {
-                filePath = config->get_servers()[servIndex]->getRoot() + "/web/error403.html";
-                return get_need_string_that_we_must_be_pass_send_system_call(filePath);
-            }
-            std::cout << "REALY?????????\n";
-                //autoindex
-        }
-        
-    }
-        return "";
-    }
-    
-std::string Servers::constructingFilePath()
-{
-    std::vector<LocationDirective*> locdir = config->get_servers()[servIndex]->getLocdir();
-    int locIndex = config->get_servers()[servIndex]->get_locIndex();
-
-    if (uri[uri.size() - 1] != '/')
-        uri += '/';
-
-    std::string filepath = config->get_servers()[servIndex]->getRoot() + uri + locdir[locIndex]->getIndex()[1];
-
-    std::cout<<"👻Server Index = "<<servIndex<<std::endl;
-    std::cout<<"👻Location Index = "<<config->get_servers()[servIndex]->get_locIndex()<<std::endl;
-    std::cout<<"👻Location = "<<uri<<std::endl;
-
-    std::cout << "te vortex pti man ganq incvor klienty uzela->" << filepath << std::endl;
-    return filepath;
+        return uri_is_directory(filePath);
+    return "";
 }
     
 std::string Servers::get_location(char *buffer)
@@ -374,8 +323,8 @@ int Servers::have_this_uri_in_our_current_server(int servIndex)
     {
         path = vec_locations[i]->getPath();
         std::cout << "yntacik locpath = " << path << std::endl;
-        if (path.size() > uri.size())
-            continue ;
+        // if (path.size() > uri.size())
+        //     continue ;
         size_t tmpLength = 0;
         for (size_t j = 1; j < uri.size() && path[j] == uri[j]; ++j)//1ic em sksum vortevdemi simvoli saxi mot /a linelu
             tmpLength++;

@@ -52,5 +52,10 @@ class Servers
         bool pathExists(const std::string& path);
         std::string getFilesInDirectory(std::string &path);
 
+        std::string uri_is_file(std::string filePath);
+        std::string uri_is_directory(std::string filePath);
+
+
+
 
 };
