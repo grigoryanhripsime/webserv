@@ -242,6 +242,33 @@ std::string Servers::uri_is_file(std::string filePath)
     return get_need_string_that_we_must_be_pass_send_system_call(filePath);
 }
 
+void Servers::listFiles(std::string path, std::vector<std::string> &files)
+{
+    DIR *dir = opendir(path.c_str());
+    if (!dir)
+        throw std::runtime_error("opendir error!");
+    
+    struct dirent *entry;
+    while ((entry = readdir(dir)) != NULL)
+    {
+        std::string name = entry->d_name;
+
+        // Skip . and ..
+        if (name == "." || name == "..")
+            continue;
+    
+        std::string fullPath = path  + name;
+
+        struct stat st;
+        if (stat(fullPath.c_str(), &st) == -1) continue;
+
+        if (S_ISDIR(st.st_mode))
+            listFiles(fullPath, files);
+
+        files.push_back(name);
+    }
+}
+
 std::string Servers::uri_is_directory(std::string filePath)
 {
     std::cout << "direktoriayi vaxt filepathy ekela->" << filePath << std::endl;
@@ -251,7 +278,7 @@ std::string Servers::uri_is_directory(std::string filePath)
     ////////krknvouma 
     std::vector<LocationDirective*> locdir = config->get_servers()[servIndex]->getLocdir();
     int locIndex = config->get_servers()[servIndex]->get_locIndex();
-    // int locIndex = config->get_servers()[servIndex]->get_locIndex();    
+    // int locIndex = config->get_servers()[servIndex]->get_locIndex();
     std::string str = config->get_servers()[servIndex]->getRoot() + locdir[locIndex]->getPath();
     // size_t i = 0;
     if (str[str.size() - 1] != '/')
@@ -275,10 +302,34 @@ std::string Servers::uri_is_directory(std::string filePath)
         filePath = config->get_servers()[servIndex]->getRoot() + "/web/error403.html";
         return get_need_string_that_we_must_be_pass_send_system_call(filePath);
     }
-    
+    else
+    {
+        std::vector<std::string> files;
+        listFiles(filePath, files);
+
+        std::string listedFiles = "";
+
+        std::vector<std::string>::iterator it = files.begin();
+        std::cout<<"🎩🎩🎩🎩\n";
+        for (; it != files.end(); it++)
+        {
+            std::cout<<*it<<std::endl;
+            std::stringstream ss_num;
+            ss_num << config->get_servers()[servIndex]->getListen().first << ":" << config->get_servers()[servIndex]->getListen().second;
+
+            std::cout<<"🍄🍄🍄 "<<uri<<" 🍄🍄🍄"<<std::endl;
+            std::string uri_to_use = "";
+            if (uri != "/") uri_to_use = uri;
+            listedFiles += "<a href=\"http://" + ss_num.str() + uri_to_use + "/" + *it + "\">" + *it + "</a><br>";
+        }
+        std::cout<<"🎩🎩🎩🎩\n";
+
+        std::cout<<listedFiles<<std::endl;
+        std::cout<<"🐞🐞🐞\n";
+        return get_need_string_that_we_must_be_pass_send_system_call(listedFiles);
+    }
     return "";
 }
-
 
 std::string Servers::constructingResponce(std::string filePath)
 {
@@ -323,10 +374,10 @@ int Servers::have_this_uri_in_our_current_server(int servIndex)
     {
         path = vec_locations[i]->getPath();
         std::cout << "yntacik locpath = " << path << std::endl;
-        // if (path.size() > uri.size())
-        //     continue ;
+        if (path.size() > uri.size())
+            continue ;
         size_t tmpLength = 0;
-        for (size_t j = 1; j < uri.size() && path[j] == uri[j]; ++j)//1ic em sksum vortevdemi simvoli saxi mot /a linelu
+        for (size_t j = 0; j < uri.size() && path[j] == uri[j]; ++j)//1ic em sksum vortevdemi simvoli saxi mot /a linelu
             tmpLength++;
         if (tmpLength > length)
         {
@@ -417,7 +468,7 @@ int Servers::check_this_metdod_has_in_appropriate_server(std::string method, int
 {
     LocationDirective* locdir;
     std::cout << "hasav stxe\n";
-    // std::cout << "which_location = " << which_location << std::endl;
+    std::cout << "which_location = " << which_location << std::endl;
     locdir = config->get_servers()[servIndex]->getLocdir()[which_location];
     (void)locdir;
     (void)method;
@@ -502,12 +553,18 @@ int Servers::find_in_index_vectors_this_string(std::string left_part_of_filePath
 
 std::string Servers::get_need_string_that_we_must_be_pass_send_system_call(std::string filePath)
 {
-    std::ifstream file(filePath.c_str());
-    if (!file)
-        std::cerr << "Failed to open file" << std::endl;
-
     std::stringstream ss;
-    ss << file.rdbuf(); // read entire content
+    if (filePath.find("</a>") == std::string::npos)
+    {
+        std::cout<<filePath<<"    🦔🦔🦔    \n";
+        std::ifstream file(filePath.c_str());
+        if (!file)
+            std::cerr << "Failed to open file" << std::endl;
+    
+        ss << file.rdbuf(); // read entire content
+    }
+    else 
+        ss << filePath;
 
 
     // После обработки можешь отправить ответ:

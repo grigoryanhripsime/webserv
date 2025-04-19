@@ -1,5 +1,6 @@
 #include"LocationDirective.hpp"
 #include <iostream>
+
 LocationDirective::LocationDirective() :
     path(""),
     redirect(),
@@ -8,7 +9,6 @@ LocationDirective::LocationDirective() :
     cgi_extension(""),
     cgi_path("") {
 
-        allow_methods.push_back("GET");//arajarkum em esi toxenq,vortev ete allow metod configi mej chlni lselem vor default pti GET lini
         validDirs[0] = "path";
         validDirs[1] = "allow_methods";
         validDirs[2] = "autoindex";
@@ -111,7 +111,7 @@ void    LocationDirective::setAllow_methods(std::vector<std::string> methods)
 void    LocationDirective::setAutoindex(const std::string& off_or_on)
 {
     if (off_or_on != "on" && off_or_on != "off")
-        throw std::runtime_error("Autoindex must be 'on' or 'off'" + off_or_on);
+        throw std::runtime_error("Autoindex must be 'on' or 'off'");
     autoindex = off_or_on;
 }
 
