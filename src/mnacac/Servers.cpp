@@ -247,7 +247,7 @@ std::string Servers::uri_is_directory(std::string filePath)
     std::cout << "direktoriayi vaxt filepathy ekela->" << filePath << std::endl;
     std::cout << "ete esi tpvela uremn jokela vor DIREKTORIAya\n";
     if (filePath[filePath.size() - 1] != '/')
-    filePath += '/';
+        filePath += '/';
     ////////krknvouma 
     std::vector<LocationDirective*> locdir = config->get_servers()[servIndex]->getLocdir();
     int locIndex = config->get_servers()[servIndex]->get_locIndex();
@@ -259,7 +259,9 @@ std::string Servers::uri_is_directory(std::string filePath)
     std::cout << "fiiiiiiiiiiiiiile->" << filePath << std::endl;
     std::cout << "strne senc mometa->" << str << std::endl;
     ////////////////
-    if (filePath == str && getFilesInDirectory(filePath) != "NULL")
+    if (filePath != str)
+        filePath = config->get_servers()[servIndex]->getRoot() + "/web/error404.html";
+    else if (getFilesInDirectory(filePath) != "NULL")//filePath == str esi el petq chi stugel,verevy ka
     {
         if (filePath[filePath.size() - 1] != '/')
             filePath += '/' + getFilesInDirectory(filePath);
@@ -270,13 +272,13 @@ std::string Servers::uri_is_directory(std::string filePath)
         return get_need_string_that_we_must_be_pass_send_system_call(filePath);
     }
     std::cout << "ba incha->" << locdir[locIndex]->getAutoindex() << std::endl;
-    if (locdir[locIndex]->getAutoindex() == "off")
+    if (filePath == str && locdir[locIndex]->getAutoindex() == "off")
     {
         filePath = config->get_servers()[servIndex]->getRoot() + "/web/error403.html";
         return get_need_string_that_we_must_be_pass_send_system_call(filePath);
     }
     
-    return "";
+    return get_need_string_that_we_must_be_pass_send_system_call(filePath);
 }
 
 
@@ -313,7 +315,6 @@ std::string Servers::get_location(char *buffer)
 int Servers::have_this_uri_in_our_current_server(int servIndex)
 {
     std::cout << "servIndex->" << servIndex << std::endl;
-    std::cout << "uri = " << uri << std::endl;
     std::vector<LocationDirective*> vec_locations = config->get_servers()[servIndex]->getLocdir();
     int which_location = -1;
     std::string path;
@@ -326,15 +327,21 @@ int Servers::have_this_uri_in_our_current_server(int servIndex)
         // if (path.size() > uri.size())
         //     continue ;
         size_t tmpLength = 0;
-        for (size_t j = 1; j < uri.size() && path[j] == uri[j]; ++j)//1ic em sksum vortevdemi simvoli saxi mot /a linelu
+        size_t j;
+        for (j = 1; j < uri.size() && path[j] == uri[j]; ++j)//1ic em sksum vortevdemi simvoli saxi mot /a linelu
             tmpLength++;
-        if (tmpLength > length)
+        if (j == uri.size() && j == path.size())
         {
-            std::cout << "i = " << i << std::endl;
+            length = tmpLength;
+            which_location = i;
+        }
+        else if (tmpLength > length)
+        {
             length = tmpLength;
             which_location = i;
         }
     }
+    std::cout << "vitoge which_locastin = " << which_location << std::endl;
     if (which_location == -1)
     {
         std::cout << "CHfind location path\n\n\n";
@@ -347,7 +354,6 @@ std::string    Servers::if_received_request_valid(char *c_buffer)
 {
     std::string method;
     validation_of_the_first_line(c_buffer, method);
-    std::cout << "sutaaaaaaaa = " << method << std::endl;
     //TODO: add other lines
     return method;
 }
@@ -357,8 +363,6 @@ std::string    Servers::validation_of_the_first_line(char *c_buffer, std::string
     servIndex = getServerThatWeConnectTo(c_buffer);//esi unenq vor serverna
     //////////////////////////////
     uri = get_location(c_buffer);
-    std::cout << "vatara->" << uri << std::endl;
-    std::cout << "servIndex = " << servIndex << std::endl;
     // int locIndex = config->get_servers()[servIndex]->get_locIndex();
     int locIndex = have_this_uri_in_our_current_server(servIndex);//esi arajin toxi locationi masi pahna
     config->get_servers()[servIndex]->setLocIndex(locIndex);//set locIndex
@@ -373,7 +377,6 @@ std::string    Servers::validation_of_the_first_line(char *c_buffer, std::string
     std::stringstream ss(c_buffer);
     std::string first_line;
     getline(ss, first_line);
-    std::cout << "firts->" << first_line  <<std::endl;
 
     if (method_is_valid(first_line, locIndex, method))
         std::cout << "first line of request is valid, can continue\n";
@@ -419,8 +422,6 @@ int Servers::check_this_metdod_has_in_appropriate_server(std::string method, int
     std::cout << "hasav stxe\n";
     // std::cout << "which_location = " << which_location << std::endl;
     locdir = config->get_servers()[servIndex]->getLocdir()[which_location];
-    (void)locdir;
-    (void)method;
     // std::cout << "tvyal locdir" << locdir->getPath() << std::endl;
     std::vector<std::string> allow_methods = locdir->getAllow_methods();
     for(size_t i = 0; i < allow_methods.size(); ++i)
@@ -462,11 +463,12 @@ std::string Servers::getFilesInDirectory(std::string &path)
         return "NULL";
 
     struct dirent *entry;
-    while ((entry = readdir(dir)) != NULL) {
+    while ((entry = readdir(dir)) != NULL)
+    {
         std::string name = entry->d_name;
         std::cout << "direktoriayi meji faylery->" << name << std::endl;
         if (name != "." && name != "..")
-        dirFiles.push_back(name);
+            dirFiles.push_back(name);
     }
     std::vector<LocationDirective*> locdir = config->get_servers()[servIndex]->getLocdir();
     int locIndex = config->get_servers()[servIndex]->get_locIndex();
