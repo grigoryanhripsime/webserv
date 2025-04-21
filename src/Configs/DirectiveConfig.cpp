@@ -4,19 +4,13 @@ DirectiveConfig::DirectiveConfig(const Directive& directives) : directives(direc
 
 DirectiveConfig::~DirectiveConfig()
 {
+    std::cout << "DirectiveConfig dtor is called\n";
     for (std::vector<ServerDirective*>::iterator it = servers.begin(); it != servers.end(); ++it)
-    {
-        // std::vector<LocationDirective*>& loc = (*it)->getLocdir();
-        // std::vector<LocationDirective*>::iterator itloc = loc.begin();
-        // for(; itloc != loc.end(); ++itloc)
-        //     delete *itloc;//esi el petq chi vortev serverdirection-i dtorum menq locationdirectivnery free enq anum!
-        delete *it;//sra shnorhiv kanchvuma
-    }
+        delete *it;
 }
 
 void DirectiveConfig::directiveValidation()
 {
-    ServerDirective *serv;
     // 1. Проверка, что нет простых директив вне блоков
     if (!directives.simpleDir.empty())
         throw DirectiveConfigException("In config file can't be simple directives outside of any block!");
@@ -27,53 +21,68 @@ void DirectiveConfig::directiveValidation()
 
     // 3. Проверка всех блоков сервера
     std::multimap<std::string, Directive *>::iterator it = directives.blocks.begin();
-    for (; it != directives.blocks.end(); ++it)//es fory bolor serverneri(blokayin directiv) vrayov ancnelu hamara, pritom menak server enq unenalu,nu vapshe 2hat blokayin directiva linelu es proektum,bayc 2rdy`location-@ serveri meja linelu
-    {
-        // 3.1. Проверка, что блок именно server
-        if (it->first != "server")
-            throw DirectiveConfigException("You can't have any other main directive except for server!");
-        
-        Directive* serverBlock = it->second;//es serverBlock-nel uni simpleDir u blocks
-        
-        // 3.2. Проверка обязательных полей сервера
-        if (serverBlock->simpleDir.find("listen") == serverBlock->simpleDir.end())
-            throw DirectiveConfigException("Server directive must have 'listen' directive!");
+    ServerDirective *serv = NULL;
+    try{
 
-        if (serverBlock->simpleDir.find("root") == serverBlock->simpleDir.end())
-            throw DirectiveConfigException("Server directive must have 'root' directive!");
-
-        serv = fillServers(serverBlock);//chem jokum inchnel lcnelu
-        ////////////////////////////////////////////////
-        // 3.3. Проверка location блоков
-        std::multimap<std::string, Directive*>::iterator itLoc = serverBlock->blocks.begin();
-        for (; itLoc != serverBlock->blocks.end(); ++itLoc)
+        for (; it != directives.blocks.end(); ++it)//es fory bolor serverneri(blokayin directiv) vrayov ancnelu hamara, pritom menak server enq unenalu,nu vapshe 2hat blokayin directiva linelu es proektum,bayc 2rdy`location-@ serveri meja linelu
         {
-            if (itLoc->first != "location")
-                throw DirectiveConfigException("You can't have any other nested directive except for location!");
+            // 3.1. Проверка, что блок именно server
+            if (it->first != "server")
+                throw DirectiveConfigException("You can't have any other main directive except for server!");
+            Directive* serverBlock = it->second;//es serverBlock-nel uni simpleDir u blocks
 
-            if (!itLoc->second->blocks.empty())
-                throw DirectiveConfigException("location block can't have any block directives inside!");
+            // 3.2. Проверка обязательных полей сервера
+            if (serverBlock->simpleDir.find("listen") == serverBlock->simpleDir.end())
+                throw DirectiveConfigException("Server directive must have 'listen' directive!");
 
-            // Проверка обязательного path у location
-            if (itLoc->second->simpleDir.find("path") == itLoc->second->simpleDir.end())
-                throw DirectiveConfigException("Location directive must have 'path' specified!");
+            if (serverBlock->simpleDir.find("root") == serverBlock->simpleDir.end())
+                throw DirectiveConfigException("Server directive must have 'root' directive!");
 
-            LocationDirective *loc = fillLocationsn(itLoc->second);
-            serv->setLocDir(loc);
-        } 
-        servers.push_back(serv);
+            // ServerDirective *serv = NULL;
+            serv = fillServers(serverBlock);//chem jokum inchnel lcnelu
+            ////////////////////////////////////////////////
+            // 3.3. Проверка location блоков
+            std::multimap<std::string, Directive*>::iterator itLoc = serverBlock->blocks.begin();
+            for (; itLoc != serverBlock->blocks.end(); ++itLoc)
+            {
+                if (itLoc->first != "location")
+                    throw DirectiveConfigException("You can't have any other nested directive except for location!");
 
-    }
-    std::cout << "axpeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeer\n";
-    if (servers.size() > 1)
-    {
-        if_config_has_more_servers__whether_each_server_has_name_when_they_have_the_same_ip_and_port(servers);
-        if (server_names_with_duplicate_IPs_must_be_different(unique_listens) < 0)
-            throw std::runtime_error("Server names with duplicate IPs must be different.");
-        //stugum enq vor unique listensi secondi`toist int-eri vectori(voronq irancic nerkayacnum enq serverneri indeqsnery voronc ip:port-ery nuynn en, iranc server_name-ery ampayman tarber linen,hakarak depqum karanq exception qcenq)
-    }
-    else
+                if (!itLoc->second->blocks.empty())
+                    throw DirectiveConfigException("location block can't have any block directives inside!");
+
+                // Проверка обязательного path у location
+                if (itLoc->second->simpleDir.find("path") == itLoc->second->simpleDir.end())
+                    throw DirectiveConfigException("Location directive must have 'path' specified!");
+
+                LocationDirective *loc = fillLocationsn(itLoc->second);
+                serv->setLocDir(loc);
+            } 
+            servers.push_back(serv);
+
+        }
         std::cout << "axpeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeer\n";
+        if (servers.size() > 1)
+        {
+            if_config_has_more_servers__whether_each_server_has_name_when_they_have_the_same_ip_and_port(servers);
+            if (server_names_with_duplicate_IPs_must_be_different(unique_listens) < 0)
+                throw std::runtime_error("Server names with duplicate IPs must be different.");
+            //stugum enq vor unique listensi secondi`toist int-eri vectori(voronq irancic nerkayacnum enq serverneri indeqsnery voronc ip:port-ery nuynn en, iranc server_name-ery ampayman tarber linen,hakarak depqum karanq exception qcenq)
+        }
+        else
+        {
+            std::cout << "axpeeeeeeeeeeeeeeeeeeeeeeeeer\n";
+        }
+    }
+    catch(...)
+    {
+        std::cout << "mooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooom\n";
+        // for(std::vector<ServerDirective *>::iterator it = servers.begin(); it != servers.end(); ++it)
+        //     delete *it;//
+        if (serv) 
+            delete serv;//es toxy prkec????))))))))
+        throw ;
+    }
 ///////////////sharunakeli
 
 }
@@ -187,54 +196,61 @@ LocationDirective *DirectiveConfig::fillLocationsn(Directive *locationBlock)
 {
     std::multimap<std::string, std::vector<std::string> >::iterator itSimpleDirLoc = locationBlock->simpleDir.begin();
     LocationDirective *loc = new LocationDirective(); //TODO: leaks
-    for (; itSimpleDirLoc != locationBlock->simpleDir.end(); ++itSimpleDirLoc)
-    {
-        if (itSimpleDirLoc->first != "index" && itSimpleDirLoc->first != "error_page" && itSimpleDirLoc->first != "allow_methods" && itSimpleDirLoc->first != "return" && itSimpleDirLoc->second.size() != 1)
-            throw std::runtime_error("There are more than one value for " + itSimpleDirLoc->first);
-        int i = 0;
-        for (; i < 11; i++)
-            if (itSimpleDirLoc->first == loc->validDirs[i])
-                break ;
-        switch (i)
+    try{
+        for (; itSimpleDirLoc != locationBlock->simpleDir.end(); ++itSimpleDirLoc)
         {
-            case 0:
-                loc->setPath(itSimpleDirLoc->second[0]);
-                break;
-            case 1:
-                loc->setAllow_methods(itSimpleDirLoc->second);//vectora dra hamar
-                break;
-            case 2:
-                loc->setAutoindex(itSimpleDirLoc->second[0]);
-                break;
-            case 3:
-                loc->setRedirect(itSimpleDirLoc->second);//qani vor vectora
-                break;
-            case 4:
-                loc->setUpload_dir(itSimpleDirLoc->second[0]);
-                break;
-            case 5:
-                loc->setCgi_extension(itSimpleDirLoc->second[0]);
-                break;
-            case 6:
-                loc->setCgi_path(itSimpleDirLoc->second[0]);
-                break;
-            case 7:
-                loc->setIndex(itSimpleDirLoc->second);
-                break;                
-            case 8:
-                loc->setClient_max_body_size(itSimpleDirLoc->second[0]);
-                break;
-            case 9:
-                loc->setRoot(itSimpleDirLoc->second[0]);
-                break;
-            case 10:
-                loc->setError_pages(itSimpleDirLoc->second);//mapa,bayc chem patkeracnum vonca petq lcnel,kam vapshe karoxa map-@ poxenq vector?
-                break;
-            default:
-                throw std::runtime_error("Invalid directive for location");
+            if (itSimpleDirLoc->first != "index" && itSimpleDirLoc->first != "error_page" && itSimpleDirLoc->first != "allow_methods" && itSimpleDirLoc->first != "return" && itSimpleDirLoc->second.size() != 1)
+                throw std::runtime_error("There are more than one value for " + itSimpleDirLoc->first);
+            int i = 0;
+            for (; i < 11; i++)
+                if (itSimpleDirLoc->first == loc->validDirs[i])
+                    break ;
+            switch (i)
+            {
+                case 0:
+                    loc->setPath(itSimpleDirLoc->second[0]);
+                    break;
+                case 1:
+                    loc->setAllow_methods(itSimpleDirLoc->second);//vectora dra hamar
+                    break;
+                case 2:
+                    loc->setAutoindex(itSimpleDirLoc->second[0]);
+                    break;
+                case 3:
+                    loc->setRedirect(itSimpleDirLoc->second);//qani vor vectora
+                    break;
+                case 4:
+                    loc->setUpload_dir(itSimpleDirLoc->second[0]);
+                    break;
+                case 5:
+                    loc->setCgi_extension(itSimpleDirLoc->second[0]);
+                    break;
+                case 6:
+                    loc->setCgi_path(itSimpleDirLoc->second[0]);
+                    break;
+                case 7:
+                    loc->setIndex(itSimpleDirLoc->second);
+                    break;                
+                case 8:
+                    loc->setClient_max_body_size(itSimpleDirLoc->second[0]);
+                    break;
+                case 9:
+                    loc->setRoot(itSimpleDirLoc->second[0]);
+                    break;
+                case 10:
+                    loc->setError_pages(itSimpleDirLoc->second);//mapa,bayc chem patkeracnum vonca petq lcnel,kam vapshe karoxa map-@ poxenq vector?
+                    break;
+                default:
+                    throw std::runtime_error("Invalid directive for location");
+            }
         }
+        return loc;
     }
-    return loc;
+    catch(...)
+    {
+        delete loc;
+        throw ;
+    }
 }
 
 DirectiveConfig::DirectiveConfigException::DirectiveConfigException(std::string err_msg)

@@ -10,6 +10,7 @@ FileReader::FileReader(const std::string &fileName) : file(fileName.c_str())
 FileReader::~FileReader()
 {
     file.close();
+    std::cout << "FileReader dtor is called\n";
     
     // std::cout<<"FileReader was destroyed!\n";
 }

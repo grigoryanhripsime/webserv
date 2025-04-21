@@ -9,7 +9,7 @@ AGeneralDirective::AGeneralDirective() : client_max_body_size(1048576), root("")
     // error_pages[500] = "error_pages/500.html";//yani defaultov menq karanq unenanq vor errorin inch eja hamapatasxan
 }
 
-AGeneralDirective::~AGeneralDirective(){}
+AGeneralDirective::~AGeneralDirective(){std::cout << "AGeneralDirective dtor is called\n";}
 /////////////index/////////////////
 bool AGeneralDirective::is_valid_index_value(std::string value)
 {

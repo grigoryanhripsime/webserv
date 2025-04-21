@@ -17,4 +17,7 @@ int ClientSocket::connectToNetwork()
     return (connect(sockfd, (struct sockaddr *)&serverAddr, sizeof(serverAddr)));
 }
 
-ClientSocket::~ClientSocket(){}
+ClientSocket::~ClientSocket(){
+    std::cout << "ClientSocket dtor is called\n";
+
+}

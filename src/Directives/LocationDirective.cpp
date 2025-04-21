@@ -43,8 +43,8 @@ void LocationDirective::validate() const
    }
 
    // Проверка autoindex
-    if (autoindex != "on" && autoindex != "off")
-        throw std::runtime_error("Location: autoindex must be 'on' or 'off'");
+    // if (autoindex != "on" && autoindex != "off")
+    //     throw std::runtime_error("Location: autoindex must be 'on' or 'off'");
 
      // Проверка CGI конфигурации
     //    Сервер видит расширение .py
@@ -104,14 +104,16 @@ void    LocationDirective::setAllow_methods(std::vector<std::string> methods)
     std::vector<std::string>::iterator it = methods.begin();
     for(; it != methods.end(); ++it)
     {
-        allow_methods.push_back(*it);///ste xienq aranc check anelu push anum?
+        if (*it != "GET" && *it != "POST" && *it != "DELETE")
+            throw std::runtime_error("invalid method in config file: " + *it);
+        allow_methods.push_back(*it);///ste xienq aranc check anelu push anum?, arden anum enq)
     }
 }
 
 void    LocationDirective::setAutoindex(const std::string& off_or_on)
 {
     if (off_or_on != "on" && off_or_on != "off")
-        throw std::runtime_error("Autoindex must be 'on' or 'off'" + off_or_on);
+        throw std::runtime_error("Autoindex must be 'on' or 'off': " + off_or_on);
     autoindex = off_or_on;
 }
 

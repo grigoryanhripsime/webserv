@@ -434,7 +434,10 @@ int Servers::check_this_metdod_has_in_appropriate_server(std::string method, int
 }
 
 
-Servers::~Servers(){}
+Servers::~Servers(){
+    std::cout << "Servers dtor is called\n";
+
+}
 
 
 

@@ -23,5 +23,7 @@ int ServerSocket::connectToNetwork()
 }
 
 ServerSocket::~ServerSocket(){
+    std::cout << "ServerSocket dtor is called\n";
+
     // close(sockfd);takanqa es toxy,epoll_ctl i xndir er tali sra patcharov
 }

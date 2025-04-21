@@ -34,6 +34,7 @@ Directive& Directive::operator=(const Directive& other) {
 }
 
 Directive::~Directive() {
+    std::cout << "Directive dtor is called\n";
     std::multimap<std::string, Directive*>::iterator it;
     for (it = blocks.begin(); it != blocks.end(); ++it) {
         delete it->second;

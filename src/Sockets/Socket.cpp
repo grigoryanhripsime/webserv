@@ -31,4 +31,6 @@ struct sockaddr_in Socket::get_serverAddr() const
 
 Socket::~Socket() 
 {
+    std::cout << "Socket dtor is called\n";
+
 }
