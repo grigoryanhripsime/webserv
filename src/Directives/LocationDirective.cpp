@@ -1,5 +1,6 @@
 #include"LocationDirective.hpp"
 #include <iostream>
+
 LocationDirective::LocationDirective() :
     path(""),
     redirect(),
@@ -112,7 +113,7 @@ void    LocationDirective::setAllow_methods(std::vector<std::string> methods)
 void    LocationDirective::setAutoindex(const std::string& off_or_on)
 {
     if (off_or_on != "on" && off_or_on != "off")
-        throw std::runtime_error("Autoindex must be 'on' or 'off': " + off_or_on);
+        throw std::runtime_error("Autoindex must be 'on' or 'off'");
     autoindex = off_or_on;
 }
 

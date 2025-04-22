@@ -56,6 +56,7 @@ class Servers
         std::string uri_is_file(std::string filePath);
         std::string uri_is_directory(std::string filePath);
 
+        void listFiles(std::string path, std::vector<std::string> &files);
 
 
 
