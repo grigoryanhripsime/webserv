@@ -202,18 +202,48 @@ void Servers::handleClientRequest(int client_fd) {
     // std::string filePath = config->get_servers()[0]->getRoot() + config->get_servers()[0]->getLocdir()[0]->getPath() + "/" + config->get_servers()[0]->getLocdir()[0]->getIndex()[1];
     std::cout << "methoooooooood = " << method <<std::endl;
     // std::string filePath = constructingFilePath();
-    if (method == "GET")
+    if (method == "invalid")
     {
-        std::string filePath = config->get_servers()[servIndex]->getRoot() + uri;
-        std::string res = constructingResponce(filePath);
-        std::cout<<"-----------------------------------\n";
-        std::cout<<res;
-        std::cout<<"-----------------------------------\n";
+        std::cout << "senc method chunenq mer allow_methods-um-> 405 Method Not Allowed.\n";//return 77;
+        std::string filePath = config->get_servers()[servIndex]->getRoot() + "/web/error405.html";
+        std::string res = get_need_string_that_we_must_be_pass_send_system_call(filePath);
         const char *response = res.c_str();
         send(client_fd, response, strlen(response), 0);
+        //en fileparhy= i erku toxyba + send-@
     }
     else
-        std::cout<< "chka heton\n";
+    {
+        if (if_http_is_valid(buffer) < 0)
+            std::cout << "505 HTTP Version Not Supported.\n";
+        //
+        if (method == "GET")
+        {
+            std::string filePath = config->get_servers()[servIndex]->getRoot() + uri;
+            std::string res = constructingResponce(filePath);
+            std::cout<<"-----------------------------------\n";
+            std::cout<<res;
+            std::cout<<"-----------------------------------\n";
+            const char *response = res.c_str();
+            send(client_fd, response, strlen(response), 0);
+        }
+        else if(method == "POST")
+        {
+            std::cout << "uri = " << uri << std::endl;
+            std::cout << "whic =" << config->get_servers()[servIndex]->get_locIndex()<<std::endl;
+
+            std::vector<LocationDirective*> locdir = config->get_servers()[servIndex]->getLocdir();
+            int locIndex = config->get_servers()[servIndex]->get_locIndex();
+             std::string upload_dir = locdir[locIndex]->getUpload_dir();
+            std::cout << "opload->" << upload_dir << std::endl;
+            if (upload_dir[0] == '/')
+                std::cout << "eee\n";
+                //uremn inqy absalute patha ,ira mejenqw stexcveliq fayly avelacnelu
+        //hakarak depqum root-um?
+        }
+        // else if (method == "DELETE")
+        //
+    }
+
 }
 
 std::string Servers::uri_is_file(std::string filePath)
@@ -377,15 +407,36 @@ std::string    Servers::validation_of_the_first_line(char *c_buffer, std::string
     std::stringstream ss(c_buffer);
     std::string first_line;
     getline(ss, first_line);
-
-    if (method_is_valid(first_line, locIndex, method))
-        std::cout << "first line of request is valid, can continue\n";
-    else
-        std::cout << "first line is not valid\n";
+std::cout << "incha vorrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr " << method_is_valid(first_line, locIndex, method)<<std::endl;
+    if (method_is_valid(first_line, locIndex, method) < 0)
+    {
+        method = "invalid";
+        std::cout << "first line is not validdddddddddddddddddddddd\n";
+    }
     return method;
     ////////////////////////////////////////
 }
 
+
+int Servers::if_http_is_valid(char *c_buffer)
+{
+    std::stringstream ss_h(c_buffer);
+    std::string first_line;
+    getline(ss_h, first_line);
+
+    std::stringstream ss(first_line);
+    std::string http_version;
+    ss >> http_version;
+    ss >> http_version;
+    ss >> http_version;
+
+    //В HTTP/1.1 он обязателен.
+    // Если отсутствует — 400 Bad Request.senc bana asum gpt-n mihat stugel ete nenc request kara ga vor bacakayi et http1-@ lracnenq et masy
+    std::cout << "hmis stex pti http_version lini http->" << http_version << std::endl;
+    if (http_version != "HTTP/1.1")
+        return -20;
+    return 1;
+}
 
 int Servers::method_is_valid(std::string first_line, int which_location, std::string& method)
 {
@@ -394,25 +445,8 @@ int Servers::method_is_valid(std::string first_line, int which_location, std::st
     ss >> method;
     std::cout << "method->" << method  <<std::endl;
     if (check_this_metdod_has_in_appropriate_server(method, which_location) < 0)
-        std::cout << "senc method chunenq mer allow_methods-um-> 405 Method Not Allowed.\n";
-    else
-        std::cout << "unenq senc method\n";
-    std::string http_version;
-    ss >> http_version;
-    ss >> http_version;
-    //В HTTP/1.1 он обязателен.
-    // Если отсутствует — 400 Bad Request.senc bana asum gpt-n mihat stugel ete nenc request kara ga vor bacakayi et http1-@ lracnenq et masy
-    std::cout << "hmis stex pti http_version lini http->" << http_version << std::endl;
-    if (http_version != "HTTP/1.1")
-        std::cout << "505 HTTP Version Not Supported.\n";
-    //ete hasela stex uremn valida arajin toxy,toist metody unenq locationy gtelenq ,http1a=>
-    // if (method == "GET")
-    //     ////
-    // else if (method == "POST")
-    //     /////
-    // else if (method == "DELETE")
-    //     //////
-    return 777;
+        return (-777);
+    return 1;
 
 }
 

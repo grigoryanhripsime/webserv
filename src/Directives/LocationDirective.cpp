@@ -8,7 +8,6 @@ LocationDirective::LocationDirective() :
     cgi_extension(""),
     cgi_path("") {
 
-        allow_methods.push_back("GET");//arajarkum em esi toxenq,vortev ete allow metod configi mej chlni lselem vor default pti GET lini
         validDirs[0] = "path";
         validDirs[1] = "allow_methods";
         validDirs[2] = "autoindex";
@@ -147,16 +146,16 @@ void    LocationDirective::setRedirect(std::vector<std::string> red)
 
 void    LocationDirective::setUpload_dir(const std::string& upload_dir)
 {
-    struct stat info;
+    // struct stat info;
 
     if (upload_dir.size() > 1 && upload_dir[upload_dir.size() - 1] == '/')
         throw std::runtime_error("Upload dir must not have / at the end." + upload_dir);
-    if (stat(upload_dir.c_str(), &info) != 0)
-        throw std::runtime_error("Directory does not exist." + upload_dir);
-    if (!(info.st_mode & S_IFDIR))
-        throw std::runtime_error("Path is not a directory.");
-    if (access(upload_dir.c_str(), W_OK) != 0)
-        throw std::runtime_error("Directory is not writable.");
+    // if (stat(upload_dir.c_str(), &info) != 0)
+    //     throw std::runtime_error("Directory does not exist." + upload_dir);
+    // if (!(info.st_mode & S_IFDIR))
+    //     throw std::runtime_error("Path is not a directory.");
+    // if (access(upload_dir.c_str(), W_OK) != 0)
+    //     throw std::runtime_error("Directory is not writable.");//bacel comentyyyyy
     this->upload_dir = upload_dir;
 }
  

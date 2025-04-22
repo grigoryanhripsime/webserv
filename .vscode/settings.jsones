@@ -1,4 +1,8 @@
 {
+  "C_Cpp.default.compileCommands": "${workspaceFolder}/compile_commands.json",
+  "C_Cpp.intelliSenseEngine": "default"
+}
+{
     "files.associations": {
         "iostream": "cpp",
         "array": "cpp",
@@ -52,9 +56,4 @@
         "set": "cpp"
     },
     "C_Cpp.errorSquiggles": "disabled"
-{
-  "C_Cpp.default.compileCommands": "${workspaceFolder}/compile_commands.json",
-  "C_Cpp.intelliSenseEngine": "default"
-}
-
 }

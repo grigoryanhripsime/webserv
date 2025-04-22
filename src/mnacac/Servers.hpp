@@ -7,7 +7,7 @@
 #include <sstream>
 #include <fstream>
 
-
+#define METHOD_ERROR -77
 #define MAX_EVENTS 10
 
 class Servers
@@ -38,6 +38,7 @@ class Servers
         int method_is_valid(std::string first_line, int which_location, std::string& method);
         int check_this_metdod_has_in_appropriate_server(std::string method, int which_location);
         std::string    validation_of_the_first_line(char *c_buffer, std::string& method);
+        int if_http_is_valid(char *c_buffer);
 
         void runningProcess();
         void connectingServerToSocket();

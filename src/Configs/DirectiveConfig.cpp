@@ -23,7 +23,6 @@ void DirectiveConfig::directiveValidation()
     std::multimap<std::string, Directive *>::iterator it = directives.blocks.begin();
     ServerDirective *serv = NULL;
     try{
-
         for (; it != directives.blocks.end(); ++it)//es fory bolor serverneri(blokayin directiv) vrayov ancnelu hamara, pritom menak server enq unenalu,nu vapshe 2hat blokayin directiva linelu es proektum,bayc 2rdy`location-@ serveri meja linelu
         {
             // 3.1. Проверка, что блок именно server
@@ -68,6 +67,7 @@ void DirectiveConfig::directiveValidation()
             if (server_names_with_duplicate_IPs_must_be_different(unique_listens) < 0)
                 throw std::runtime_error("Server names with duplicate IPs must be different.");
             //stugum enq vor unique listensi secondi`toist int-eri vectori(voronq irancic nerkayacnum enq serverneri indeqsnery voronc ip:port-ery nuynn en, iranc server_name-ery ampayman tarber linen,hakarak depqum karanq exception qcenq)
+            //Armany asec vor ete nuyn ip port unen 1ic avel serverver configi error tanq,lav chi vor nayum enq ete anunnery tarber enq asum enq lav 
         }
         else
         {
@@ -76,9 +76,6 @@ void DirectiveConfig::directiveValidation()
     }
     catch(...)
     {
-        std::cout << "mooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooom\n";
-        // for(std::vector<ServerDirective *>::iterator it = servers.begin(); it != servers.end(); ++it)
-        //     delete *it;//
         if (serv) 
             delete serv;//es toxy prkec????))))))))
         throw ;
