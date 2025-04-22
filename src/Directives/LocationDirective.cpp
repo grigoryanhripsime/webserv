@@ -59,6 +59,28 @@ void LocationDirective::validate() const
         throw std::runtime_error("Upload directory must be an absolute path (start with '/')");
 }
 
+void    LocationDirective::setIndex(const std::vector<std::string>& indexVec)
+{
+    std::vector<std::string>::const_iterator it = indexVec.begin();
+    for(; it != indexVec.end(); ++it)
+    {
+        if (is_valid_index_value(*it))
+            index.push_back(*it);
+    }
+
+    std::cout<<"🎅🏽🎅🏽🎅🏽🎅🏽\n";
+
+    for (size_t i = 0; i < index.size(); i++)
+        std::cout<<index[i]<<std::endl;
+
+
+
+    std::cout<<"🎅🏽🎅🏽🎅🏽🎅🏽\n";
+
+
+    
+}
+
 // bool shouldHandleAsCgi(const std::string& filename) const {
 //     // Проверяем, заканчивается ли файл на cgi_extension
 //     if (!cgi_extension.empty() && 

@@ -18,6 +18,7 @@ class Servers
         int epfd;
         std::string uri;//kara ev heto jnjvi
         int servIndex;
+
         // int locIndex;
     public:
         Servers(DirectiveConfig &dirConf);
@@ -35,9 +36,9 @@ class Servers
 
         ///validation buffer
         std::string    if_received_request_valid(char *c_buffer);
-        int method_is_valid(std::string first_line, int which_location, std::string& method);
+        void method_is_valid(std::string first_line, int which_location);
         int check_this_metdod_has_in_appropriate_server(std::string method, int which_location);
-        std::string    validation_of_the_first_line(char *c_buffer, std::string& method);
+        std::string validation_of_the_first_line(std::string line);
         int if_http_is_valid(char *c_buffer);
 
         void runningProcess();
