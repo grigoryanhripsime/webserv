@@ -16,9 +16,10 @@ class Servers
         DirectiveConfig *config;
         std::vector<ServerSocket> servSock;//eto server soket(bind,listen),a ne resultat accepta
         int epfd;
-        std::string uri;//kara ev heto jnjvi
+        std::string uri;//GET-i hamar
         int servIndex;
-        // int locIndex;
+        std::string contentType;//POST-i hamar
+        size_t contentLength;//POST-i hamar
     public:
         Servers(DirectiveConfig &dirConf);
         void setupEpoll();
@@ -27,9 +28,12 @@ class Servers
         void handleClientRequest(int client_fd);
         ~Servers();
         //utils///
+    std::string post_method_tasovka(char *buffer, std::string uri, int client_fd);
+
         std::string get_location(char *buffer);
         int have_this_uri_in_our_current_server(int serverInd);
-        
+    void    set_contentType(std::string line);
+void set_contentLength(std::string line, int client_fd);
 
         int getServerThatWeConnectTo(std::string buffer);
 
@@ -39,7 +43,8 @@ class Servers
         int check_this_metdod_has_in_appropriate_server(std::string method, int which_location);
         std::string    validation_of_the_first_line(char *c_buffer, std::string& method);
         int if_http_is_valid(char *c_buffer);
-
+        std::string post_method_tasovka(char *buffer, std::string uri);
+        void    parse_post_request(char *buffer, int client_fd);
         void runningProcess();
         void connectingServerToSocket();
         std::string constructingResponce(std::string filePath);

@@ -228,15 +228,11 @@ void Servers::handleClientRequest(int client_fd) {
         }
         else if(method == "POST")
         {
+            
+
             std::cout << "uri = " << uri << std::endl;
             std::cout << "whic =" << config->get_servers()[servIndex]->get_locIndex()<<std::endl;
-
-            std::vector<LocationDirective*> locdir = config->get_servers()[servIndex]->getLocdir();
-            int locIndex = config->get_servers()[servIndex]->get_locIndex();
-             std::string upload_dir = locdir[locIndex]->getUpload_dir();
-            std::cout << "opload->" << upload_dir << std::endl;
-            if (upload_dir[0] == '/')
-                std::cout << "eee\n";
+            std::string res = post_method_tasovka(buffer, uri, client_fd);
                 //uremn inqy absalute patha ,ira mejenqw stexcveliq fayly avelacnelu
         //hakarak depqum root-um?
         }
@@ -244,6 +240,68 @@ void Servers::handleClientRequest(int client_fd) {
         //
     }
 
+}
+
+std::string Servers::post_method_tasovka(char *buffer, std::string uri, int client_fd)
+{
+    std::vector<LocationDirective*> locdir = config->get_servers()[servIndex]->getLocdir();
+    int locIndex = config->get_servers()[servIndex]->get_locIndex();
+
+    std::cout << "okey->" << uri << std::endl;
+
+    parse_post_request(buffer, client_fd);
+
+    std::string upload_dir = locdir[locIndex]->getUpload_dir();
+    std::cout << "opload->" << upload_dir << std::endl;
+    if (upload_dir[0] == '/')
+        std::cout << "eee\n";
+    return "";
+} 
+
+void    Servers::parse_post_request(char *buffer, int client_fd)
+{
+    std::stringstream ss(buffer);
+    std::string line;
+    while (getline(ss, line))
+    {
+        std::cout <<"line = "<< line << std::endl;
+        if (line.find("Content-Type") != std::string::npos)
+        {
+            set_contentType(line);
+            std::cout << "ev ayd tivn e->" << contentType<<std::endl;
+        }
+        else if (line.find("Content-Length") != std::string::npos)
+        {
+            set_contentLength(line, client_fd);
+            std::cout << "ev ayd lenghtn e->" << contentLength<<std::endl;
+        }
+    }
+}
+
+void Servers::set_contentLength(std::string line, int client_fd)
+{
+    std::stringstream ss(line);
+    std::string tmp;
+    ss >> tmp;
+    ss >> tmp;
+    std::stringstream ssHelper(tmp);
+    ssHelper >> contentLength;
+    std::vector<LocationDirective*> locdir = config->get_servers()[servIndex]->getLocdir();
+    int locIndex = config->get_servers()[servIndex]->get_locIndex(); 
+    if (contentLength > locdir[locIndex]->getBodySize())
+    {
+        std::string filePath = config->get_servers()[servIndex]->getRoot() + "/web/error403.html";
+        std::string res = get_need_string_that_we_must_be_pass_send_system_call(filePath);
+        const char *response = res.c_str();
+        send(client_fd, response, strlen(response), 0);
+    }
+} 
+
+void    Servers::set_contentType(std::string line)
+{
+    std::stringstream ss(line);
+    ss >> contentType;
+    ss >> contentType;
 }
 
 std::string Servers::uri_is_file(std::string filePath)
@@ -405,12 +463,12 @@ int Servers::have_this_uri_in_our_current_server(int servIndex)
     {
         path = vec_locations[i]->getPath();
         std::cout << "yntacik locpath = " << path << std::endl;
-        if (path.size() > uri.size())
-            continue ;
         size_t tmpLength = 0;
         size_t j;
         for (j = 1; j < uri.size() && path[j] == uri[j]; ++j)//1ic em sksum vortevdemi simvoli saxi mot /a linelu
             tmpLength++;
+        if (uri.size() < path.size())
+            continue ;
         if (j == uri.size() && j == path.size())
         {
             length = tmpLength;
@@ -458,7 +516,7 @@ std::string    Servers::validation_of_the_first_line(char *c_buffer, std::string
     std::stringstream ss(c_buffer);
     std::string first_line;
     getline(ss, first_line);
-std::cout << "incha vorrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr " << method_is_valid(first_line, locIndex, method)<<std::endl;
+    std::cout << "incha vorrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr " << method_is_valid(first_line, locIndex, method)<<std::endl;
     if (method_is_valid(first_line, locIndex, method) < 0)
     {
         method = "invalid";
