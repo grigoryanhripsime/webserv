@@ -216,8 +216,10 @@ void Servers::handleClientRequest(int client_fd) {
         if (if_http_is_valid(buffer) < 0)
             std::cout << "505 HTTP Version Not Supported.\n";
         //
+        std::cout<<"reached here\n";
         if (method == "GET")
         {
+            std::cout<<"here\n";
             std::string filePath = config->get_servers()[servIndex]->getRoot() + uri;
             std::string res = constructingResponce(filePath);
             std::cout<<"-----------------------------------\n";
@@ -423,7 +425,6 @@ std::string Servers::uri_is_directory(std::string filePath)
 
 std::string Servers::constructingResponce(std::string filePath)
 {
-
     std::cout << "filepath === " << filePath << std::endl;
     if (pathExists(filePath) == false)
         throw std::runtime_error(" путь не существует или нет прав на доступ(файл/директория)");
@@ -463,6 +464,11 @@ int Servers::have_this_uri_in_our_current_server(int servIndex)
     {
         path = vec_locations[i]->getPath();
         std::cout << "yntacik locpath = " << path << std::endl;
+<<<<<<< HEAD
+=======
+        // if (path.size() > uri.size())
+        //     continue ;
+>>>>>>> 4f87d98b4786aa37cdcad35e4ef396181fb06ef0
         size_t tmpLength = 0;
         size_t j;
         for (j = 1; j < uri.size() && path[j] == uri[j]; ++j)//1ic em sksum vortevdemi simvoli saxi mot /a linelu
@@ -491,18 +497,37 @@ int Servers::have_this_uri_in_our_current_server(int servIndex)
 
 std::string    Servers::if_received_request_valid(char *c_buffer)
 {
-    std::string method;
-    validation_of_the_first_line(c_buffer, method);
+    servIndex = getServerThatWeConnectTo(c_buffer);//esi unenq vor serverna
+
+
+    std::stringstream ss(c_buffer);
+    std::vector<std::string> lines;
+    std::string line;
+    while (std::getline(ss, line))
+        lines.push_back(line);
+        
+    std::string method = validation_of_the_first_line(lines[0]);
+    std::cout<<"🏈🏈🏈\n";
+    for (int i = 0; i < 3; i++)
+        std::cout<<lines[i]<<std::endl;
+    // validation_of_the_second_line(lines[1]);
     //TODO: add other lines
+    std::cout<<"🥐🥐🥐 "<<method<<std::endl;
+    
     return method;
 }
 
-std::string    Servers::validation_of_the_first_line(char *c_buffer, std::string& method)
+std::string    Servers::validation_of_the_first_line(std::string line)
 {
-    servIndex = getServerThatWeConnectTo(c_buffer);//esi unenq vor serverna
-    //////////////////////////////
-    uri = get_location(c_buffer);
-    // int locIndex = config->get_servers()[servIndex]->get_locIndex();
+    std::vector<std::string> result;
+    std::istringstream iss(line);
+    std::string word;
+
+    while (iss >> word)
+        result.push_back(word);
+    if (result.size() < 3)
+        throw std::runtime_error("error page piti bacvi, headeri error a");
+    uri = result[1];
     int locIndex = have_this_uri_in_our_current_server(servIndex);//esi arajin toxi locationi masi pahna
     config->get_servers()[servIndex]->setLocIndex(locIndex);//set locIndex
     if (locIndex < 0)
@@ -510,9 +535,14 @@ std::string    Servers::validation_of_the_first_line(char *c_buffer, std::string
         std::cout << "yavni bacaskaanaaaaaa\n";
         throw std::runtime_error("error page pti bacvi browser-um");//es hmi exception em qcum vor segfault chta,bayc heto pti zut error page-@ bacenq
     }
+    //TODO: add check for server's index
     //////////////////////////////
+
+    if (result[2] != "HTTP/1.1" && result[2] != "HTTP/2")
+        throw std::runtime_error("error page:: headery     sxal a");
     
     ///////////////////////////////
+<<<<<<< HEAD
     std::stringstream ss(c_buffer);
     std::string first_line;
     getline(ss, first_line);
@@ -523,7 +553,13 @@ std::string    Servers::validation_of_the_first_line(char *c_buffer, std::string
         std::cout << "first line is not validdddddddddddddddddddddd\n";
     }
     return method;
+=======
+    if (check_this_metdod_has_in_appropriate_server(result[0], locIndex) < 0)
+        std::runtime_error("error page: header");
+
+>>>>>>> 4f87d98b4786aa37cdcad35e4ef396181fb06ef0
     ////////////////////////////////////////
+    return result[0];
 }
 
 
@@ -547,20 +583,10 @@ int Servers::if_http_is_valid(char *c_buffer)
     return 1;
 }
 
-int Servers::method_is_valid(std::string first_line, int which_location, std::string& method)
-{
-    std::stringstream ss(first_line);
-    // std::string method;
-    ss >> method;
-    std::cout << "method->" << method  <<std::endl;
-    if (check_this_metdod_has_in_appropriate_server(method, which_location) < 0)
-        return (-777);
-    return 1;
-
-}
-
 int Servers::check_this_metdod_has_in_appropriate_server(std::string method, int which_location)
 {
+    // this->method1 = method;
+    // // std::cout<<"☔️☔️☔️☔️  "<<method<<std::endl;
     LocationDirective* locdir;
     std::cout << "hasav stxe\n";
     std::cout << "which_location = " << which_location << std::endl;
