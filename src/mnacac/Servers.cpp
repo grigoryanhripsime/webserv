@@ -464,11 +464,8 @@ int Servers::have_this_uri_in_our_current_server(int servIndex)
     {
         path = vec_locations[i]->getPath();
         std::cout << "yntacik locpath = " << path << std::endl;
-<<<<<<< HEAD
-=======
-        // if (path.size() > uri.size())
-        //     continue ;
->>>>>>> 4f87d98b4786aa37cdcad35e4ef396181fb06ef0
+        if (path.size() > uri.size())
+            continue ;
         size_t tmpLength = 0;
         size_t j;
         for (j = 1; j < uri.size() && path[j] == uri[j]; ++j)//1ic em sksum vortevdemi simvoli saxi mot /a linelu
@@ -498,7 +495,6 @@ int Servers::have_this_uri_in_our_current_server(int servIndex)
 std::string    Servers::if_received_request_valid(char *c_buffer)
 {
     servIndex = getServerThatWeConnectTo(c_buffer);//esi unenq vor serverna
-
 
     std::stringstream ss(c_buffer);
     std::vector<std::string> lines;
@@ -542,22 +538,9 @@ std::string    Servers::validation_of_the_first_line(std::string line)
         throw std::runtime_error("error page:: headery     sxal a");
     
     ///////////////////////////////
-<<<<<<< HEAD
-    std::stringstream ss(c_buffer);
-    std::string first_line;
-    getline(ss, first_line);
-    std::cout << "incha vorrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr " << method_is_valid(first_line, locIndex, method)<<std::endl;
-    if (method_is_valid(first_line, locIndex, method) < 0)
-    {
-        method = "invalid";
-        std::cout << "first line is not validdddddddddddddddddddddd\n";
-    }
-    return method;
-=======
     if (check_this_metdod_has_in_appropriate_server(result[0], locIndex) < 0)
         std::runtime_error("error page: header");
 
->>>>>>> 4f87d98b4786aa37cdcad35e4ef396181fb06ef0
     ////////////////////////////////////////
     return result[0];
 }

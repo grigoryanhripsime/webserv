@@ -18,13 +18,8 @@ class Servers
         int epfd;
         std::string uri;//GET-i hamar
         int servIndex;
-<<<<<<< HEAD
         std::string contentType;//POST-i hamar
         size_t contentLength;//POST-i hamar
-=======
-
-        // int locIndex;
->>>>>>> 4f87d98b4786aa37cdcad35e4ef396181fb06ef0
     public:
         Servers(DirectiveConfig &dirConf);
         void setupEpoll();
