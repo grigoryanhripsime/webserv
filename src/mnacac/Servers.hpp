@@ -6,6 +6,10 @@
 #include <cstring>
 #include <sstream>
 #include <fstream>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <algorithm>
 
 #define METHOD_ERROR -77
 #define MAX_EVENTS 10
@@ -18,8 +22,12 @@ class Servers
         int epfd;
         std::string uri;//GET-i hamar
         int servIndex;
-        std::string contentType;//POST-i hamar
+        std::string MainContentType;//POST-i hamar
         size_t contentLength;//POST-i hamar
+        int error_page_num;
+        std::string boundary;
+        std::string file_type;
+        std::string post_body;
     public:
         Servers(DirectiveConfig &dirConf);
         void setupEpoll();
@@ -28,12 +36,12 @@ class Servers
         void handleClientRequest(int client_fd);
         ~Servers();
         //utils///
-    std::string post_method_tasovka(char *buffer, std::string uri, int client_fd);
+
 
         std::string get_location(char *buffer);
         int have_this_uri_in_our_current_server(int serverInd);
-    void    set_contentType(std::string line);
-void set_contentLength(std::string line, int client_fd);
+    void    set_MainContentType(std::string line);
+void set_contentLength(std::string line);
 
         int getServerThatWeConnectTo(std::string buffer);
 
@@ -43,8 +51,8 @@ void set_contentLength(std::string line, int client_fd);
         int check_this_metdod_has_in_appropriate_server(std::string method, int which_location);
         std::string validation_of_the_first_line(std::string line);
         int if_http_is_valid(char *c_buffer);
-        std::string post_method_tasovka(char *buffer, std::string uri);
-        void    parse_post_request(char *buffer, int client_fd);
+        std::string post_method_tasovka(char *buffer);
+        void    parse_post_request(char *buffer);
         void runningProcess();
         void connectingServerToSocket();
         std::string constructingResponce(std::string filePath);
@@ -63,6 +71,8 @@ void set_contentLength(std::string line, int client_fd);
 
         void listFiles(std::string path, std::vector<std::string> &files);
 
-
-
+        //deep
+        std::string handle_multipart_upload(const std::string &upload_dir);
+        std::string handle_simple_post(const std::string &upload_dir);
+        void create_directories(const std::string &path);
 };

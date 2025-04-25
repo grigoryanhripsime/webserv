@@ -5,7 +5,7 @@ Servers::Servers(DirectiveConfig &dirConf)
 {
     std::cout << "Server ctor is called\n";
     config = &dirConf;
-
+    file_type = "text/plain";//default
     connectingServerToSocket();
 
     runningProcess();
@@ -234,9 +234,11 @@ void Servers::handleClientRequest(int client_fd) {
 
             std::cout << "uri = " << uri << std::endl;
             std::cout << "whic =" << config->get_servers()[servIndex]->get_locIndex()<<std::endl;
-            std::string res = post_method_tasovka(buffer, uri, client_fd);
+            std::string res = post_method_tasovka(buffer);
                 //uremn inqy absalute patha ,ira mejenqw stexcveliq fayly avelacnelu
         //hakarak depqum root-um?
+            const char *response = res.c_str();
+            send(client_fd, response, strlen(response), 0);
         }
         // else if (method == "DELETE")
         //
@@ -244,67 +246,262 @@ void Servers::handleClientRequest(int client_fd) {
 
 }
 
-std::string Servers::post_method_tasovka(char *buffer, std::string uri, int client_fd)
+// Обработка POST-запроса
+std::string Servers::post_method_tasovka(char *buffer)
 {
     std::vector<LocationDirective*> locdir = config->get_servers()[servIndex]->getLocdir();
     int locIndex = config->get_servers()[servIndex]->get_locIndex();
 
-    std::cout << "okey->" << uri << std::endl;
-
-    parse_post_request(buffer, client_fd);
-
-    std::string upload_dir = locdir[locIndex]->getUpload_dir();
-    std::cout << "opload->" << upload_dir << std::endl;
-    if (upload_dir[0] == '/')
-        std::cout << "eee\n";
-    return "";
-} 
-
-void    Servers::parse_post_request(char *buffer, int client_fd)
-{
-    std::stringstream ss(buffer);
-    std::string line;
-    while (getline(ss, line))
-    {
-        std::cout <<"line = "<< line << std::endl;
-        if (line.find("Content-Type") != std::string::npos)
-        {
-            set_contentType(line);
-            std::cout << "ev ayd tivn e->" << contentType<<std::endl;
-        }
-        else if (line.find("Content-Length") != std::string::npos)
-        {
-            set_contentLength(line, client_fd);
-            std::cout << "ev ayd lenghtn e->" << contentLength<<std::endl;
-        }
+    // Парсим POST-запрос, чтобы извлечь Content-Type, Content-Length и тело
+    parse_post_request(buffer);
+    if (error_page_num == 413) {
+        // Если размер тела превышает limit_client_body_size, возвращаем 413
+        std::string filePath = config->get_servers()[servIndex]->getRoot() + "/web/error413.html";
+        return get_need_string_that_we_must_be_pass_send_system_call(filePath);
     }
+
+    // Получаем upload_dir как строку
+    std::string upload_dir = locdir[locIndex]->getUpload_dir();
+    std::cout << "UPLOAD DIR->" << upload_dir << std::endl;
+    if (upload_dir.empty()) {
+        // Если upload_dir не указан, возвращаем 403 Forbidden
+        std::string filePath = config->get_servers()[servIndex]->getRoot() + "/web/error403.html";
+        return get_need_string_that_we_must_be_pass_send_system_call(filePath);
+    }
+
+    // Проверяем, является ли upload_dir абсолютным путем, если нет — добавляем root
+    if (upload_dir[0] != '/') {
+        upload_dir = config->get_servers()[servIndex]->getRoot() + "/" + upload_dir;
+    }
+    else
+    {
+        upload_dir = upload_dir.substr(1);
+        upload_dir = config->get_servers()[servIndex]->getRoot() + "/" + upload_dir;
+    }
+    // Удаляем завершающий слэш, чтобы избежать проблем с путями
+    if (!upload_dir.empty() && upload_dir[upload_dir.size() - 1] == '/') {
+        upload_dir.erase(upload_dir.size() - 1);
+    }
+
+    std::string response_body;
+    std::cout << "type of content is->" << MainContentType << std::endl;
+    if (MainContentType == "multipart/form-data") {
+        // Обрабатываем загрузку файлов для multipart/form-data
+        std::cout << "mtanq kino\n";
+        response_body = handle_multipart_upload(upload_dir);
+    } 
+    else {
+        // Обрабатываем другие типы контента (например, application/x-www-form-urlencoded)
+        response_body = handle_simple_post(upload_dir);
+    }//esi stugac chi
+    std::cout << "RESPONSE BODY->>" << response_body << std::endl;
+
+    // Формируем HTTP-ответ
+    std::stringstream ss;
+    ss << "HTTP/1.1 200 OK\r\n"
+       << "Content-Length: " << response_body.size() << "\r\n"
+       << "Content-Type: text/plain\r\n"
+       << "\r\n"
+       << response_body;
+
+    return ss.str();
+    return "";
 }
 
-void Servers::set_contentLength(std::string line, int client_fd)
+// Парсинг POST-запроса
+void Servers::parse_post_request(char *buffer)
+{
+    std::string request_body;
+    std::string buf_str(buffer);
+    size_t body_start = buf_str.find("\r\n\r\n");
+
+    // Сбрасываем код ошибки
+    error_page_num = 0;
+
+    if (body_start != std::string::npos) {
+        // Извлекаем тело запроса (включая все \r\n)
+        request_body = buf_str.substr(body_start + 4);
+
+        // Обрабатываем заголовки
+        std::stringstream ss(buf_str.substr(0, body_start));
+        std::string line;
+        while (getline(ss, line)) {
+            if (!line.empty() && line != "\r") {
+                if (line.find("Content-Type: ") != std::string::npos) {
+                    set_MainContentType(line);
+                } else if (line.find("Content-Length: ") != std::string::npos) {
+                    set_contentLength(line);
+                }
+            }
+        }
+    }
+
+    // Сохраняем тело для дальнейшей обработки
+    this->post_body = request_body;
+    std::cout << "Content type is->" << MainContentType << std::endl;
+    std::cout << "LENGHT->" << contentLength << std::endl << std::endl;
+
+    std::cout << "POST BODY->" << post_body << std::endl<<std::endl<<std::endl;
+}
+
+// Установка Content-Type и границы для multipart
+void Servers::set_MainContentType(std::string line)
+{
+    size_t pos = line.find("Content-Type: ");
+    if (pos != std::string::npos) {
+        MainContentType = line.substr(pos + 14);
+        MainContentType = MainContentType.substr(0, MainContentType.find(';'));
+        if (MainContentType == "multipart/form-data") {
+            size_t boundary_pos = line.find("boundary=");
+            if (boundary_pos != std::string::npos) {
+                boundary = "--" + line.substr(boundary_pos + 9);
+                boundary = boundary.substr(0, boundary.find('\r'));
+            }
+        }
+         else {
+            file_type = MainContentType;
+        }
+    }
+    std::cout << "HELPER->" << file_type<< std::endl;
+    std::cout << "BOUNDARY->" << boundary<< std::endl;
+
+}
+
+// Установка Content-Length и проверка на превышение лимита
+void Servers::set_contentLength(std::string line)
 {
     std::stringstream ss(line);
     std::string tmp;
-    ss >> tmp;
-    ss >> tmp;
-    std::stringstream ssHelper(tmp);
-    ssHelper >> contentLength;
-    std::vector<LocationDirective*> locdir = config->get_servers()[servIndex]->getLocdir();
-    int locIndex = config->get_servers()[servIndex]->get_locIndex(); 
-    if (contentLength > locdir[locIndex]->getBodySize())
-    {
-        std::string filePath = config->get_servers()[servIndex]->getRoot() + "/web/error403.html";
-        std::string res = get_need_string_that_we_must_be_pass_send_system_call(filePath);
-        const char *response = res.c_str();
-        send(client_fd, response, strlen(response), 0);
-    }
-} 
+    ss >> tmp >> contentLength;
 
-void    Servers::set_contentType(std::string line)
-{
-    std::stringstream ss(line);
-    ss >> contentType;
-    ss >> contentType;
+    std::vector<LocationDirective*> locdir = config->get_servers()[servIndex]->getLocdir();
+    int locIndex = config->get_servers()[servIndex]->get_locIndex();
+    if (contentLength > locdir[locIndex]->getBodySize()) {
+        error_page_num = 413; // Request Entity Too Large
+    }
 }
+
+std::string Servers::handle_multipart_upload(const std::string &upload_dir)
+{
+    std::string file_content;
+    std::string file_path;
+    std::string headers;
+    std::string filename;
+    if (boundary.empty()) {
+        return "Error: No boundary found for multipart/form-data";
+    }
+
+    std::string body = post_body;
+    std::string response = "Files uploaded successfully:\n";
+    size_t pos = 0;
+
+    // Создаем директорию, если она не существует
+    mkdir(upload_dir.c_str(), 0755);
+
+    while ((pos = body.find(boundary)) != std::string::npos)
+    {
+        body = body.substr(pos + boundary.length());
+        std::cout << "cur body->" << body << std::endl;
+        if (body.empty() || body.find("--") == 0)//body pustoy ili body начинается с двух дефисов --.
+            break; // Конец multipart
+        // Извлекаем заголовки части
+        size_t header_end = body.find("\r\n\r\n");
+        if (header_end == std::string::npos)
+        {
+            std::cout << "continue??\n";
+            continue;
+        }
+        headers = body.substr(0, header_end);
+        std::cout << "headers->" << headers << std::endl<<std::endl;
+
+        body = body.substr(header_end + 4);
+        std::cout << "do body->" << body << std::endl<<std::endl;
+        // Находим конец части
+        size_t part_end = body.find(boundary);
+        if (part_end == std::string::npos)
+            part_end = body.length();
+        // Ищем имя файла в Content-Disposition
+        size_t filename_pos = headers.find("filename=\"");
+        if (filename_pos != std::string::npos) {
+            filename_pos += 10;
+            size_t filename_end = headers.find("\"", filename_pos);
+            filename = headers.substr(filename_pos, filename_end - filename_pos);
+        }
+        std::cout << "FILENAME-> "<< filename << std::endl;
+        if (!filename.empty()) {
+            // Извлекаем содержимое файла
+            file_content = body.substr(0, part_end - 2); // Удаляем \r\n
+
+            file_path = upload_dir + "/" + filename;
+
+            std::cout << "FILE PATH->" << file_path <<std::endl;
+            std::string dir_path = file_path.substr(0, file_path.find_last_of('/'));
+            create_directories(dir_path);
+
+            int fd = open(file_path.c_str(), O_CREAT | O_WRONLY | O_TRUNC, 0644);
+            if (fd == -1) {
+                return "Error: Failed to open file for writing";
+            }
+            std::cout << "new fd = " << fd <<std::endl;
+            ssize_t written = write(fd, file_content.c_str(), file_content.size());
+            close(fd);
+
+            if (written == -1 || static_cast<size_t>(written) != file_content.size()) {
+                return "Error: Failed to write file";
+            }
+
+            response += "Uploaded: " + filename + "\n";
+        }
+
+        // Обрезаем body для следующей части
+        body = body.substr(part_end);
+    }
+    std::cout << "posle body->" << body << std::endl;
+    std::cout << "BOUNDARTY is->" << boundary << std::endl;
+    std::cout << "HEADER->" << headers << std::endl;
+    std::cout << "FILE-CONTENT-<" << file_content <<std::endl;
+    std::cout << "FILE_PATH ->" << file_path <<std::endl;
+    std::cout << "RESSSSSSSPONSE->" << response << std::endl;
+    return response;
+}
+
+// Обработка простых POST-запросов (не multipart)
+std::string Servers::handle_simple_post(const std::string &upload_dir)
+{
+    // Сохраняем тело POST в файл post_data.txt в upload_dir
+    std::string file_path = upload_dir + "/post_data.txt";
+    int fd = open(file_path.c_str(), O_CREAT | O_WRONLY | O_TRUNC, 0644);
+    if (fd == -1) {
+        return "Error: Failed to open file for writing";
+    }
+
+    ssize_t written = write(fd, post_body.c_str(), post_body.size());
+    close(fd);
+
+    if (written == -1 || static_cast<size_t>(written) != post_body.size()) {
+        return "Error: Failed to write POST data";
+    }
+
+    return "POST data saved successfully";
+}
+
+
+
+// Вспомогательная функция для рекурсивного создания директорий
+void Servers::create_directories(const std::string &path) {
+    std::string current_path;
+    for (size_t i = 0; i < path.size(); ++i) {
+        if (path[i] == '/') {
+            if (!current_path.empty()) {
+                mkdir(current_path.c_str(), 0755);
+            }
+        }
+        current_path += path[i];
+    }
+    if (!current_path.empty()) {
+        mkdir(current_path.c_str(), 0755);
+    }
+}//esi ashxatuma bayc mihat haskanal vonca ashxatum:)))))
 
 std::string Servers::uri_is_file(std::string filePath)
 {
@@ -524,7 +721,7 @@ std::string    Servers::validation_of_the_first_line(std::string line)
     if (result.size() < 3)
         throw std::runtime_error("error page piti bacvi, headeri error a");
     uri = result[1];
-    int locIndex = have_this_uri_in_our_current_server(servIndex);//esi arajin toxi locationi masi pahna
+    int locIndex = have_this_uri_in_our_current_server(servIndex);//esi arajin toxi uri masi pahna
     config->get_servers()[servIndex]->setLocIndex(locIndex);//set locIndex
     if (locIndex < 0)
     {

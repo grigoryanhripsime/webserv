@@ -1,0 +1,3 @@
+/home/vbarsegh/42/webserv/build/CMakeFiles/webserv.dir
+/home/vbarsegh/42/webserv/build/CMakeFiles/edit_cache.dir
+/home/vbarsegh/42/webserv/build/CMakeFiles/rebuild_cache.dir

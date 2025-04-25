@@ -599,3 +599,15 @@ timeout:
 /////////////////
 "Когда я открываю браузер и пишу localhost:8080, это тот момент, когда клиент отправляет данные?"
 ✅ Да! Это момент, когда браузер подключается как клиент и отправляет HTTP-запрос на сервер.
+
+
+
+
+
+
+POST /upload HTTP/1.1\r\n
+Host: example.com\r\n
+Content-Type: multipart/form-data; boundary=xyz123\r\n
+Content-Length: 1000\r\n
+\r\n  ← Здесь заканчиваются заголовки (это и есть `\r\n\r\n`)
+BODY_STARTS_HERE...
