@@ -39,6 +39,8 @@ create_obj_dirs:
 	@mkdir -p $(OBJSPATH)/Configs
 	@mkdir -p $(OBJSPATH)/Directives
 	@mkdir -p $(OBJSPATH)/Sockets
+	@mkdir -p $(OBJSPATH)/CGI
+
 
 clean:
 	@rm -rf $(OBJSPATH)
