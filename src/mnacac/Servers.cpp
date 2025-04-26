@@ -526,6 +526,8 @@ std::string Servers::uri_is_directory(std::string filePath)
     // int locIndex = config->get_servers()[servIndex]->get_locIndex();
     std::string str = config->get_servers()[servIndex]->getRoot() + locdir[locIndex]->getPath();
     // size_t i = 0;
+    if (str[str.size() - 1] == '?')
+        str = str.substr(0, str.size() - 1);
     if (str[str.size() - 1] != '/')
         str += '/';
     std::cout << "fiiiiiiiiiiiiiile->" << filePath << std::endl;
@@ -581,6 +583,8 @@ std::string Servers::uri_is_directory(std::string filePath)
 std::string Servers::constructingResponce(std::string filePath)
 {
     std::cout << "filepath === " << filePath << std::endl;
+    if (filePath[filePath.size() - 1] == '?')
+        filePath = filePath.substr(0, filePath.size() - 1);
     if (pathExists(filePath) == false)
         throw std::runtime_error(" путь не существует или нет прав на доступ(файл/директория)");
     if (isFile(filePath)) //Если ты проверяешь путь и он:❌ не существует — верни ошибку 404 Not Found
