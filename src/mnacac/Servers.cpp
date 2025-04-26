@@ -39,7 +39,6 @@ void Servers::connectingServerToSocket()
     }
 }
 
-
 void Servers::runningProcess()
 {
     setupEpoll();
@@ -142,7 +141,6 @@ void Servers::acceptClient(int server_fd)
     }
 }
 
-
 int Servers::getServerThatWeConnectTo(std::string buffer)
 {
     std::stringstream ss(buffer);
@@ -219,7 +217,7 @@ void Servers::handleClientRequest(int client_fd) {
         std::cout<<"reached here\n";
         if (method == "GET")
         {
-            std::cout<<"here\n";
+            // if ()
             std::string filePath = config->get_servers()[servIndex]->getRoot() + uri;
             std::string res = constructingResponce(filePath);
             std::cout<<"-----------------------------------\n";
@@ -485,10 +483,9 @@ std::string Servers::handle_simple_post(const std::string &upload_dir)
     return "POST data saved successfully";
 }
 
-
-
 // Вспомогательная функция для рекурсивного создания директорий
-void Servers::create_directories(const std::string &path) {
+void Servers::create_directories(const std::string &path)
+ {
     std::string current_path;
     for (size_t i = 0; i < path.size(); ++i) {
         if (path[i] == '/') {
@@ -700,12 +697,12 @@ std::string    Servers::if_received_request_valid(char *c_buffer)
         lines.push_back(line);
         
     std::string method = validation_of_the_first_line(lines[0]);
-    std::cout<<"🏈🏈🏈\n";
-    for (int i = 0; i < 3; i++)
-        std::cout<<lines[i]<<std::endl;
-    // validation_of_the_second_line(lines[1]);
-    //TODO: add other lines
-    std::cout<<"🥐🥐🥐 "<<method<<std::endl;
+    // std::cout<<"🏈🏈🏈\n";
+    // for (int i = 0; i < 3; i++)
+    //     std::cout<<lines[i]<<std::endl;
+    // // validation_of_the_second_line(lines[1]);
+    // //TODO: add other lines
+    // std::cout<<"🥐🥐🥐 "<<method<<std::endl;
     
     return method;
 }
@@ -721,6 +718,8 @@ std::string    Servers::validation_of_the_first_line(std::string line)
     if (result.size() < 3)
         throw std::runtime_error("error page piti bacvi, headeri error a");
     uri = result[1];
+    if (uri == "/favicon.ico")
+        return "";
     int locIndex = have_this_uri_in_our_current_server(servIndex);//esi arajin toxi uri masi pahna
     config->get_servers()[servIndex]->setLocIndex(locIndex);//set locIndex
     if (locIndex < 0)
@@ -782,13 +781,10 @@ int Servers::check_this_metdod_has_in_appropriate_server(std::string method, int
     return -1;//chkar tenc metod
 }
 
-
-Servers::~Servers(){
+Servers::~Servers()
+{
     std::cout << "Servers dtor is called\n";
-
 }
-
-
 
 bool Servers::pathExists(const std::string& path)
 {
@@ -852,7 +848,6 @@ int Servers::find_in_index_vectors_this_string(std::string left_part_of_filePath
     }
     return -1;
 }
-
 
 std::string Servers::get_need_string_that_we_must_be_pass_send_system_call(std::string filePath)
 {
