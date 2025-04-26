@@ -3,6 +3,7 @@
 #include "ServerSocket.hpp"
 #include <sys/epoll.h>
 #include "DirectiveConfig.hpp"
+#include "Reques_header_validation.hpp"
 #include <cstring>
 #include <sstream>
 #include <fstream>
@@ -20,14 +21,15 @@ class Servers
         DirectiveConfig *config;
         std::vector<ServerSocket> servSock;//eto server soket(bind,listen),a ne resultat accepta
         int epfd;
-        std::string uri;//GET-i hamar
         int servIndex;
+        std::string uri;//GET-i hamar
         std::string MainContentType;//POST-i hamar
         size_t contentLength;//POST-i hamar
         int error_page_num;
         std::string boundary;
         std::string file_type;
         std::string post_body;
+        
     public:
         Servers(DirectiveConfig &dirConf);
         void setupEpoll();
@@ -38,18 +40,12 @@ class Servers
         //utils///
 
 
-        std::string get_location(char *buffer);
-        int have_this_uri_in_our_current_server(int serverInd);
-    void    set_MainContentType(std::string line);
-void set_contentLength(std::string line);
+        void    set_MainContentType(std::string line);
+        void set_contentLength(std::string line);
 
         int getServerThatWeConnectTo(std::string buffer);
 
         ///validation buffer
-        std::string    if_received_request_valid(char *c_buffer);
-        void method_is_valid(std::string first_line, int which_location);
-        int check_this_metdod_has_in_appropriate_server(std::string method, int which_location);
-        std::string validation_of_the_first_line(std::string line);
         int if_http_is_valid(char *c_buffer);
         std::string post_method_tasovka(char *buffer);
         void    parse_post_request(char *buffer);
