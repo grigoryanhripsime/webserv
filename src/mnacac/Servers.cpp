@@ -1,4 +1,5 @@
 #include "Servers.hpp"
+#include <sstream>
 #include <dirent.h>
 
 Servers::Servers(DirectiveConfig &dirConf)
@@ -111,7 +112,9 @@ void Servers::runLoop()
             {
                 epoll_ctl(epfd, EPOLL_CTL_DEL, sockfd, NULL);
                 close(sockfd);
-                throw std::runtime_error("Error or hangup detected on socket " + sockfd);
+                std::ostringstream oss;
+                oss << sockfd;
+                throw std::runtime_error("Error or hangup detected on socket " + oss.str());
             }
         }
     }

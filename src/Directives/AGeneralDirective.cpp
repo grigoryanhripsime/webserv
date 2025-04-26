@@ -15,7 +15,7 @@ bool AGeneralDirective::is_valid_index_value(std::string value)
 {
     std::cout << "elav = " << value << std::endl;
     {
-        unsigned int ind = value.find('.');
+        size_t ind = value.find('.');
         if (value[0] == '.' || (ind != std::string::npos && !is_all_letters(value.substr(ind + 1, value.size()))))
             throw std::runtime_error("Innvalid value(poxir message-@)" + value);
     }

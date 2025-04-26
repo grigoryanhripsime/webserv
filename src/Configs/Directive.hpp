@@ -4,8 +4,9 @@
 #include <iostream>
 #include <vector>
 
-struct Directive 
+class Directive 
 {
+public:
     std::multimap<std::string, std::vector<std::string> > simpleDir;
     std::multimap<std::string, Directive *> blocks;
     Directive(const Directive& other);
