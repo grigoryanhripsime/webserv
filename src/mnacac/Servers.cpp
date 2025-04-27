@@ -1,6 +1,5 @@
 #include "Servers.hpp"
 
-
 Servers::Servers(DirectiveConfig &dirConf)
 {
     std::cout << "Server ctor is called\n";
@@ -144,10 +143,7 @@ void Servers::acceptClient(int server_fd)
     }
 }
 
-
-
 Servers::~Servers()
 {
     std::cout << "Servers dtor is called\n";
 }
-

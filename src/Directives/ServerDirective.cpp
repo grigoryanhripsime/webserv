@@ -16,6 +16,11 @@ ServerDirective::ServerDirective()
 
 }
 
+std::vector<LocationDirective*>& ServerDirective::getLocdir() { return locdir; }
+std::pair<std::string, int> ServerDirective::getListen() const { return listen; }
+std::string ServerDirective::getServer_name() const { return server_name; }
+int ServerDirective::get_locIndex() const { return locIndex; }
+
 void ServerDirective::validate() const
 {
     // if (listen.empty())
@@ -40,7 +45,6 @@ ServerDirective::~ServerDirective()
         delete *it;
 }
 
-
 /////////////setters//////////////
 ////////////////listen validacia/////////
 int     ServerDirective::ip_part_contain_correct_integers(std::string ip_part)
@@ -64,6 +68,7 @@ int     ServerDirective::ip_part_contain_correct_integers(std::string ip_part)
     }
     return 1;
 }
+
 void    ServerDirective::check_and_set_port(const std::string& ipAndPort, size_t& indexOfVerjaket, bool flag)
 {
     if (flag)
@@ -92,6 +97,7 @@ void    ServerDirective::check_and_set_port(const std::string& ipAndPort, size_t
         }
     }
 }
+
 void    ServerDirective::setListen(const std::string& ipAndPort)
 {   
     size_t indexOfVerjaket = ipAndPort.find(":");
@@ -108,6 +114,7 @@ void    ServerDirective::setListen(const std::string& ipAndPort)
     else
         check_and_set_port(ipAndPort, indexOfVerjaket, false);
 }
+
 /////////////done losten validaca////////////////
 void    ServerDirective::setServer_name(const std::string& name)
 {

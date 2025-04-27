@@ -29,7 +29,6 @@ void Request_header_validation::delete_validation(std::vector<std::string> lines
     
 }
 
-
 std::string    Request_header_validation::if_received_request_valid(char *c_buffer)
 {
     servIndex = getServerThatWeConnectTo(c_buffer);//e si unenq vor serverna
@@ -60,7 +59,6 @@ std::string    Request_header_validation::if_received_request_valid(char *c_buff
     }
     return method;
 }
-
 
 std::string    Request_header_validation::validation_of_the_first_line(std::string line)
 {
@@ -188,4 +186,3 @@ int Request_header_validation::getServerThatWeConnectTo(std::string buffer)
     std::cout << "en vat depqna\n";
     return 0;
 }
-

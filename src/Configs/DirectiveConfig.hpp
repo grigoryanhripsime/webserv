@@ -32,8 +32,8 @@ class DirectiveConfig
         };
         
         ////getter
-        std::vector<ServerDirective *> get_servers() const {return servers;} //TODO: move this to cpp
-        std::map<std::pair<std::string, int>, std::vector<int> > get_unique_listens() const {return unique_listens;}
+        std::vector<ServerDirective *> get_servers() const;
+        std::map<std::pair<std::string, int>, std::vector<int> > get_unique_listens() const;
         
         ////
         void if_config_has_more_servers__whether_each_server_has_name_when_they_have_the_same_ip_and_port(std::vector<ServerDirective *> servers);

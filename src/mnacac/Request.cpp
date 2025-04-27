@@ -267,7 +267,6 @@ void Request::create_directories(const std::string &path)
     }
 }//esi ashxatuma bayc mihat haskanal vonca ashxatum:)))))
 
-
 //////////////GET
 bool Request::pathExists(const std::string& path)
 {
@@ -359,7 +358,6 @@ std::string Request::get_need_string_that_we_must_be_pass_send_system_call(std::
 
     return header + ss1.str() + whiteSpaces + ss.str();
 }
-
 
 std::string Request::uri_is_file(std::string filePath)
 {

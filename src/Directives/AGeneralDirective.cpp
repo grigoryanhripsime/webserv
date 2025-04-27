@@ -9,6 +9,10 @@ AGeneralDirective::AGeneralDirective() : client_max_body_size(1048576), root("")
     // error_pages[500] = "error_pages/500.html";//yani defaultov menq karanq unenanq vor errorin inch eja hamapatasxan
 }
 
+std::map<int, std::string> AGeneralDirective::getError_page() { return error_pages; }
+std::vector<std::string>& AGeneralDirective::getIndex() { return index; } 
+size_t  AGeneralDirective::getBodySize() { return client_max_body_size; }
+
 AGeneralDirective::~AGeneralDirective(){std::cout << "AGeneralDirective dtor is called\n";}
 /////////////index/////////////////
 bool AGeneralDirective::is_valid_index_value(std::string value)

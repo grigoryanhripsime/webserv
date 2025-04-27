@@ -1,5 +1,7 @@
 #include "ServerSocket.hpp"
 
+ServerSocket::ServerSocket() : Socket() {}
+
 ServerSocket::ServerSocket(int domainIP, int service, int protocol, int port, std::string ipAddress, int queueCount) : Socket(domainIP, service, protocol, port, ipAddress)
 {
     std::cout << "ServerSocket ctor is callled\n";

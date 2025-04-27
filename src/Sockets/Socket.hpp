@@ -13,7 +13,7 @@ class Socket
         int sockfd;//vor el dublikat chunenanq,serversoketum` server_fd, clientsoketum`client_fd
         struct sockaddr_in serverAddr;
     public:
-        Socket() {}
+        Socket();
         Socket(int domainIP, int service, int protocol, int port, std::string ipAddress);
         virtual ~Socket();
         virtual int connectToNetwork() = 0;

@@ -29,9 +29,9 @@ public:
     const std::string& getRoot() const { return root; }
 
         /////getters////
-    std::map<int, std::string> getError_page() {return error_pages;}
-    std::vector<std::string>& getIndex() {return index;} 
-    size_t  getBodySize(){return client_max_body_size;}
+    std::map<int, std::string> getError_page();
+    std::vector<std::string>& getIndex();
+    size_t  getBodySize();
     ////////////index validacia
     bool is_valid_index_value(std::string index);
     /////////body size vsalidacia/
