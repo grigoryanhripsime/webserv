@@ -100,6 +100,7 @@ void Servers::runLoop()
                         Request request(config->get_servers());
                         std::cout << "kanchvav" << std::endl;
                         request.handleClientRequest(sockfd);
+                        requests.push_back(request);
                     }
                     catch(std::exception& e)
                     {

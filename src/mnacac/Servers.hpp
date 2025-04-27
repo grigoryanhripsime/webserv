@@ -13,6 +13,7 @@ class Servers
         DirectiveConfig *config;
         std::vector<ServerSocket> servSock;//eto server soket(bind,listen),a ne resultat accepta
         int epfd;
+        std::vector<Request> requests;
         
     public:
         Servers(DirectiveConfig &dirConf);

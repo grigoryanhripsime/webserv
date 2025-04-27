@@ -5,7 +5,7 @@
 #include <vector>
 #include "ServerDirective.hpp"
 
-class Reques_header_validation
+class Request_header_validation
 {
     private:
         std::vector<ServerDirective *> servers;
@@ -19,7 +19,7 @@ class Reques_header_validation
         int get_servIndex() const; 
         std::string get_method() const; 
 
-        Reques_header_validation(std::vector<ServerDirective *> servers);
+        Request_header_validation(std::vector<ServerDirective *> servers);
         std::string    if_received_request_valid(char *c_buffer);
         std::string    validation_of_the_first_line(std::string line);
         int have_this_uri_in_our_current_server(int servIndex);
