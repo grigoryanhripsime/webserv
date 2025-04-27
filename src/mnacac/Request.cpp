@@ -15,14 +15,13 @@ Request::Request(std::vector<ServerDirective *> servers)
 std::string Request::post_method_tasovka(char *buffer)
 {
     std::vector<LocationDirective*> locdir = servers[servIndex]->getLocdir();
-    int locIndex = servers[servIndex]->get_locIndex();
-
     // Парсим POST-запрос, чтобы извлечь Content-Type, Content-Length и тело
     parse_post_request(buffer);
     if (error_page_num == 413) {
         // Если размер тела превышает limit_client_body_size, возвращаем 413
-        std::string root =  (locdir[locIndex]->getRoot() != "") ? locdir[locIndex]->getRoot() : servers[servIndex]->getRoot();
-        std::string filePath = root + "/web/error413.html";
+        // std::string root =  (locdir[locIndex]->getRoot() != "") ? locdir[locIndex]->getRoot() : servers[servIndex]->getRoot();
+        // std::string filePath = root + "/web/error413.html";
+        std::string filePath = getFilepath("/web/error413.html");
         return get_need_string_that_we_must_be_pass_send_system_call(filePath);
     }
 
@@ -31,8 +30,9 @@ std::string Request::post_method_tasovka(char *buffer)
     std::cout << "UPLOAD DIR->" << upload_dir << std::endl;
     if (upload_dir.empty()) {
         // Если upload_dir не указан, возвращаем 403 Forbidden
-        std::string root =  (locdir[locIndex]->getRoot() != "") ? locdir[locIndex]->getRoot() : servers[servIndex]->getRoot();
-        std::string filePath = root + "/web/error403.html";
+        // std::string root =  (locdir[locIndex]->getRoot() != "") ? locdir[locIndex]->getRoot() : servers[servIndex]->getRoot();
+        // std::string filePath = root + "/web/error403.html";
+        std::string filePath = getFilepath("/web/error403.html");
         return get_need_string_that_we_must_be_pass_send_system_call(filePath);
     }
 
@@ -386,8 +386,9 @@ std::string Request::uri_is_file(std::string filePath)
     if (find_in_index_vectors_this_string(left_part_of_filePath, locdir[locIndex]->getIndex()) < 0)
     {
         std::cout << "error page???????\n";
-        std::string root =  (locdir[locIndex]->getRoot() != "") ? locdir[locIndex]->getRoot() : servers[servIndex]->getRoot();
-        filePath = root + "/web/error404.html";
+        // std::string root =  (locdir[locIndex]->getRoot() != "") ? locdir[locIndex]->getRoot() : servers[servIndex]->getRoot();
+        // filePath = root + "/web/error404.html";
+        filePath = getFilepath("/web/error404.html");
     }
     //////////
     std::cout << "ete esi tpvela uremn jokela vor fayla\n";
@@ -443,8 +444,9 @@ std::string Request::uri_is_directory(std::string filePath)
     ////////////////
     if (filePath != str)
     {
-        std::string root =  (locdir[locIndex]->getRoot() != "") ? locdir[locIndex]->getRoot() : servers[servIndex]->getRoot();
-        filePath = root + "/web/error404.html";
+        // std::string root =  (locdir[locIndex]->getRoot() != "") ? locdir[locIndex]->getRoot() : servers[servIndex]->getRoot();
+        // filePath = root + "/web/error404.html";
+        filePath = getFilepath("/web/error404.html");
     }
     else if (getFilesInDirectory(filePath) != "NULL")//filePath == str esi el petq chi stugel,verevy ka
     {
@@ -459,8 +461,9 @@ std::string Request::uri_is_directory(std::string filePath)
     std::cout << "ba incha->" << locdir[locIndex]->getAutoindex() << std::endl;
     if (filePath == str && locdir[locIndex]->getAutoindex() == "off")
     {
-        std::string root =  (locdir[locIndex]->getRoot() != "") ? locdir[locIndex]->getRoot() : servers[servIndex]->getRoot();
-        filePath = root + "/web/error403.html";
+        // std::string root =  (locdir[locIndex]->getRoot() != "") ? locdir[locIndex]->getRoot() : servers[servIndex]->getRoot();
+        // filePath = root + "/web/error403.html";
+        filePath = getFilepath("/web/error403.html");
         return get_need_string_that_we_must_be_pass_send_system_call(filePath);
     }
     else
@@ -547,10 +550,11 @@ void Request::handleClientRequest(int client_fd) {
     if (method == "GET")
     {
         std::cout<<"SERVINDEX: "<<servIndex<<std::endl;
-        std::vector<LocationDirective*> locdir = servers[servIndex]->getLocdir();
-        int locIndex = servers[servIndex]->get_locIndex();
-        std::string root =  (locdir[locIndex]->getRoot() != "") ? locdir[locIndex]->getRoot() : servers[servIndex]->getRoot();
-        std::string filePath = root + uri;
+        // std::vector<LocationDirective*> locdir = servers[servIndex]->getLocdir();
+        // int locIndex = servers[servIndex]->get_locIndex();
+        // std::string root =  (locdir[locIndex]->getRoot() != "") ? locdir[locIndex]->getRoot() : servers[servIndex]->getRoot();
+        // std::string filePath = root + uri;
+        std::string filePath = getFilepath(uri);
         std::string res = constructingResponce(filePath);
         std::cout<<"-----------------------------------\n";
         std::cout<<res;
@@ -563,8 +567,6 @@ void Request::handleClientRequest(int client_fd) {
         std::cout << "uri = " << uri << std::endl;
         std::cout << "whic =" << servers[servIndex]->get_locIndex()<<std::endl;
         std::string res = post_method_tasovka(buffer);
-            //uremn inqy absalute patha ,ira mejenqw stexcveliq fayly avelacnelu
-    //hakarak depqum root-um?
         const char *response = res.c_str();
         send(client_fd, response, strlen(response), 0);
     }
@@ -591,4 +593,23 @@ int Request::if_http_is_valid(char *c_buffer)
     if (http_version != "HTTP/1.1")
         return -20;
     return 1;
+}
+
+
+
+// std::string Request::getFilepath()
+// {
+//     std::vector<LocationDirective*> locdir = servers[servIndex]->getLocdir();
+//     int locIndex = servers[servIndex]->get_locIndex();
+//     std::string root =  (locdir[locIndex]->getRoot() != "") ? locdir[locIndex]->getRoot() : servers[servIndex]->getRoot();
+//     std::string filePath = root + uri;
+//     return filePath;
+// }
+std::string Request::getFilepath(std::string uri)
+{
+    std::vector<LocationDirective*> locdir = servers[servIndex]->getLocdir();
+    int locIndex = servers[servIndex]->get_locIndex();
+    std::string root =  (locdir[locIndex]->getRoot() != "") ? locdir[locIndex]->getRoot() : servers[servIndex]->getRoot();
+    std::string filePath = root + uri;
+    return filePath;
 }

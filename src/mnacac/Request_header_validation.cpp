@@ -3,6 +3,7 @@
 Request_header_validation::Request_header_validation(std::vector<ServerDirective *> servers)
 {
     this->servers = servers;
+    // this->req = req;
 }
 
 std::string Request_header_validation::get_uri() const { return uri; }

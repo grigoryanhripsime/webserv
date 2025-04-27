@@ -49,6 +49,8 @@ public:
     void    set_contentLength(std::string line);
     void handleClientRequest(int client_fd);
     int if_http_is_valid(char *c_buffer);
+    std::string getFilepath(std::string uri);
+
 };
 
 
