@@ -52,7 +52,7 @@ std::string    Reques_header_validation::if_received_request_valid(char *c_buffe
     else 
     {
         throw std::runtime_error("senc method chunenq mer allow_methods-um-> 405 Method Not Allowed.\n");//return 77;
-        // std::string filePath = config->get_servers()[servIndex]->getRoot() + "/web/error405.html";
+        // std::string filePath = servers[servIndex]->getRoot() + "/web/error405.html";
         // std::string res = get_need_string_that_we_must_be_pass_send_system_call(filePath);
         // const char *response = res.c_str();
         // send(client_fd, response, strlen(response), 0);

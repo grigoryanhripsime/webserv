@@ -9,7 +9,7 @@ class Reques_header_validation
 {
     private:
         std::vector<ServerDirective *> servers;
-        Request req;
+        // Request req;
         int servIndex;
         std::string uri;//GET-i hamar
         std::string method;
@@ -29,4 +29,5 @@ class Reques_header_validation
         void get_validation(std::vector<std::string> lines);
         void post_validation(std::vector<std::string> lines);
         void delete_validation(std::vector<std::string> lines);
+
 };
