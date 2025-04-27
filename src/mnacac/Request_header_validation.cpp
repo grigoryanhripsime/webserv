@@ -14,7 +14,10 @@ std::string Request_header_validation::get_method() const { return method; }
 void Request_header_validation::get_validation(std::vector<std::string> lines)
 {
     (void) lines;
-    
+    // for (int i = 2; i < lines.size(); i++)
+    // {
+
+    // }
 }
 
 void Request_header_validation::post_validation(std::vector<std::string> lines)
@@ -31,15 +34,16 @@ void Request_header_validation::delete_validation(std::vector<std::string> lines
 
 std::string    Request_header_validation::if_received_request_valid(char *c_buffer)
 {
-    servIndex = getServerThatWeConnectTo(c_buffer);//e si unenq vor serverna
-    std::cout<<"SERVINDEX: "<<servIndex<<std::endl;
-
     std::stringstream ss(c_buffer);
     std::vector<std::string> lines;
     std::string line;
     while (std::getline(ss, line))
         lines.push_back(line);
-        
+
+    if (lines.size() < 2)
+        throw std::runtime_error("header cant contain less than 2 lines.");
+    
+    servIndex = getServerThatWeConnectTo(lines[1]);
     std::string method = validation_of_the_first_line(lines[0]);
 
     if (method == "GET")
@@ -153,19 +157,10 @@ int Request_header_validation::check_this_metdod_has_in_appropriate_server(std::
     return -1;//chkar tenc metod
 }
 
-int Request_header_validation::getServerThatWeConnectTo(std::string buffer)
+int Request_header_validation::getServerThatWeConnectTo(std::string line)
 {
-    std::stringstream ss(buffer);
-    std::string line;
-    while (std::getline(ss, line) && line.find("Host: ") == std::string::npos)
-        continue;
-    
-    std::string serverName = line.substr(6);//karevor atributa, requesti meji Host: -i dimaci grvacna(minchev porty(:8080))
+    std::string serverName = line.substr(6);
     serverName = serverName.substr(0, serverName.find(":"));
-    std::cout<<"⛵️⛵️⛵️⛵️"<<serverName<<std::endl;
-
-    if (servers.size() == 0)
-        std::cout<<"blbl\n";
 
     for (size_t i = 0; i < servers.size(); i++)
     {
