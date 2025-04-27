@@ -9,6 +9,7 @@ class Reques_header_validation
 {
     private:
         std::vector<ServerDirective *> servers;
+        Request req;
         int servIndex;
         std::string uri;//GET-i hamar
         std::string method;

@@ -32,7 +32,7 @@ void Reques_header_validation::delete_validation(std::vector<std::string> lines)
 
 std::string    Reques_header_validation::if_received_request_valid(char *c_buffer)
 {
-    servIndex = getServerThatWeConnectTo(c_buffer);//esi unenq vor serverna
+    servIndex = getServerThatWeConnectTo(c_buffer);//e si unenq vor serverna
     std::cout<<"SERVINDEX: "<<servIndex<<std::endl;
 
     std::stringstream ss(c_buffer);
