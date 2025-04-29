@@ -10,7 +10,7 @@
 CGI::CGI() {}
 
 CGI::~CGI() {}
-
+// TODO: change to real parameters
 std::string CGI::CGI_handler(const Request& request, const std::string& interpreter, const std::string& script_path,
                              const std::string& script_name, const std::string& path_info,
                              const std::string& server_name, const std::string& server_port,
@@ -37,6 +37,21 @@ std::string CGI::CGI_handler(const Request& request, const std::string& interpre
 
 void CGI::CGI_parse() {
     env.clear();
+    #if 0 // TODO: change env to this 
+    env["REDIRECT_STATUS"] = "200";
+	env["GATEWAY_INTERFACE"] = "CGI/1.1";
+	env["SCRIPT_NAME"] = _filePath; 
+	env["SCRIPT_FILENAME"] = _filePath;
+	env["REQUEST_METHOD"] = request->getMethod();
+	env["CONTENT_LENGTH"] = std::to_string(request->getContentLength()); 
+	env["CONTENT_TYPE"] = request->getHeadersMap()["Content-Type"];
+	env["PATH_INFO"] = request->getUri();
+	env["QUERY_STRING"] = request->getQuery();
+	env["REQUEST_URI"] = request->getUri() + request->getQuery();
+	env["SERVER_PROTOCOL"] = "HTTP/1.1";
+	env["SERVER_SOFTWARE"] = "Weebserv/1.0";
+    #endif
+
     env.push_back("REQUEST_METHOD=" + request.method);
     env.push_back("QUERY_STRING=" + request.query_string);
     env.push_back("CONTENT_TYPE=" + request.content_type);
