@@ -12,60 +12,112 @@ Request::Request(std::vector<ServerDirective *> servers)
 }
 
 /////////////POST
-std::string Request::post_method_tasovka(char *buffer)
+
+
+std::string Request::urlDecode(const std::string &str)
 {
+    std::string result;
+    for (size_t i = 0; i < str.length(); i++) {
+        if (str[i] == '+') {
+            result += ' ';
+        }
+        else if (str[i] == '%' && i + 2 < str.length()) {
+            int value;
+            std::istringstream iss(str.substr(i + 1, 2));
+            if (iss >> std::hex >> value) {
+                result += static_cast<char>(value);
+                i += 2;
+            }
+            else {
+                result += str[i];
+            }
+        }
+        else {
+            result += str[i];
+        }
+    }
+    return result;
+}
+
+void Request::parseUrlEncodedForm(const std::string &body)
+{
+    std::cout << "ekanq parseUrlEncodedForm\n";
+    form_data.clear();
+    size_t pos = 0;
+    std::cout << "body->"<<body <<std::endl;
+    while (pos < body.length()) {
+        size_t amp_pos = body.find('&', pos);
+        std::string pair = body.substr(pos, 
+            (amp_pos == std::string::npos) ? body.length() - pos : amp_pos - pos);
+        
+        size_t eq_pos = pair.find('=');
+        std::string key = (eq_pos == std::string::npos) ? pair : pair.substr(0, eq_pos);
+        std::string value = (eq_pos == std::string::npos) ? "" : pair.substr(eq_pos + 1);
+        
+        form_data[urlDecode(key)] = urlDecode(value);
+        
+        pos = (amp_pos == std::string::npos) ? body.length() : amp_pos + 1;
+    }
+}
+
+std::string Request::post_method_tasovka(char *buffer) {
     std::vector<LocationDirective*> locdir = servers[servIndex]->getLocdir();
-    // Парсим POST-запрос, чтобы извлечь Content-Type, Content-Length и тело
+    int locIndex = servers[servIndex]->get_locIndex();
     parse_post_request(buffer);
+    
+    // Handle error cases first
     if (error_page_num == 413) {
-        // Если размер тела превышает limit_client_body_size, возвращаем 413
-        // std::string root =  (locdir[locIndex]->getRoot() != "") ? locdir[locIndex]->getRoot() : servers[servIndex]->getRoot();
-        // std::string filePath = root + "/web/error413.html";
         std::string filePath = getFilepath("/web/error413.html");
         return get_need_string_that_we_must_be_pass_send_system_call(filePath);
     }
 
-    // Получаем upload_dir как строку
-    std::string upload_dir = locdir[locIndex]->getUpload_dir();
-    std::cout << "UPLOAD DIR->" << upload_dir << std::endl;
-    if (upload_dir.empty()) {
-        // Если upload_dir не указан, возвращаем 403 Forbidden
-        // std::string root =  (locdir[locIndex]->getRoot() != "") ? locdir[locIndex]->getRoot() : servers[servIndex]->getRoot();
-        // std::string filePath = root + "/web/error403.html";
-        std::string filePath = getFilepath("/web/error403.html");
-        return get_need_string_that_we_must_be_pass_send_system_call(filePath);
-    }
-
-    // Проверяем, является ли upload_dir абсолютным путем, если нет — добавляем root
-    if (upload_dir[0] != '/') {
-        std::string root =  (locdir[locIndex]->getRoot() != "") ? locdir[locIndex]->getRoot() : servers[servIndex]->getRoot();
-        upload_dir = root + "/" + upload_dir;
-    }
-    else
-    {
-        upload_dir = upload_dir.substr(1);
-        std::string root =  (locdir[locIndex]->getRoot() != "") ? locdir[locIndex]->getRoot() : servers[servIndex]->getRoot();
-        upload_dir = root + "/" + upload_dir;
-    }
-    // Удаляем завершающий слэш, чтобы избежать проблем с путями
-    if (!upload_dir.empty() && upload_dir[upload_dir.size() - 1] == '/') {
-        upload_dir.erase(upload_dir.size() - 1);
-    }
-
     std::string response_body;
-    std::cout << "type of content is->" << MainContentType << std::endl;
-    if (MainContentType == "multipart/form-data") {
-        // Обрабатываем загрузку файлов для multipart/form-data
-        std::cout << "mtanq kino\n";
+    std::string upload_dir = locdir[locIndex]->getUpload_dir();
+    
+    // Handle different content types
+    if (MainContentType.find("application/x-www-form-urlencoded") != std::string::npos) {
+        parseUrlEncodedForm(post_body);
+        
+        // Build response from parsed form data
+        std::stringstream ss;
+        ss << "Form data received:\n";
+        for (std::map<std::string, std::string>::const_iterator it = form_data.begin(); 
+             it != form_data.end(); ++it) {
+            ss << it->first << ": " << it->second << "\n";
+        }
+        response_body = ss.str();
+    }
+    else if (MainContentType.find("multipart/form-data") != std::string::npos)
+    {
+        std::cout << "VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV\n";
+        if (upload_dir.empty())
+        {
+            std::string filePath = getFilepath("/web/error403.html");
+            return get_need_string_that_we_must_be_pass_send_system_call(filePath);
+        }
+        // Process upload directory path
+        std::string root = (locdir[locIndex]->getRoot() != "") ? locdir[locIndex]->getRoot() : servers[servIndex]->getRoot();
+        if (upload_dir[0] != '/')
+            upload_dir = root + "/" + upload_dir;
+        else
+            upload_dir = root + upload_dir.substr(1);
+        
+        // Remove trailing slash if present
+        if (!upload_dir.empty() && upload_dir[upload_dir.size() - 1] == '/')
+            upload_dir.erase(upload_dir.size() - 1);
+        
         response_body = handle_multipart_upload(upload_dir);
     } 
-    else {
-        // Обрабатываем другие типы контента (например, application/x-www-form-urlencoded)
+    else
+    {
+        // Handle other content types (raw data)
+        if (upload_dir.empty())
+            upload_dir = (locdir[locIndex]->getRoot() != "") ? locdir[locIndex]->getRoot() : servers[servIndex]->getRoot();
+        std::cout << "======" << upload_dir << std::endl;
         response_body = handle_simple_post(upload_dir);
-    }//esi stugac chi
-    std::cout << "RESPONSE BODY->>" << response_body << std::endl;
+    }
 
-    // Формируем HTTP-ответ
+    // Build HTTP response
     std::stringstream ss;
     ss << "HTTP/1.1 200 OK\r\n"
        << "Content-Length: " << response_body.size() << "\r\n"
@@ -74,12 +126,12 @@ std::string Request::post_method_tasovka(char *buffer)
        << response_body;
 
     return ss.str();
-    return "";
 }
 
 // Парсинг POST-запроса
 void Request::parse_post_request(char *buffer)
 {
+    std::cout << "buffer = " << buffer<<std::endl;
     std::string request_body;
     std::string buf_str(buffer);
     size_t body_start = buf_str.find("\r\n\r\n");
@@ -90,7 +142,7 @@ void Request::parse_post_request(char *buffer)
     if (body_start != std::string::npos) {
         // Извлекаем тело запроса (включая все \r\n)
         request_body = buf_str.substr(body_start + 4);
-
+        std::cout << "uzmes ases->" << request_body<<std::endl;
         // Обрабатываем заголовки
         std::stringstream ss(buf_str.substr(0, body_start));
         std::string line;
@@ -120,16 +172,18 @@ void Request::set_MainContentType(std::string line)
     if (pos != std::string::npos) {
         MainContentType = line.substr(pos + 14);
         MainContentType = MainContentType.substr(0, MainContentType.find(';'));
-        if (MainContentType == "multipart/form-data") {
+        std::cout << "MainContentType = " <<MainContentType<<std::endl;
+        if (MainContentType == "multipart/form-data")
+        {
             size_t boundary_pos = line.find("boundary=");
-            if (boundary_pos != std::string::npos) {
+            if (boundary_pos != std::string::npos)
+            {
                 boundary = "--" + line.substr(boundary_pos + 9);
                 boundary = boundary.substr(0, boundary.find('\r'));
             }
         }
-         else {
+        else
             file_type = MainContentType;
-        }
     }
     std::cout << "HELPER->" << file_type<< std::endl;
     std::cout << "BOUNDARY->" << boundary<< std::endl;
@@ -369,7 +423,7 @@ std::string Request::uri_is_file(std::string filePath)
 {
     std::vector<LocationDirective*> locdir = servers[servIndex]->getLocdir();
     int locIndex = servers[servIndex]->get_locIndex(); 
-    std::cout << "locindex = " <<   locIndex<< std::endl;
+    std::cout << "locindexxxxxxxxxxx = " <<   locIndex<< std::endl;
     std::string root =  (locdir[locIndex]->getRoot() != "") ? locdir[locIndex]->getRoot() : servers[servIndex]->getRoot();
     std::string str = root + locdir[locIndex]->getPath();
     std::cout << "strse havasraaaaa->>>>>>>" << str << std::endl;
@@ -512,9 +566,10 @@ std::string Request::constructingResponce(std::string filePath)
         return uri_is_directory(filePath);
     return "";
 }
-
+#define SIZE (1 << 12)
 void Request::handleClientRequest(int client_fd) {
-    char buffer[1024];
+    char buffer[SIZE] = {0};
+    std::cout << "vvvvv\n";
     ssize_t bytesRead = read(client_fd, buffer, sizeof(buffer));
 
     if (bytesRead == -1) {

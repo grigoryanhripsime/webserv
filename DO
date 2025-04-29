@@ -611,3 +611,90 @@ Content-Type: multipart/form-data; boundary=xyz123\r\n
 Content-Length: 1000\r\n
 \r\n  ← Здесь заканчиваются заголовки (это и есть `\r\n\r\n`)
 BODY_STARTS_HERE...
+
+
+
+
+Для обычных полей формы (application/x-www-form-urlencoded):
+Данные только парсятся в form_data map
+Не создаются файлы на диске
+Данные просто показываются в ответе (или передаются в CGI)
+
+
+// std::string Request::post_method_tasovka(char *buffer)
+// {
+//     std::vector<LocationDirective*> locdir = servers[servIndex]->getLocdir();
+//     parse_post_request(buffer);
+//     if (error_page_num == 413) {
+//         std::string filePath = getFilepath("/web/error413.html");
+//         return get_need_string_that_we_must_be_pass_send_system_call(filePath);
+//     }
+//     std::string response_body;
+//     if (MainContentType.find("application/x-www-form-urlencoded") != std::string::npos)
+//     {
+//         std::cout << "EKANQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQqq\n";
+//         std::cout << post_body<<std::endl;
+//         parseUrlEncodedForm(post_body);
+//         // Build response from parsed form data
+//         std::stringstream ss;
+//         ss << "Received form data:\n";
+//         for (std::map<std::string, std::string>::const_iterator it = form_data.begin(); 
+//              it != form_data.end(); ++it) {
+//             ss << it->first << " = " << it->second << "\n";
+//         }
+//         response_body = ss.str();
+//     }
+//     else if (MainContentType == "multipart/form-data")
+//     {
+//         ///////////////check upload_dir//////////////////
+//         int locIndex = servers[servIndex]->get_locIndex();
+//         std::cout << "mtanq kino = " << locIndex << std::endl;
+//             std::string upload_dir = locdir[locIndex]->getUpload_dir();
+//         std::cout << "UPLOAD DIR->" << upload_dir << std::endl;
+//         if (upload_dir.empty()) {
+//             // Если upload_dir не указан, возвращаем 403 Forbidden
+//             std::string filePath = getFilepath("/web/error403.html");
+//             return get_need_string_that_we_must_be_pass_send_system_call(filePath);
+//         }
+
+//         // Проверяем, является ли upload_dir абсолютным путем, если нет — добавляем root
+//         if (upload_dir[0] != '/') {
+//             std::string root =  (locdir[locIndex]->getRoot() != "") ? locdir[locIndex]->getRoot() : servers[servIndex]->getRoot();
+//             upload_dir = root + "/" + upload_dir;
+//         }
+//         else
+//         {
+//             upload_dir = upload_dir.substr(1);
+//             std::string root =  (locdir[locIndex]->getRoot() != "") ? locdir[locIndex]->getRoot() : servers[servIndex]->getRoot();
+//             upload_dir = root + "/" + upload_dir;
+//         }
+//         // Удаляем завершающий слэш, чтобы избежать проблем с путями
+//         if (!upload_dir.empty() && upload_dir[upload_dir.size() - 1] == '/') {
+//             upload_dir.erase(upload_dir.size() - 1);
+//         }
+//         ///////////////////done check upload_dir//////////////
+//         // Обрабатываем загрузку файлов для multipart/form-data
+//         response_body = handle_multipart_upload(upload_dir);
+//     } 
+//     else
+//     {
+//         std::string upload_dir = locdir[locIndex]->getUpload_dir();
+//         // Обрабатываем другие типы контента (например, application/x-www-form-urlencoded)
+//         response_body = handle_simple_post(upload_dir);
+//     }
+//     std::cout << "RESPONSE BODY->>" << response_body << std::endl;
+
+//     // Формируем HTTP-ответ
+//     std::stringstream ss;
+//     ss << "HTTP/1.1 200 OK\r\n"
+//        << "Content-Length: " << response_body.size() << "\r\n"
+//        << "Content-Type: text/plain\r\n"
+//        << "\r\n"
+//        << response_body;
+
+//     return ss.str();
+// }
+
+
+
+kogda content-type application/x-www-form-urlencoded upload_dir ispolzuyetca na nginxe?

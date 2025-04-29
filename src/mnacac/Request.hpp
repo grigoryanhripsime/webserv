@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <sstream>
 #include <dirent.h>
+#include <limits>
 class Request
 {
 private:
@@ -26,6 +27,7 @@ private:
     std::string file_type;//POST-i hamar
     int error_page_num;
     int epfd;
+    std::map<std::string, std::string> form_data;//POST-i hamar
     
 public:
     Request(std::vector<ServerDirective *> servers);
@@ -50,7 +52,8 @@ public:
     void handleClientRequest(int client_fd);
     int if_http_is_valid(char *c_buffer);
     std::string getFilepath(std::string uri);
-
+    std::string urlDecode(const std::string &str);
+    void parseUrlEncodedForm(const std::string &body);
 };
 
 
