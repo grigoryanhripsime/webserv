@@ -60,10 +60,11 @@ void Request::parseUrlEncodedForm(const std::string &body)
     }
 }
 
-std::string Request::post_method_tasovka(char *buffer) {
+std::string Request::post_method_tasovka(char *buffer, int bytesRead) {
     std::vector<LocationDirective*> locdir = servers[servIndex]->getLocdir();
     int locIndex = servers[servIndex]->get_locIndex();
-    parse_post_request(buffer);
+    std::cout << "matryyyyyyyyyyyyy>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << buffer<<std::endl;
+    parse_post_request(buffer, bytesRead);
     
     // Handle error cases first
     if (error_page_num == 413) {
@@ -129,11 +130,12 @@ std::string Request::post_method_tasovka(char *buffer) {
 }
 
 // Парсинг POST-запроса
-void Request::parse_post_request(char *buffer)
+void Request::parse_post_request(char *buffer, int bytesRead)
 {
     std::cout << "buffer = " << buffer<<std::endl;
+    std::cout << "prc buffer\n";
     std::string request_body;
-    std::string buf_str(buffer);
+    std::string buf_str = std::string(buffer, bytesRead);
     size_t body_start = buf_str.find("\r\n\r\n");
 
     // Сбрасываем код ошибки
@@ -275,7 +277,6 @@ std::string Request::handle_multipart_upload(const std::string &upload_dir)
 
             response += "Uploaded: " + filename + "\n";
         }
-
         // Обрезаем body для следующей части
         body = body.substr(part_end);
     }
@@ -566,12 +567,13 @@ std::string Request::constructingResponce(std::string filePath)
         return uri_is_directory(filePath);
     return "";
 }
-#define SIZE (1 << 12)
+#define SIZE (1 << 14)
 void Request::handleClientRequest(int client_fd) {
+    std::cout << "SIZEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEee=" << SIZE<<std::endl;
     char buffer[SIZE] = {0};
     std::cout << "vvvvv\n";
     ssize_t bytesRead = read(client_fd, buffer, sizeof(buffer));
-
+    std::cout << "mda = " << bytesRead<<std::endl;
     if (bytesRead == -1) {
         std::cerr << "Error reading from client socket" << std::endl;
         epoll_ctl(epfd, EPOLL_CTL_DEL, client_fd, NULL); // 🔻 Удаляем из epoll
@@ -621,7 +623,7 @@ void Request::handleClientRequest(int client_fd) {
     {
         std::cout << "uri = " << uri << std::endl;
         std::cout << "whic =" << servers[servIndex]->get_locIndex()<<std::endl;
-        std::string res = post_method_tasovka(buffer);
+        std::string res = post_method_tasovka(buffer, bytesRead);
         const char *response = res.c_str();
         send(client_fd, response, strlen(response), 0);
     }

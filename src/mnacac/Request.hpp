@@ -41,8 +41,8 @@ public:
     std::string getFilesInDirectory(std::string &path);
     std::string uri_is_file(std::string filePath);
     std::string uri_is_directory(std::string filePath);
-    std::string post_method_tasovka(char *buffer);
-    void    parse_post_request(char *buffer);
+    std::string post_method_tasovka(char *buffer, int bytesRead);
+    void    parse_post_request(char *buffer, int bytesRead);
     void listFiles(std::string path, std::vector<std::string> &files);
     int find_in_index_vectors_this_string(std::string left_part_of_filePath, std::vector<std::string> cur_loc_index);
     std::string get_need_string_that_we_must_be_pass_send_system_call(std::string filePath);
