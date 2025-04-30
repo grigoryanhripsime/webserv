@@ -15,15 +15,15 @@ std::string CGI::CGI_handler(const Request& request, const std::string& interpre
                              const std::string& script_name, const std::string& path_info,
                              const std::string& server_name, const std::string& server_port,
                              const std::string& remote_addr) {
-    this->request = request;
-    this->interpreter = interpreter;
-    this->script_path = script_path;
-    this->script_name = script_name;
-    this->path_info = path_info;
-    this->server_name = server_name;
-    this->server_port = server_port;
-    this->remote_addr = remote_addr;
-    this->output.clear();
+    this->request = request;         /* In place of this need class/struct/strings for method, content length and type, query string, body and headers */
+    this->interpreter = interpreter; /* example: "/usr/bin/php-cgi", maybe get all vector of paths and dynamicly set it */
+    this->script_path = script_path; /* example: "/path/to/script.php" */
+    this->script_name = script_name; /* example: "/cgi-bin/script.php" */
+    this->path_info = path_info;     /* example: "" */
+    this->server_name = server_name; /* example: "example.com" */
+    this->server_port = server_port; /* example: "80" */
+    this->remote_addr = remote_addr; /* example: "127.0.0.1" */
+    this->output.clear();            /* this string may go to some getter for error/exception message */
 
     CGI_parse();
     CGI_exec();
@@ -37,32 +37,24 @@ std::string CGI::CGI_handler(const Request& request, const std::string& interpre
 
 void CGI::CGI_parse() {
     env.clear();
-    #if 0 // TODO: change env to this 
-    env["REDIRECT_STATUS"] = "200";
-	env["GATEWAY_INTERFACE"] = "CGI/1.1";
-	env["SCRIPT_NAME"] = _filePath; 
-	env["SCRIPT_FILENAME"] = _filePath;
-	env["REQUEST_METHOD"] = request->getMethod();
-	env["CONTENT_LENGTH"] = std::to_string(request->getContentLength()); 
-	env["CONTENT_TYPE"] = request->getHeadersMap()["Content-Type"];
-	env["PATH_INFO"] = request->getUri();
-	env["QUERY_STRING"] = request->getQuery();
-	env["REQUEST_URI"] = request->getUri() + request->getQuery();
-	env["SERVER_PROTOCOL"] = "HTTP/1.1";
-	env["SERVER_SOFTWARE"] = "Weebserv/1.0";
-    #endif
-
+    #if 1 // TODO: get real info
+    env.push_back("REDIRECT_STATUS=200");
+	env.push_back("GATEWAY_INTERFACE=CGI/1.1");
     env.push_back("REQUEST_METHOD=" + request.method);
-    env.push_back("QUERY_STRING=" + request.query_string);
-    env.push_back("CONTENT_TYPE=" + request.content_type);
-    std::ostringstream oss;
+    env.push_back("SCRIPT_NAME=" + script_name);
+    env.push_back("SCRIPT_FILENAME=" + script_name); // Why?
+	std::ostringstream oss;
     oss << request.content_length;
     env.push_back("CONTENT_LENGTH=" + oss.str());
-    env.push_back("SCRIPT_NAME=" + script_name);
-    env.push_back("PATH_INFO=" + path_info);
+    env.push_back("CONTENT_TYPE=" + request.content_type);
+    env.push_back("PATH_INFO=" + path_info); // URI
+    env.push_back("QUERY_STRING=" + path_info + request.query_string); // URI+QUERY
     env.push_back("SERVER_NAME=" + server_name);
     env.push_back("SERVER_PORT=" + server_port);
     env.push_back("REMOTE_ADDR=" + remote_addr);
+	env.push_back("SERVER_PROTOCOL=HTTP/1.1");
+	env.push_back("SERVER_SOFTWARE=Weebserv/1.0");
+    #endif
     for (std::map<std::string, std::string>::const_iterator it = request.headers.begin();
          it != request.headers.end(); ++it) {
         std::string header_name = it->first;
