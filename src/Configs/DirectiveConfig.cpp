@@ -2,6 +2,9 @@
 
 DirectiveConfig::DirectiveConfig(const Directive& directives) : directives(directives) {}
 
+std::vector<ServerDirective *> DirectiveConfig::get_servers() const { return servers; }
+std::map<std::pair<std::string, int>, std::vector<int> > DirectiveConfig::get_unique_listens() const { return unique_listens; }
+
 DirectiveConfig::~DirectiveConfig()
 {
     std::cout << "DirectiveConfig dtor is called\n";

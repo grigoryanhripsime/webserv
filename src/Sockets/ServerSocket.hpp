@@ -8,7 +8,7 @@ class   ServerSocket : public Socket
         int connection;
         virtual int connectToNetwork();
     public:
-        ServerSocket() : Socket() {}
+        ServerSocket();
         ServerSocket(int domainIP, int service, int protocol, int port, std::string ipAddress, int queueCount);
         virtual ~ServerSocket();
 };

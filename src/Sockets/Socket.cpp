@@ -1,4 +1,7 @@
 #include "Socket.hpp"
+
+Socket::Socket() {}
+
 // service ->typeOfService
 Socket::Socket(int domainIP, int service, int protocol, int port, std::string ipAddress)
 {

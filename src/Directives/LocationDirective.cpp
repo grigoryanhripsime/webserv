@@ -7,7 +7,8 @@ LocationDirective::LocationDirective() :
     autoindex("off"),
     upload_dir(""),
     cgi_extension(""),
-    cgi_path("") {
+    cgi_path("") 
+{
 
         validDirs[0] = "path";
         validDirs[1] = "allow_methods";
@@ -21,6 +22,14 @@ LocationDirective::LocationDirective() :
         validDirs[9] = "root";
         validDirs[10] = "error_pages";
 }
+
+std::string LocationDirective::getPath() const { return path; }
+std::vector<std::string> LocationDirective::getAllow_methods() const { return allow_methods; }
+std::map<int, std::string> LocationDirective::getRedirect() { return redirect; }
+std::string LocationDirective::getAutoindex() const { return autoindex; }
+std::string LocationDirective::getUpload_dir() const { return upload_dir; }
+std::string LocationDirective::getCgi_extension() const { return cgi_extension; }
+std::string LocationDirective::getCgi_path() const { return cgi_path; }
 
 LocationDirective::~LocationDirective() {std::cout << "LocationDirective dtor\n";}
 
@@ -67,18 +76,6 @@ void    LocationDirective::setIndex(const std::vector<std::string>& indexVec)
         if (is_valid_index_value(*it))
             index.push_back(*it);
     }
-
-    std::cout<<"🎅🏽🎅🏽🎅🏽🎅🏽\n";
-
-    for (size_t i = 0; i < index.size(); i++)
-        std::cout<<index[i]<<std::endl;
-
-
-
-    std::cout<<"🎅🏽🎅🏽🎅🏽🎅🏽\n";
-
-
-    
 }
 
 // bool shouldHandleAsCgi(const std::string& filename) const {
@@ -92,8 +89,6 @@ void    LocationDirective::setIndex(const std::vector<std::string>& indexVec)
 //     }
 //     return false;
 // }
-
-
 
 ////////////////setters/////////////
 bool LocationDirective::isValidLocationPath(const std::string& path) {
@@ -181,7 +176,6 @@ void    LocationDirective::setUpload_dir(const std::string& upload_dir)
     //     throw std::runtime_error("Directory is not writable.");//bacel comentyyyyy
     this->upload_dir = upload_dir;
 }
- 
 
 void    LocationDirective::setCgi_path(const std::string& cgi_path)
 {

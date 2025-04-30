@@ -34,19 +34,18 @@ class LocationDirective : public AGeneralDirective
         ~LocationDirective();
         virtual void validate() const;  // для валидации значений
         void setIndex(const std::vector<std::string>& indexVec);
-
         
         //getters////
-        std::string getPath() const {return path;}
-        std::vector<std::string> getAllow_methods() const {return allow_methods;}
-        std::map<int, std::string> getRedirect() {return redirect;}
-        std::string getAutoindex() const {return autoindex;}
-        std::string getUpload_dir() const {return upload_dir;}
-        std::string getCgi_extension() const {return cgi_extension;}
-        std::string getCgi_path() const {return cgi_path;}
+        std::string getPath() const;
+        std::vector<std::string> getAllow_methods() const;
+        std::map<int, std::string> getRedirect();
+        std::string getAutoindex() const;
+        std::string getUpload_dir() const;
+        std::string getCgi_extension() const;
+        std::string getCgi_path() const;
+
         ///////path validacia
         bool isValidLocationPath(const std::string& path);
-
         int validateRedirect(std::string codeStr, std::string url);
 
 };

@@ -25,18 +25,20 @@ class ServerDirective : public AGeneralDirective
         void    setLocDir(LocationDirective *loc);
         void    setLocIndex(int ind) {locIndex = ind;}
         std::string validDirs[6];
+        
     public:
         ServerDirective();
         ~ServerDirective();
         virtual void validate() const;  // для валидации значений
 
         ///getter///
-        std::vector<LocationDirective*>& getLocdir() {return locdir;}
-        std::pair<std::string, int> getListen() const {return listen;}
-        std::string getServer_name() const {return server_name;}
-        int get_locIndex() const {return locIndex;}
-    ////listen validacia//////////
-    void    check_and_set_port(const std::string& ipAndPort, size_t& indexOfVerjaket, bool flag);
-    int     ip_part_contain_correct_integers(std::string ip_part);
-    ///////////////////////////////
+        std::vector<LocationDirective*>& getLocdir();
+        std::pair<std::string, int> getListen() const;
+        std::string getServer_name() const;
+        int get_locIndex() const;
+
+        ////listen validacia//////////
+        void    check_and_set_port(const std::string& ipAndPort, size_t& indexOfVerjaket, bool flag);
+        int     ip_part_contain_correct_integers(std::string ip_part);
+        ///////////////////////////////
 };

@@ -1,46 +1,50 @@
-#include "Reques_header_validation.hpp"
+#include "Request_header_validation.hpp"
 
-Reques_header_validation::Reques_header_validation(std::vector<ServerDirective *> servers)
+Request_header_validation::Request_header_validation(std::vector<ServerDirective *> servers)
 {
     this->servers = servers;
+    // this->req = req;
 }
 
-std::string Reques_header_validation::get_uri() const { return uri; }
+std::string Request_header_validation::get_uri() const { return uri; }
 
-int Reques_header_validation::get_servIndex() const { return servIndex; }
+int Request_header_validation::get_servIndex() const { return servIndex; }
 
-std::string Reques_header_validation::get_method() const { return method; }
+std::string Request_header_validation::get_method() const { return method; }
 
-void Reques_header_validation::get_validation(std::vector<std::string> lines)
+void Request_header_validation::get_validation(std::vector<std::string> lines)
+{
+    (void) lines;
+    // for (int i = 2; i < lines.size(); i++)
+    // {
+
+    // }
+}
+
+void Request_header_validation::post_validation(std::vector<std::string> lines)
 {
     (void) lines;
     
 }
 
-void Reques_header_validation::post_validation(std::vector<std::string> lines)
+void Request_header_validation::delete_validation(std::vector<std::string> lines)
 {
     (void) lines;
     
 }
 
-void Reques_header_validation::delete_validation(std::vector<std::string> lines)
+std::string    Request_header_validation::if_received_request_valid(char *c_buffer)
 {
-    (void) lines;
-    
-}
-
-
-std::string    Reques_header_validation::if_received_request_valid(char *c_buffer)
-{
-    servIndex = getServerThatWeConnectTo(c_buffer);//esi unenq vor serverna
-    std::cout<<"SERVINDEX: "<<servIndex<<std::endl;
-
     std::stringstream ss(c_buffer);
     std::vector<std::string> lines;
     std::string line;
     while (std::getline(ss, line))
         lines.push_back(line);
-        
+
+    if (lines.size() < 2)
+        throw std::runtime_error("header cant contain less than 2 lines.");
+    
+    servIndex = getServerThatWeConnectTo(lines[1]);
     std::string method = validation_of_the_first_line(lines[0]);
 
     if (method == "GET")
@@ -52,7 +56,7 @@ std::string    Reques_header_validation::if_received_request_valid(char *c_buffe
     else 
     {
         throw std::runtime_error("senc method chunenq mer allow_methods-um-> 405 Method Not Allowed.\n");//return 77;
-        // std::string filePath = config->get_servers()[servIndex]->getRoot() + "/web/error405.html";
+        // std::string filePath = servers[servIndex]->getRoot() + "/web/error405.html";
         // std::string res = get_need_string_that_we_must_be_pass_send_system_call(filePath);
         // const char *response = res.c_str();
         // send(client_fd, response, strlen(response), 0);
@@ -61,8 +65,7 @@ std::string    Reques_header_validation::if_received_request_valid(char *c_buffe
     return method;
 }
 
-
-std::string    Reques_header_validation::validation_of_the_first_line(std::string line)
+std::string    Request_header_validation::validation_of_the_first_line(std::string line)
 {
     std::vector<std::string> result;
     std::istringstream iss(line);
@@ -96,7 +99,7 @@ std::string    Reques_header_validation::validation_of_the_first_line(std::strin
     return result[0];
 }
 
-int Reques_header_validation::have_this_uri_in_our_current_server(int servIndex)
+int Request_header_validation::have_this_uri_in_our_current_server(int servIndex)
 {
     std::cout << "servIndex->" << servIndex << std::endl;
     std::vector<LocationDirective*> vec_locations = servers[servIndex]->getLocdir();
@@ -136,7 +139,7 @@ int Reques_header_validation::have_this_uri_in_our_current_server(int servIndex)
     return which_location;
 }
 
-int Reques_header_validation::check_this_metdod_has_in_appropriate_server(std::string method, int which_location)
+int Request_header_validation::check_this_metdod_has_in_appropriate_server(std::string method, int which_location)
 {
     // this->method1 = method;
     // // std::cout<<"☔️☔️☔️☔️  "<<method<<std::endl;
@@ -155,19 +158,10 @@ int Reques_header_validation::check_this_metdod_has_in_appropriate_server(std::s
     return -1;//chkar tenc metod
 }
 
-int Reques_header_validation::getServerThatWeConnectTo(std::string buffer)
+int Request_header_validation::getServerThatWeConnectTo(std::string line)
 {
-    std::stringstream ss(buffer);
-    std::string line;
-    while (std::getline(ss, line) && line.find("Host: ") == std::string::npos)
-        continue;
-    
-    std::string serverName = line.substr(6);//karevor atributa, requesti meji Host: -i dimaci grvacna(minchev porty(:8080))
+    std::string serverName = line.substr(6);
     serverName = serverName.substr(0, serverName.find(":"));
-    std::cout<<"⛵️⛵️⛵️⛵️"<<serverName<<std::endl;
-
-    if (servers.size() == 0)
-        std::cout<<"blbl\n";
 
     for (size_t i = 0; i < servers.size(); i++)
     {
@@ -188,4 +182,3 @@ int Reques_header_validation::getServerThatWeConnectTo(std::string buffer)
     std::cout << "en vat depqna\n";
     return 0;
 }
-
