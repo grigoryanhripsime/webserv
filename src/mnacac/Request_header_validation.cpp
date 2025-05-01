@@ -4,6 +4,7 @@ Request_header_validation::Request_header_validation(std::vector<ServerDirective
 {
     this->servers = servers;
     // this->req = req;
+    status = STATIC;
 }
 
 std::string Request_header_validation::get_uri() const { return uri; }
@@ -46,7 +47,7 @@ std::string    Request_header_validation::if_received_request_valid(char *c_buff
     
     servIndex = getServerThatWeConnectTo(lines[1]);
     std::string method = validation_of_the_first_line(lines[0]);
-
+    // std::cout << "ific araj->" << locIndex<<std::endl;
     if (method == "GET")
         get_validation(lines);
     else if (method == "POST")
@@ -182,3 +183,29 @@ int Request_header_validation::getServerThatWeConnectTo(std::string line)
     std::cout << "en vat depqna\n";
     return 0;
 }
+
+
+void    Request_header_validation::status_handler()
+{
+    std::vector<std::string> uri_share;
+    std::istringstream iss(uri);
+    std::string token;
+    
+    while (std::getline(iss, token, '/')) {
+        if (!token.empty()) {  // Пропускаем пустые токены
+            uri_share.push_back(token);
+        }
+    }
+
+    if (uri_share[0] == "cgi-bin")
+    {
+        std::vector<LocationDirective*> locdir = servers[servIndex]->getLocdir();
+        int locIndex = servers[servIndex]->get_locIndex();
+        std::cout << "bebeeeeeeeeeeeeeeeeeeeeeee = " << locIndex<<std::endl;
+        // LocationDirective *loc = locdir[locIndex];
+        status = DYNAMIC;
+    }
+    else
+        status = STATIC;
+    std::cout << "\r\n\r\n" << status << "\r\n\r\n";
+ }

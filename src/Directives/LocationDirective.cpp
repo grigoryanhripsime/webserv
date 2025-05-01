@@ -179,14 +179,14 @@ void    LocationDirective::setUpload_dir(const std::string& upload_dir)
 
 void    LocationDirective::setCgi_path(const std::string& cgi_path)
 {
-    struct stat info;
+    // struct stat info;
     
     if (cgi_path.size() < 2 || cgi_path[0] != '/')
         throw std::runtime_error("CGI path must start with '//'" + cgi_path);
-    if (stat(upload_dir.c_str(), &info) != 0)
-        throw std::runtime_error("File does not exist.");
-    if (!(info.st_mode & S_IFREG))
-        throw std::runtime_error("Path is not a file.");///stex partadir pti fayl lini,upload_dir-umel direktoria pti lini(partadir)???????
+    // if (stat(upload_dir.c_str(), &info) != 0)
+    //     throw std::runtime_error("File does not exist.");
+    // if (!(info.st_mode & S_IFREG))
+    //     throw std::runtime_error("Path is not a file.");///stex partadir pti fayl lini,upload_dir-umel direktoria pti lini(partadir)???????
     if (access(cgi_path.c_str(), X_OK) != 0)
         throw std::runtime_error("File is not executable.");
     this->cgi_path = cgi_path;

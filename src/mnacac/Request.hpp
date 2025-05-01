@@ -25,6 +25,7 @@ private:
     std::string boundary;//POST-i hamar
     std::string post_body;//POST-i hamar
     std::string file_type;//POST-i hamar
+    std::string query;//uri-i mej ?-ic heto sax,ete ka
     int error_page_num;
     int epfd;
     std::map<std::string, std::string> form_data;//POST-i hamar
