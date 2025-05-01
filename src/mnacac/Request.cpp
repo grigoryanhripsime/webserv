@@ -599,18 +599,33 @@ void Request::handleClientRequest(int client_fd) {
     ////////////////////////////////////    
     // std::string filePath = servers[0]->getRoot() + servers[0]->getLocdir()[0]->getPath() + "/" + servers[0]->getLocdir()[0]->getIndex()[1];
     std::cout << "methoooooooood = " << method <<std::endl;
-    // std::string filePath = constructingFilePath();
+    locIndex = servers[servIndex]->get_locIndex();
+    std::cout << "hehehe= " << locIndex <<std::endl;
+
+    #if 0 // TODO move this to execute function
+    CGI cgi(1, 2, 3);
+    request_header_validation.handle.status_handler();
+    switch(request_header_validation.get_status()) {
+        case DINAMIC:
+        request_header_validation.set_status(cgi.handler());
+        break;
+        case STATIC:
+        // function for static methods
+        break;
+    }
+    if (request_header_validation.get_mode() == ERROR) {
+        // function for error message
+    }
+    #endif
     if (if_http_is_valid(buffer) < 0)
         std::cout << "505 HTTP Version Not Supported.\n";
     //
     std::cout<<"reached here\n";
     if (method == "GET")
     {
+    std::cout << "hehehe= " << locIndex <<std::endl;
+
         std::cout<<"SERVINDEX: "<<servIndex<<std::endl;
-        // std::vector<LocationDirective*> locdir = servers[servIndex]->getLocdir();
-        // int locIndex = servers[servIndex]->get_locIndex();
-        // std::string root =  (locdir[locIndex]->getRoot() != "") ? locdir[locIndex]->getRoot() : servers[servIndex]->getRoot();
-        // std::string filePath = root + uri;
         std::string filePath = getFilepath(uri);
         std::string res = constructingResponce(filePath);
         std::cout<<"-----------------------------------\n";
