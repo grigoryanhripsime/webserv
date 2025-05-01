@@ -12,6 +12,7 @@
 #include <sstream>
 #include <dirent.h>
 #include <limits>
+#include "CGI.hpp"
 class Request
 {
 private:
@@ -30,6 +31,8 @@ private:
     int epfd;
     std::map<std::string, std::string> form_data;//POST-i hamar
     
+    std::string get_response(std::string &method, char *buffer, int bytesRead);
+
 public:
     Request(std::vector<ServerDirective *> servers);
     ~Request(){};
@@ -55,6 +58,15 @@ public:
     std::string getFilepath(std::string uri);
     std::string urlDecode(const std::string &str);
     void parseUrlEncodedForm(const std::string &body);
+    std::string get_method() const{return method;}
+    size_t get_content_length() const{return contentLength;}
+    std::string get_content_type() const{return MainContentType;}
+    std::string get_query() const{return query;}
+    std::string get_body() {return post_body;}
+    int get_servIndex() const {return servIndex;}
+    std::vector<ServerDirective *> get_servers() const {return servers;}
+    std::string get_uri() const{return uri;}
+
 };
 
 

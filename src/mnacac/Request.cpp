@@ -592,9 +592,8 @@ void Request::handleClientRequest(int client_fd) {
     std::cout << "Received request: " << std::string(buffer, bytesRead) << std::endl;
 
     Request_header_validation request_header_validation(servers);
-
-    //checking if http request header is correct
     std::string method = request_header_validation.if_received_request_valid(buffer);
+    //checking if http request header is correct
     uri = request_header_validation.get_uri();
     servIndex = request_header_validation.get_servIndex();
     ////////////////////////////////////    
@@ -602,48 +601,62 @@ void Request::handleClientRequest(int client_fd) {
     std::cout << "methoooooooood = " << method <<std::endl;
     locIndex = servers[servIndex]->get_locIndex();
     std::cout << "hehehe= " << locIndex <<std::endl;
+    //checking if http request header is correct
 
-    #if 1 // TODO move this to execute function
     request_header_validation.status_handler();
+    CGI cgi(this);
+    const char *response;
     switch(request_header_validation.get_status()) {
         case DYNAMIC:
-        // CGI cgi(1, 2, 3);
-        // cgi.handler();
+        std::cout << "Dynamic function called\r\n\r\n";
+        response = cgi.CGI_handler().c_str();
+        std::cout << response << "\n\n";
+        send(client_fd, response, strlen(response), 0);
+        std::cout << "Dynamic function ended\r\n\r\n";
         break;
         case STATIC:
-        // function for static methods
+        std::cout << "Static function called\r\n\r\n";
+        response = get_response(method, buffer, bytesRead).c_str();
+        send(client_fd, response, strlen(response), 0);
+        
         break;
     }
-    #endif
     if (if_http_is_valid(buffer) < 0)
-        std::cout << "505 HTTP Version Not Supported.\n";
+    std::cout << "505 HTTP Version Not Supported.\n";
     //
+    
+
+}
+
+std::string Request::get_response(std::string &method, char *buffer, int bytesRead)
+{
+    
+
+
+    // function for static methods
     std::cout<<"reached here\n";
+    std::string res;
     if (method == "GET")
     {
     std::cout << "hehehe= " << locIndex <<std::endl;
 
         std::cout<<"SERVINDEX: "<<servIndex<<std::endl;
         std::string filePath = getFilepath(uri);
-        std::string res = constructingResponce(filePath);
+        res = constructingResponce(filePath);
         std::cout<<"-----------------------------------\n";
         std::cout<<res;
         std::cout<<"-----------------------------------\n";
-        const char *response = res.c_str();
-        send(client_fd, response, strlen(response), 0);
     }
     else if(method == "POST")
     {
         std::cout << "uri = " << uri << std::endl;
         std::cout << "whic =" << servers[servIndex]->get_locIndex()<<std::endl;
-        std::string res = post_method_tasovka(buffer, bytesRead);
-        const char *response = res.c_str();
-        send(client_fd, response, strlen(response), 0);
+        res = post_method_tasovka(buffer, bytesRead);
     }
     // else if (method == "DELETE")
     //
+    return res;
 }
-
 
 int Request::if_http_is_valid(char *c_buffer)
 {
