@@ -9,6 +9,7 @@ Request::Request(std::vector<ServerDirective *> servers)
     method = "";
     uri = "";//GET-i hamar
     file_type = "text/plain";//default
+    query = "";
 }
 
 /////////////POST
@@ -602,19 +603,16 @@ void Request::handleClientRequest(int client_fd) {
     locIndex = servers[servIndex]->get_locIndex();
     std::cout << "hehehe= " << locIndex <<std::endl;
 
-    #if 0 // TODO move this to execute function
-    CGI cgi(1, 2, 3);
-    request_header_validation.handle.status_handler();
+    #if 1 // TODO move this to execute function
+    request_header_validation.status_handler();
     switch(request_header_validation.get_status()) {
-        case DINAMIC:
-        request_header_validation.set_status(cgi.handler());
+        case DYNAMIC:
+        // CGI cgi(1, 2, 3);
+        // cgi.handler();
         break;
         case STATIC:
         // function for static methods
         break;
-    }
-    if (request_header_validation.get_mode() == ERROR) {
-        // function for error message
     }
     #endif
     if (if_http_is_valid(buffer) < 0)

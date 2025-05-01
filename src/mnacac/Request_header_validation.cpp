@@ -4,6 +4,7 @@ Request_header_validation::Request_header_validation(std::vector<ServerDirective
 {
     this->servers = servers;
     // this->req = req;
+    status = STATIC;
 }
 
 std::string Request_header_validation::get_uri() const { return uri; }
@@ -199,8 +200,12 @@ void    Request_header_validation::status_handler()
     if (uri_share[0] == "cgi-bin")
     {
         std::vector<LocationDirective*> locdir = servers[servIndex]->getLocdir();
-    int locIndex = servers[servIndex]->get_locIndex();
+        int locIndex = servers[servIndex]->get_locIndex();
         std::cout << "bebeeeeeeeeeeeeeeeeeeeeeee = " << locIndex<<std::endl;
+        // LocationDirective *loc = locdir[locIndex];
+        status = DYNAMIC;
     }
-    status = DINAMIC;
+    else
+        status = STATIC;
+    std::cout << "\r\n\r\n" << status << "\r\n\r\n";
  }

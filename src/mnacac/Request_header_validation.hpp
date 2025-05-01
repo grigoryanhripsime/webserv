@@ -8,10 +8,8 @@
 
 typedef enum e_status
 {
-    OK = 0,
-    ERROR = 1,
     STATIC = 2,
-    DINAMIC = 3
+    DYNAMIC = 3
 } status_type;
 
 class Request_header_validation
