@@ -13,31 +13,9 @@ int Request_header_validation::get_servIndex() const { return servIndex; }
 
 std::string Request_header_validation::get_method() const { return method; }
 
-void Request_header_validation::get_validation(std::vector<std::string> lines)
-{
-    (void) lines;
-    // for (int i = 2; i < lines.size(); i++)
-    // {
-
-    // }
-}
-
-void Request_header_validation::post_validation(std::vector<std::string> lines)
-{
-    (void) lines;
-    
-}
-
-void Request_header_validation::delete_validation(std::vector<std::string> lines)
-{
-    (void) lines;
-    
-}
-
 std::string    Request_header_validation::if_received_request_valid(Request &req, char *c_buffer)
 {
     std::stringstream ss(c_buffer);
-    std::vector<std::string> lines;
     std::string line;
     while (std::getline(ss, line))
         lines.push_back(line);
@@ -55,14 +33,9 @@ std::string    Request_header_validation::if_received_request_valid(Request &req
     }
     std::string method = validation_of_the_first_line(req, lines[0]);
     // std::cout << "ific araj->" << locIndex<<std::endl;
-    if (method == "GET")
-        get_validation(lines);
-    else if (method == "POST")
-        post_validation(lines);
-    else if (method == "DELETE")
-        delete_validation(lines);
-    else 
+    if (method != "GET" && method != "POST" && method != "DELETE") 
     {
+        //405
         throw std::runtime_error("senc method chunenq mer allow_methods-um-> 405 Method Not Allowed.\n");//return 77;
         // std::string filePath = servers[servIndex]->getRoot() + "/web/error405.html";
         // std::string res = get_need_string_that_we_must_be_pass_send_system_call(filePath);
@@ -71,6 +44,35 @@ std::string    Request_header_validation::if_received_request_valid(Request &req
         // //en fileparhy= i erku toxyba + send-@
     }
     return method;
+}
+
+
+void Request_header_validation::fill_headers_map(headers_map &headers)
+{
+    headers.clear();
+
+    for (std::vector<std::string>::iterator it = lines.begin(); it != lines.end(); ++it) {
+        std::string line = *it;
+        std::string::size_type colonPos = line.find(':');
+
+        if (colonPos != std::string::npos) {
+            std::string key = line.substr(0, colonPos);
+            std::string value = line.substr(colonPos + 1);
+
+            // Trim leading and trailing spaces (basic version)
+            while (!key.empty() && key[0] == ' ') key.erase(0, 1);
+            while (!key.empty() && key[key.size() - 1] == ' ') key.erase(key.size() - 1, 1);
+            while (!value.empty() && value[0] == ' ') value.erase(0, 1);
+            while (!value.empty() && value[value.size() - 1] == ' ') value.erase(value.size() - 1, 1);
+
+            headers[key] = value;
+        }
+    }
+
+    // Output the map
+    for (std::map<std::string, std::string>::iterator it = headers.begin(); it != headers.end(); ++it) {
+        std::cout << it->first << " => " << it->second << std::endl;
+    }
 }
 
 std::string    Request_header_validation::validation_of_the_first_line(Request &req, std::string line)

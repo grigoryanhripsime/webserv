@@ -12,6 +12,8 @@ typedef enum e_status
     DYNAMIC = 3
 } status_type;
 
+typedef std::map<std::string, std::string>  headers_map;
+
 class Request_header_validation
 {
     private:
@@ -20,7 +22,7 @@ class Request_header_validation
         int servIndex;
         std::string uri;//GET-i hamar
         std::string method;
-
+        std::vector<std::string> lines;
     public:
         void    set_status(status_type status){this->status = status;}
         std::string get_uri() const;
@@ -35,9 +37,7 @@ class Request_header_validation
         int have_this_uri_in_our_current_server(int servIndex);
         int check_this_metdod_has_in_appropriate_server(std::string method, int which_location);
         int getServerThatWeConnectTo(std::string line);
+        void fill_headers_map(headers_map &headers);
 
-        void get_validation(std::vector<std::string> lines);
-        void post_validation(std::vector<std::string> lines);
-        void delete_validation(std::vector<std::string> lines);
 
 };

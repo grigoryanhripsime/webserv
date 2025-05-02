@@ -27,7 +27,7 @@ std::string CGI::CGI_handler()
     getcwd(buff, 1024);
     this->script_path = std::string(buff) + locdir[locIndex]->getPath() + '/' + locdir[locIndex]->getIndex()[0]; /* example: "/path/to/script.php" */
     
-    this->script_name = std::string(buff) + locdir[locIndex]->getPath() + '/' + locdir[locIndex]->getIndex()[0]; /* example: "/cgi-bin/script.php" */
+    this->script_name = locdir[locIndex]->getPath() + '/' + locdir[locIndex]->getIndex()[0]; /* example: "/cgi-bin/script.php" */
     this->path_info = request->get_uri();     /* example: "" */
     this->server_name = server->getServer_name(); /* example: "example.com" */
     this->server_port = server->getListen().second; /* example: "80" */
@@ -65,16 +65,17 @@ void CGI::CGI_parse() {
 	env.push_back("SERVER_PROTOCOL=HTTP/1.1");
 	env.push_back("SERVER_SOFTWARE=Weebserv/1.0");
     #endif
-    // for (std::map<std::string, std::string>::const_iterator it = request.headers.begin();
-    //      it != request.headers.end(); ++it) {
-    //     std::string header_name = it->first;
-    //     std::string cgi_name = "HTTP_";
-    //     for (size_t i = 0; i < header_name.size(); ++i) {
-    //         char c = header_name[i];
-    //         cgi_name += (c == '-' ? '_' : std::toupper(c));
-    //     }
-    //     env.push_back(cgi_name + "=" + it->second);
-    // }
+    headers_map headers = request->get_headers();
+    for (std::map<std::string, std::string>::const_iterator it = headers.begin();
+         it != headers.end(); ++it) {
+        std::string header_name = it->first;
+        std::string cgi_name = "HTTP_";
+        for (size_t i = 0; i < header_name.size(); ++i) {
+            char c = header_name[i];
+            cgi_name += (c == '-' ? '_' : std::toupper(c));
+        }
+        env.push_back(cgi_name + "=" + it->second);
+    }
 }
 
 void CGI::CGI_exec() {

@@ -607,6 +607,7 @@ void Request::handleClientRequest(int client_fd) {
 
     Request_header_validation request_header_validation(servers);
     std::string method = request_header_validation.if_received_request_valid(*this, buffer);
+    request_header_validation.fill_headers_map(headers);
     //checking if http request header is correct
     uri = request_header_validation.get_uri();
     servIndex = request_header_validation.get_servIndex();

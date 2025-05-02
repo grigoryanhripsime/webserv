@@ -13,6 +13,9 @@
 #include <dirent.h>
 #include <limits>
 #include "CGI.hpp"
+
+typedef std::map<std::string, std::string>  headers_map;
+
 class Request
 {
 private:
@@ -30,6 +33,7 @@ private:
     int error_page_num;
     int epfd;
     std::map<std::string, std::string> form_data;//POST-i hamar
+    headers_map headers;
     
     std::string get_response(std::string &method, char *buffer, int bytesRead);
 
@@ -63,6 +67,8 @@ public:
     std::string get_content_type() const{return MainContentType;}
     std::string get_query() const{return query;}
     std::string get_body() {return post_body;}
+    headers_map &get_headers() {return headers;}
+    
     int get_servIndex() const {return servIndex;}
     std::vector<ServerDirective *> get_servers() const {return servers;}
     std::string get_uri() const{return uri;}
