@@ -26,11 +26,12 @@ std::string CGI::CGI_handler()
     char buff[1024] = {0};
     getcwd(buff, 1024);
     this->script_path = std::string(buff) + locdir[locIndex]->getPath() + '/' + locdir[locIndex]->getIndex()[0]; /* example: "/path/to/script.php" */
-    
     this->script_name = locdir[locIndex]->getPath() + '/' + locdir[locIndex]->getIndex()[0]; /* example: "/cgi-bin/script.php" */
     this->path_info = request->get_uri();     /* example: "" */
+    std::ostringstream oss;
+    oss << server->getListen().second;
     this->server_name = server->getServer_name(); /* example: "example.com" */
-    this->server_port = server->getListen().second; /* example: "80" */
+    this->server_port = oss.str(); /* example: "80" */
     this->remote_addr = server->getListen().first; /* example: "127.0.0.1" */
     this->output.clear();            /* this string may go to some getter for error/exception message */
     
@@ -52,13 +53,17 @@ void CGI::CGI_parse() {
 	env.push_back("GATEWAY_INTERFACE=CGI/1.1");
     env.push_back("REQUEST_METHOD=" + request->get_method());
     env.push_back("SCRIPT_NAME=" + script_name);
-    env.push_back("SCRIPT_FILENAME=" + script_name); // Why?
+    char buff[1024] = {0};
+    getcwd(buff, 1024);
+    env.push_back("SCRIPT_FILENAME=" + std::string(buff) + script_name); // Why?
 	std::ostringstream oss;
-    oss << request->get_content_length();
+    std::string content_type = request->get_content_type();
+    oss << (content_type == "POST" ? request->get_content_length() : 0);
     env.push_back("CONTENT_LENGTH=" + oss.str());
-    env.push_back("CONTENT_TYPE=" + request->get_content_type());
+    env.push_back("CONTENT_TYPE=" + content_type);
     env.push_back("PATH_INFO=" + path_info); // URI
-    env.push_back("QUERY_STRING=" + path_info + request->get_query()); // URI+QUERY
+    env.push_back("QUERY_STRING=" + request->get_query()); // URI+QUERY
+    env.push_back("REQUEST_URI=" + request->get_uri() + request->get_query()); // URI+QUERY
     env.push_back("SERVER_NAME=" + server_name);
     env.push_back("SERVER_PORT=" + server_port);
     env.push_back("REMOTE_ADDR=" + remote_addr);
@@ -78,9 +83,18 @@ void CGI::CGI_parse() {
     }
 }
 
+void handle_timeout(int)
+{
+    std::cerr << "Execution timed out" << std::endl;
+	
+    exit(EXIT_FAILURE);
+}
+
 void CGI::CGI_exec() {
     int stdin_pipe[2];
     int stdout_pipe[2];
+    unsigned int timeout = 0;
+
     if (pipe(stdin_pipe) == -1 || pipe(stdout_pipe) == -1) {
         return;
     }
@@ -101,9 +115,13 @@ void CGI::CGI_exec() {
         dup2(stdout_pipe[1], 1);
         close(stdin_pipe[0]);
         close(stdout_pipe[1]);
+        
+        signal(SIGALRM, handle_timeout);
+        alarm(timeout);
 
         std::vector<char*> envp;
         for (size_t i = 0; i < env.size(); ++i) {
+            std::clog << env[i] << std::endl;
             envp.push_back(const_cast<char*>(env[i].c_str()));
         }
         envp.push_back(0);
