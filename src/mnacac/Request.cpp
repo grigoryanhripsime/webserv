@@ -121,9 +121,10 @@ std::string Request::post_method_tasovka(char *buffer, int bytesRead) {
 
     // Build HTTP response
     std::stringstream ss;
-    ss << "HTTP/1.1 200 OK\r\n"
+    ss << "HTTP/1.1 200 OK\r\n"//200 texy dnenq error_oage_NUm(yani vorpes status code?te  henc 200e toxem?)
        << "Content-Length: " << response_body.size() << "\r\n"
-       << "Content-Type: text/plain\r\n"
+       << "Content-Type: " << get_content_type() + "\r\n"
+    //    << "Content-Type: text/plain\r\n"
        << "\r\n"
        << response_body;
 
@@ -214,6 +215,7 @@ std::string Request::handle_multipart_upload(const std::string &upload_dir)
     std::string headers;
     std::string filename;
     if (boundary.empty()) {
+        error_page_num = 400;
         return "Error: No boundary found for multipart/form-data";
     }
 
@@ -266,6 +268,7 @@ std::string Request::handle_multipart_upload(const std::string &upload_dir)
 
             int fd = open(file_path.c_str(), O_CREAT | O_WRONLY | O_TRUNC, 0644);
             if (fd == -1) {
+                error_page_num = 500;
                 return "Error: Failed to open file for writing";
             }
             std::cout << "new fd = " << fd <<std::endl;
@@ -273,6 +276,7 @@ std::string Request::handle_multipart_upload(const std::string &upload_dir)
             close(fd);
 
             if (written == -1 || static_cast<size_t>(written) != file_content.size()) {
+                error_page_num = 500;
                 return "Error: Failed to write file";
             }
 
@@ -297,6 +301,7 @@ std::string Request::handle_simple_post(const std::string &upload_dir)
     std::string file_path = upload_dir + "/post_data.txt";
     int fd = open(file_path.c_str(), O_CREAT | O_WRONLY | O_TRUNC, 0644);
     if (fd == -1) {
+        error_page_num = 500;
         return "Error: Failed to open file for writing";
     }
 
@@ -304,6 +309,7 @@ std::string Request::handle_simple_post(const std::string &upload_dir)
     close(fd);
 
     if (written == -1 || static_cast<size_t>(written) != post_body.size()) {
+        error_page_num = 500;
         return "Error: Failed to write POST data";
     }
 
@@ -442,6 +448,7 @@ std::string Request::uri_is_file(std::string filePath)
     if (find_in_index_vectors_this_string(left_part_of_filePath, locdir[locIndex]->getIndex()) < 0)
     {
         std::cout << "error page???????\n";
+        error_page_num = 404;
         // std::string root =  (locdir[locIndex]->getRoot() != "") ? locdir[locIndex]->getRoot() : servers[servIndex]->getRoot();
         // filePath = root + "/web/error404.html";
         filePath = getFilepath("/web/error404.html");
@@ -502,6 +509,9 @@ std::string Request::uri_is_directory(std::string filePath)
     {
         // std::string root =  (locdir[locIndex]->getRoot() != "") ? locdir[locIndex]->getRoot() : servers[servIndex]->getRoot();
         // filePath = root + "/web/error404.html";
+        error_page_num = 404;
+        // filePath = getFilepath(get_servers()[get_servIndex()]->getError_page()[error_page_num]);
+
         filePath = getFilepath("/web/error404.html");
     }
     else if (getFilesInDirectory(filePath) != "NULL")//filePath == str esi el petq chi stugel,verevy ka
@@ -509,7 +519,7 @@ std::string Request::uri_is_directory(std::string filePath)
         if (filePath[filePath.size() - 1] != '/')
             filePath += '/' + getFilesInDirectory(filePath);
         else
-        filePath += getFilesInDirectory(filePath);
+            filePath += getFilesInDirectory(filePath);
             
         std::cout << "/ enq morace hastat->" << filePath << std::endl;
         return get_need_string_that_we_must_be_pass_send_system_call(filePath);
@@ -519,6 +529,7 @@ std::string Request::uri_is_directory(std::string filePath)
     {
         // std::string root =  (locdir[locIndex]->getRoot() != "") ? locdir[locIndex]->getRoot() : servers[servIndex]->getRoot();
         // filePath = root + "/web/error403.html";
+        error_page_num = 403;
         filePath = getFilepath("/web/error403.html");
         return get_need_string_that_we_must_be_pass_send_system_call(filePath);
     }
@@ -557,7 +568,10 @@ std::string Request::constructingResponce(std::string filePath)
     if (filePath[filePath.size() - 1] == '?')
         filePath = filePath.substr(0, filePath.size() - 1);
     if (pathExists(filePath) == false)
+    {
+        error_page_num = 404;//kam 403
         throw std::runtime_error(" путь не существует или нет прав на доступ(файл/директория)");
+    }
     if (isFile(filePath)) //Если ты проверяешь путь и он:❌ не существует — верни ошибку 404 Not Found
     {
         //stex pti stugenq ardyoq mer locationi index i valuneri mej ka tvyal fayly te che
@@ -592,7 +606,7 @@ void Request::handleClientRequest(int client_fd) {
     std::cout << "Received request: " << std::string(buffer, bytesRead) << std::endl;
 
     Request_header_validation request_header_validation(servers);
-    std::string method = request_header_validation.if_received_request_valid(buffer);
+    std::string method = request_header_validation.if_received_request_valid(*this, buffer);
     //checking if http request header is correct
     uri = request_header_validation.get_uri();
     servIndex = request_header_validation.get_servIndex();
@@ -605,24 +619,41 @@ void Request::handleClientRequest(int client_fd) {
 
     request_header_validation.status_handler();
     CGI cgi(this);
-    const char *response;
+    // const char *response;
     switch(request_header_validation.get_status()) {
         case DYNAMIC:
         std::cout << "Dynamic function called\r\n\r\n";
-        response = cgi.CGI_handler().c_str();
-        std::cout << response << "\n\n";
-        send(client_fd, response, strlen(response), 0);
+        // response = cgi.CGI_handler().c_str();
+        // std::cout << response << "\n\n";
+        send(client_fd, cgi.CGI_handler().c_str(), strlen(cgi.CGI_handler().c_str()), 0);
         std::cout << "Dynamic function ended\r\n\r\n";
         break;
         case STATIC:
         std::cout << "Static function called\r\n\r\n";
-        response = get_response(method, buffer, bytesRead).c_str();
-        send(client_fd, response, strlen(response), 0);
+        // response = get_response(method, buffer, bytesRead).c_str();
+        std::cout << "ayo hasnum enq sendin\n\n";
+        send(client_fd,  get_response(method, buffer, bytesRead).c_str(), strlen( get_response(method, buffer, bytesRead).c_str()), 0);
         
         break;
     }
+    // if (method == "GET")
+    // {
+    // std::cout << "hehehe= " << locIndex <<std::endl;
+
+    //     std::cout<<"SERVINDEX: "<<servIndex<<std::endl;
+    //     std::string filePath = getFilepath(uri);
+    //    std::string res = constructingResponce(filePath);
+    //     std::cout<<"-----------------------------------\n";
+    //     std::cout<<res;
+    //     std::cout<<"-----------------------------------\n";
+    //     // const char *response = res.c_str();
+    //     send(client_fd,  res.c_str(), strlen( res.c_str()), 0);
+    // }
     if (if_http_is_valid(buffer) < 0)
-    std::cout << "505 HTTP Version Not Supported.\n";
+    {
+        error_page_num = 505;
+        std::cout << "505 HTTP Version Not Supported.\n";
+    }
     //
     
 
@@ -678,16 +709,6 @@ int Request::if_http_is_valid(char *c_buffer)
     return 1;
 }
 
-
-
-// std::string Request::getFilepath()
-// {
-//     std::vector<LocationDirective*> locdir = servers[servIndex]->getLocdir();
-//     int locIndex = servers[servIndex]->get_locIndex();
-//     std::string root =  (locdir[locIndex]->getRoot() != "") ? locdir[locIndex]->getRoot() : servers[servIndex]->getRoot();
-//     std::string filePath = root + uri;
-//     return filePath;
-// }
 std::string Request::getFilepath(std::string uri)
 {
     std::vector<LocationDirective*> locdir = servers[servIndex]->getLocdir();

@@ -34,7 +34,7 @@ void Request_header_validation::delete_validation(std::vector<std::string> lines
     
 }
 
-std::string    Request_header_validation::if_received_request_valid(char *c_buffer)
+std::string    Request_header_validation::if_received_request_valid(Request &req, char *c_buffer)
 {
     std::stringstream ss(c_buffer);
     std::vector<std::string> lines;
@@ -43,10 +43,17 @@ std::string    Request_header_validation::if_received_request_valid(char *c_buff
         lines.push_back(line);
 
     if (lines.size() < 2)
+    {
+        req.set_error_page_num(400);
         throw std::runtime_error("header cant contain less than 2 lines.");
+    }
     
     servIndex = getServerThatWeConnectTo(lines[1]);
-    std::string method = validation_of_the_first_line(lines[0]);
+    if (servIndex < 0 || static_cast<size_t>(servIndex) >= servers.size()) {
+        req.set_error_page_num(500); // Internal Server Error for invalid server index
+        throw std::runtime_error("Invalid server index");
+    }
+    std::string method = validation_of_the_first_line(req, lines[0]);
     // std::cout << "ific araj->" << locIndex<<std::endl;
     if (method == "GET")
         get_validation(lines);
@@ -66,8 +73,12 @@ std::string    Request_header_validation::if_received_request_valid(char *c_buff
     return method;
 }
 
-std::string    Request_header_validation::validation_of_the_first_line(std::string line)
+std::string    Request_header_validation::validation_of_the_first_line(Request &req, std::string line)
 {
+    // if (servIndex < 0 || static_cast<size_t>(servIndex) >= servers.size()) {
+    //     req.set_error_page_num(500); // Internal Server Error for invalid server index
+    //     throw std::runtime_error("Invalid server index");
+    // }
     std::vector<std::string> result;
     std::istringstream iss(line);
     std::string word;
@@ -75,26 +86,41 @@ std::string    Request_header_validation::validation_of_the_first_line(std::stri
     while (iss >> word)
         result.push_back(word);
     if (result.size() < 3)
+    {
+        req.set_error_page_num(400);
         throw std::runtime_error("error page piti bacvi, headeri error a");
+    }
     uri = result[1];
     if (uri == "/favicon.ico")
         return "";
+    size_t harcakanInd = uri.find('?');//stugel,norem avelacre
+    if (harcakanInd != std::string::npos)
+        req.set_query(uri.substr(harcakanInd + 1));
     int locIndex = have_this_uri_in_our_current_server(servIndex);//esi arajin toxi uri masi pahna
     servers[servIndex]->setLocIndex(locIndex);//set locIndex
     if (locIndex < 0)
     {
+        req.set_error_page_num(404);//zdes kakoe cifr dat?
+         
         std::cout << "yavni bacaskaanaaaaaa\n";
+
         throw std::runtime_error("error page pti bacvi browser-um");//es hmi exception em qcum vor segfault chta,bayc heto pti zut error page-@ bacenq
     }
     //TODO: add check for server's index
     //////////////////////////////
 
     if (result[2] != "HTTP/1.1" && result[2] != "HTTP/2")
+    {
+        req.set_error_page_num(505);
         throw std::runtime_error("error page:: headery     sxal a");
+    }
     
     ///////////////////////////////
     if (check_this_metdod_has_in_appropriate_server(result[0], locIndex) < 0)
+    {
+        req.set_error_page_num(405);
         std::runtime_error("error page: header");
+    }
 
     ////////////////////////////////////////
     return result[0];
@@ -181,7 +207,7 @@ int Request_header_validation::getServerThatWeConnectTo(std::string line)
     //ete unenq nuyn ip-ov ev port-ov serverner bayc tvelenq server_name apa zaprosty etalua et name-ov serverin
     //bayc ete unenq nuyn ip-ov ev port-ov serverner bayc chenq tvel server_name apa zaprosty etalua arajin et ip-ov u prot-ov serverin
     std::cout << "en vat depqna\n";
-    return 0;
+    return 0;//xi 0????????????????????vor chisht anunov server chunenq pti meka arajin exac serverin eta requesty te -1 reurn anum u ynde stugum em eroor page bacem 500
 }
 
 

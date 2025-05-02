@@ -4,8 +4,8 @@
 #include <cstring>
 #include <vector>
 #include "ServerDirective.hpp"
-
-
+#include "Request.hpp"
+class Request;
 typedef enum e_status
 {
     STATIC = 2,
@@ -30,8 +30,8 @@ class Request_header_validation
 
         void    status_handler();
         Request_header_validation(std::vector<ServerDirective *> servers);
-        std::string    if_received_request_valid(char *c_buffer);
-        std::string    validation_of_the_first_line(std::string line);
+        std::string    if_received_request_valid(Request &req, char *c_buffer);
+        std::string    validation_of_the_first_line(Request &req, std::string line);
         int have_this_uri_in_our_current_server(int servIndex);
         int check_this_metdod_has_in_appropriate_server(std::string method, int which_location);
         int getServerThatWeConnectTo(std::string line);
