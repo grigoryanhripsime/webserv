@@ -29,7 +29,7 @@ public:
     const std::string& getRoot() const { return root; }
 
         /////getters////
-    std::map<int, std::string> getError_page();
+    std::map<int, std::string> getError_pages();
     std::vector<std::string>& getIndex();
     size_t  getBodySize();
     ////////////index validacia

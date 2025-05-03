@@ -15,6 +15,7 @@
 #include "CGI.hpp"
 
 typedef std::map<std::string, std::string>  headers_map;
+#define SIZE (1 << 14)
 
 class Request
 {

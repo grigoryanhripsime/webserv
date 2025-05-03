@@ -278,7 +278,7 @@ void DirectiveConfig::printServers()
         std::cout << "listen-i port = " <<par.second<<std::endl;
         
         std::cout << "server_name = " << (*it)->getServer_name() <<std::endl;
-        std::map<int, std::string> err  = (*it)->getError_page();
+        std::map<int, std::string> err  = (*it)->getError_pages();
         std::map<int, std::string>::iterator it1 = err.begin();
         for (; it1 != err.end(); ++it1)
         {

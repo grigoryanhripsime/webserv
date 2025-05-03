@@ -588,7 +588,6 @@ std::string Request::constructingResponce(std::string filePath)
         return uri_is_directory(filePath);
     return "";
 }
-#define SIZE (1 << 14)
 void Request::handleClientRequest(int client_fd) {
     std::cout << "SIZEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEee=" << SIZE<<std::endl;
     char buffer[SIZE] = {0};
@@ -609,26 +608,29 @@ void Request::handleClientRequest(int client_fd) {
     }
 
     // Здесь ты можешь обработать запрос клиента
-    std::cout << "Received request: " << std::string(buffer, bytesRead) << std::endl;
+    std::cout << std::string(buffer, bytesRead) << std::endl;
 
     Request_header_validation request_header_validation(servers);
-    method = request_header_validation.if_received_request_valid(*this, buffer);
-    request_header_validation.fill_headers_map(headers);
-    //checking if http request header is correct
-    uri = request_header_validation.get_uri();
-    servIndex = request_header_validation.get_servIndex();
-    ////////////////////////////////////    
-    // std::string filePath = servers[0]->getRoot() + servers[0]->getLocdir()[0]->getPath() + "/" + servers[0]->getLocdir()[0]->getIndex()[1];
-    std::cout << "methoooooooood = " << method <<std::endl;
-    locIndex = servers[servIndex]->get_locIndex();
-    std::cout << "hehehe= " << locIndex <<std::endl;
-    //checking if http request header is correct
+    try 
+    {
+        method = request_header_validation.if_received_request_valid(*this, buffer);
+        request_header_validation.fill_headers_map(headers);
+        //checking if http request header is correct
+        std::cout<<"🫧🫧🫧 meka hasel em\n";
+        servIndex = request_header_validation.get_servIndex();
+        uri = request_header_validation.get_uri();
+        ////////////////////////////////////    
+        // std::string filePath = servers[0]->getRoot() + servers[0]->getLocdir()[0]->getPath() + "/" + servers[0]->getLocdir()[0]->getIndex()[1];
+        std::cout << "methoooooooood = " << method <<std::endl;
+        locIndex = servers[servIndex]->get_locIndex();
+        std::cout << "hehehe= " << locIndex <<std::endl;
+        //checking if http request header is correct
+        request_header_validation.status_handler();
+    } catch (std::exception &e) {
+        std::cout<<"🧑‍⚖️🧑‍⚖️🧑‍⚖️\n"<<error_page_num<<std::endl;
+        request_header_validation.set_status(status_type(ERROR));
+    }
 
-
-    //TODO: segv
-    std::cout<<"hasel em 🙀🙀\n";
-
-    request_header_validation.status_handler();
     CGI cgi(this);
     // const char *response;
     switch(request_header_validation.get_status()) {
@@ -644,8 +646,20 @@ void Request::handleClientRequest(int client_fd) {
             // response = get_response(method, buffer, bytesRead).c_str();
             std::cout << "ayo hasnum enq sendin\n\n";
             send(client_fd,  get_response(method, buffer, bytesRead).c_str(), strlen( get_response(method, buffer, bytesRead).c_str()), 0);
-            
-        break;
+            break;
+        case ERROR:
+            std::cout<<"el miiii\n";
+            std::cout<<error_page_num<<" hehe "<< servIndex <<" \n";
+            std::map<int, std::string>::const_iterator it = servers[servIndex]->getError_pages().begin();
+            for (; it != servers[servIndex]->getError_pages().end(); ++it) {
+                std::cout<<"👼🏽👼🏽👼🏽" << it->first << " => " << it->second << std::endl;
+            }
+            std::string filename = servers[servIndex]->getError_pages().find(error_page_num)->second;
+            std::string filePath = servers[servIndex]->getRoot() + filename;
+            std::cout<<"💃🏼💃🏼💃🏼 "<<filePath<<std::endl;
+            // std::string res = constructingResponce(servers[servIndex]->getRoot + servers[servIndex]->getError_page().get(405));
+            // send(client_fd,  , 0);
+            break;
     }
     // if (method == "GET")
     // {
@@ -665,16 +679,10 @@ void Request::handleClientRequest(int client_fd) {
         error_page_num = 505;
         std::cout << "505 HTTP Version Not Supported.\n";
     }
-    //
-    
-
 }
 
 std::string Request::get_response(std::string &method, char *buffer, int bytesRead)
 {
-    
-
-
     // function for static methods
     std::cout<<"reached here\n";
     std::string res;

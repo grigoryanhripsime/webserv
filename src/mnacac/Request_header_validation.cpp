@@ -35,7 +35,7 @@ std::string    Request_header_validation::if_received_request_valid(Request &req
     // std::cout << "ific araj->" << locIndex<<std::endl;
     if (method != "GET" && method != "POST" && method != "DELETE") 
     {
-        //405
+        req.set_error_page_num(405);
         throw std::runtime_error("senc method chunenq mer allow_methods-um-> 405 Method Not Allowed.\n");//return 77;
         // std::string filePath = servers[servIndex]->getRoot() + "/web/error405.html";
         // std::string res = get_need_string_that_we_must_be_pass_send_system_call(filePath);
@@ -69,10 +69,10 @@ void Request_header_validation::fill_headers_map(headers_map &headers)
         }
     }
 
-    // Output the map
-    for (std::map<std::string, std::string>::iterator it = headers.begin(); it != headers.end(); ++it) {
-        std::cout << it->first << " => " << it->second << std::endl;
-    }
+    // // Output the map
+    // for (std::map<std::string, std::string>::iterator it = headers.begin(); it != headers.end(); ++it) {
+    //     std::cout << it->first << " => " << it->second << std::endl;
+    // }
 }
 
 std::string    Request_header_validation::validation_of_the_first_line(Request &req, std::string line)
@@ -170,8 +170,6 @@ int Request_header_validation::have_this_uri_in_our_current_server(int servIndex
 
 int Request_header_validation::check_this_metdod_has_in_appropriate_server(std::string method, int which_location)
 {
-    // this->method1 = method;
-    // // std::cout<<"☔️☔️☔️☔️  "<<method<<std::endl;
     LocationDirective* locdir;
     std::cout << "hasav stxe\n";
     std::cout << "which_location = " << which_location << std::endl;
