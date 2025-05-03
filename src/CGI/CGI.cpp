@@ -9,8 +9,19 @@
 
 CGI::CGI(Request * const request) : request(request) {}
 
+std::string CGI::_get_index(const std::vector<std::string> &index, const std::string& path)
+{
+    for (std::size_t i = 0; i != index.size(); ++i) {
+        if (path_info == path + '/' + index[i]) {
+            return index[i];
+        }
+    }
+    throw std::runtime_error("Location: autoindex must be 'on' or 'off'");
+}
+
 static const std::string _get_extension(const std::string& str)
 {
+
     std::string ext = str.substr(str.find_last_of('.', str.length()));
     return ext;
 }
@@ -26,17 +37,18 @@ std::string CGI::CGI_handler()
     if (server == NULL) {
         return "";
     }
+    this->path_info = request->get_uri();     /* example: "" */
     std::vector<LocationDirective *> locdir = server->getLocdir();
     int locIndex = server->get_locIndex();
-    std::string ext = _get_extension(locdir[locIndex]->getIndex()[0]);
+    std::string index = _get_index(locdir[locIndex]->getIndex(), locdir[locIndex]->getPath());
+    std::string ext = _get_extension(index);
     std::clog << "extension = " << ext << "\n";
     this->interpreter = locdir[locIndex]->getCgi_path(ext); /* example: "/usr/bin/php-cgi", maybe get all vector of paths and dynamicly set it */
     std::clog << "interpeter = " << interpreter << "\n\n";
     char buff[1024] = {0};
     getcwd(buff, 1024);
-    this->script_path = std::string(buff) + locdir[locIndex]->getPath() + '/' + locdir[locIndex]->getIndex()[0]; /* example: "/path/to/script.php" */
-    this->script_name = locdir[locIndex]->getPath() + '/' + locdir[locIndex]->getIndex()[0]; /* example: "/cgi-bin/script.php" */
-    this->path_info = request->get_uri();     /* example: "" */
+    this->script_path = std::string(buff) + locdir[locIndex]->getPath() + '/' + index; /* example: "/path/to/script.php" */
+    this->script_name = locdir[locIndex]->getPath() + '/' + index; /* example: "/cgi-bin/script.php" */
     std::ostringstream oss;
     oss << server->getListen().second;
     this->server_name = server->getServer_name(); /* example: "example.com" */

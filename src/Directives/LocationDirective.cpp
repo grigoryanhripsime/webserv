@@ -51,16 +51,6 @@ void LocationDirective::validate() const
    // Проверка autoindex
     // if (autoindex != "on" && autoindex != "off")
     //     throw std::runtime_error("Location: autoindex must be 'on' or 'off'");
-
-     // Проверка CGI конфигурации
-    //    Сервер видит расширение .py
-    //    Запускает файл через /usr/bin/python3 hello.py
-    // if (!cgi_extension.empty() && cgi_path.empty())//ete extension ka bayc cgi_path chka errora
-    //     throw std::runtime_error("Location: CGI path required when extension is set");
-    // if (cgi_extension.empty() && !cgi_path.empty())//errora nayev hakarak depqy
-    //     throw std::runtime_error("Location: CGI extension required when path is set");
-    // if (!cgi_extension.empty() && cgi_extension[0] != '.')
-    //     throw std::runtime_error("CGI extension must start with '.' (e.g., '.py')");
     if (!upload_dir.empty() && upload_dir[0] != '/')
         throw std::runtime_error("Upload directory must be an absolute path (start with '/')");
 }
@@ -193,7 +183,6 @@ static void _validateCgi_extension_key(const std::string& extension)
 
 void    LocationDirective::setCgi_extension(const std::multimap<std::string, std::vector<std::string> >& extension)
 {
-    std::clog << "JUPA JUPA JUPA\n";
     for (std::multimap<std::string, std::vector<std::string> >::const_iterator itExt = extension.begin(); itExt != extension.end(); ++itExt) {
         if (itExt->first.size() < 2 || itExt->second.size() != 1)
             throw std::runtime_error("CGI extension must look like this with '.py /usr/bin/python3'");
@@ -208,7 +197,6 @@ void    LocationDirective::setCgi_extension(const std::multimap<std::string, std
 
 void    LocationDirective::setCgi_extension(const std::vector<std::string>& extension)
 {
-    std::clog << "JUPA JUPA JUPA\n";
     if (extension.size() != 2)
         throw std::runtime_error("CGI extension must look like this with '.py /usr/bin/python3'");
     std::string key = extension[0];

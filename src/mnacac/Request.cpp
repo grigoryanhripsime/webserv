@@ -392,8 +392,10 @@ int Request::find_in_index_vectors_this_string(std::string left_part_of_filePath
     for(size_t i = 0; i < cur_loc_index.size(); ++i)
     {
         // std::cout << "cur_loc_index i-n  = " <<cur_loc_index[i]<< std::endl;
-        if (cur_loc_index[i] == left_part_of_filePath)
+        if (cur_loc_index[i] == left_part_of_filePath) {
+    std::clog << "💩💩Current index index = " << i << "\n\n";
             return i;
+        }
     }
     return -1;
 }
@@ -445,7 +447,8 @@ std::string Request::uri_is_file(std::string filePath)
     if (left_part_of_filePath[0] == '/')
         left_part_of_filePath.erase(0,1);
     std::cout << "------------------------------>" << left_part_of_filePath << std::endl;
-    if (find_in_index_vectors_this_string(left_part_of_filePath, locdir[locIndex]->getIndex()) < 0)
+    currentIndex = find_in_index_vectors_this_string(left_part_of_filePath, locdir[locIndex]->getIndex());
+    if (currentIndex < 0)
     {
         std::cout << "error page???????\n";
         error_page_num = 404;

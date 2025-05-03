@@ -23,6 +23,7 @@ private:
     std::vector<ServerDirective *> servers;
     int servIndex;
     int locIndex;
+    int currentIndex;
     std::string method;
     std::string uri;//GET-i hamar
     std::string MainContentType;//POST-i hamar
@@ -68,6 +69,7 @@ public:
     std::string get_content_type() const{return MainContentType;}
     std::string get_query() const{return query;}
     std::string get_body() {return post_body;}
+    int get_currentIndex() const {return currentIndex;};
     headers_map &get_headers() {return headers;}
     
     int get_servIndex() const {return servIndex;}
