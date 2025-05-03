@@ -76,6 +76,12 @@ public:
 
     void    set_query(std::string query){this->query = query;}
     void    set_error_page_num(int error_num){this->error_page_num = error_num;}
+    void    set_servIndex(int servIndex) {this->servIndex = servIndex;}
+    void    set_method(std::string method) {this->method = method;}
+    void    set_uri(std::string uri) {this->uri = uri;}
+
+    std::string autoindex(std::string filePath);
+
 
 };
 

@@ -25,13 +25,14 @@ std::string    Request_header_validation::if_received_request_valid(Request &req
         req.set_error_page_num(400);
         throw std::runtime_error("header cant contain less than 2 lines.");
     }
-    
     servIndex = getServerThatWeConnectTo(lines[1]);
+    req.set_servIndex(servIndex);
     if (servIndex < 0 || static_cast<size_t>(servIndex) >= servers.size()) {
         req.set_error_page_num(500); // Internal Server Error for invalid server index
         throw std::runtime_error("Invalid server index");
     }
-    std::string method = validation_of_the_first_line(req, lines[0]);
+    method = validation_of_the_first_line(req, lines[0]);
+    req.set_method(method);
     // std::cout << "ific araj->" << locIndex<<std::endl;
     if (method != "GET" && method != "POST" && method != "DELETE") 
     {
@@ -93,6 +94,7 @@ std::string    Request_header_validation::validation_of_the_first_line(Request &
         throw std::runtime_error("error page piti bacvi, headeri error a");
     }
     uri = result[1];
+    req.set_uri(uri);
     if (uri == "/favicon.ico")
         return "";
     size_t harcakanInd = uri.find('?');//stugel,norem avelacre
@@ -102,7 +104,7 @@ std::string    Request_header_validation::validation_of_the_first_line(Request &
     servers[servIndex]->setLocIndex(locIndex);//set locIndex
     if (locIndex < 0)
     {
-        req.set_error_page_num(404);//zdes kakoe cifr dat?
+        req.set_error_page_num(405);//zdes kakoe cifr dat?
          
         std::cout << "yavni bacaskaanaaaaaa\n";
 

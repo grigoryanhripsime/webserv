@@ -9,8 +9,7 @@ class Request;
 typedef enum e_status
 {
     STATIC = 2,
-    DYNAMIC = 3,
-    ERROR = 4
+    DYNAMIC = 3
 } status_type;
 
 typedef std::map<std::string, std::string>  headers_map;

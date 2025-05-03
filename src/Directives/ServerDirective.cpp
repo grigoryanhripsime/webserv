@@ -13,7 +13,6 @@ ServerDirective::ServerDirective()
     validDirs[3] = "client_max_body_size";
     validDirs[4] = "root";
     validDirs[5] = "error_page";
-
 }
 
 std::vector<LocationDirective*>& ServerDirective::getLocdir() { return locdir; }
