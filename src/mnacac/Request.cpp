@@ -524,7 +524,7 @@ std::string Request::uri_is_directory(std::string filePath)
         std::cout << "/ enq morace hastat->" << filePath << std::endl;
         return get_need_string_that_we_must_be_pass_send_system_call(filePath);
     }
-    std::cout << "ba incha->" << locdir[locIndex]->getAutoindex() << std::endl;
+    std::cout << "👽ba incha->" << locdir[locIndex]->getAutoindex() << std::endl;
     if (filePath == str && locdir[locIndex]->getAutoindex() == "off")
     {
         // std::string root =  (locdir[locIndex]->getRoot() != "") ? locdir[locIndex]->getRoot() : servers[servIndex]->getRoot();
@@ -545,10 +545,16 @@ std::string Request::uri_is_directory(std::string filePath)
         for (; it != files.end(); it++)
         {
             std::cout<<*it<<std::endl;
+            std::string server;
+            std::cout<<"😃😃😃\n";
+            if (servers[servIndex]->getServer_name() != "")
+                server = servers[servIndex]->getServer_name();
+            else
+                server = servers[servIndex]->getListen().first;
             std::stringstream ss_num;
-            ss_num << servers[servIndex]->getListen().first << ":" << servers[servIndex]->getListen().second;
+            ss_num << server << ":" << servers[servIndex]->getListen().second;
 
-            std::cout<<"🍄🍄🍄 "<<uri<<" 🍄🍄🍄"<<std::endl;
+            std::cout<<"🍄🍄🍄 "<<ss_num.str()<<" 🍄🍄🍄"<<std::endl;
             std::string uri_to_use = "";
             if (uri != "/") uri_to_use = uri;
             listedFiles += "<a href=\"http://" + ss_num.str() + uri_to_use + "/" + *it + "\">" + *it + "</a><br>";
@@ -618,23 +624,27 @@ void Request::handleClientRequest(int client_fd) {
     std::cout << "hehehe= " << locIndex <<std::endl;
     //checking if http request header is correct
 
+
+    //TODO: segv
+    std::cout<<"hasel em 🙀🙀\n";
+
     request_header_validation.status_handler();
     CGI cgi(this);
     // const char *response;
     switch(request_header_validation.get_status()) {
         case DYNAMIC:
-        std::cout << "Dynamic function called\r\n\r\n";
-        // response = cgi.CGI_handler().c_str();
-        // std::cout << response << "\n\n";
-        send(client_fd, cgi.CGI_handler().c_str(), strlen(cgi.CGI_handler().c_str()), 0);
-        std::cout << "Dynamic function ended\r\n\r\n";
-        break;
+            std::cout << "Dynamic function called\r\n\r\n";
+            // response = cgi.CGI_handler().c_str();
+            // std::cout << response << "\n\n";
+            send(client_fd, cgi.CGI_handler().c_str(), strlen(cgi.CGI_handler().c_str()), 0);
+            std::cout << "Dynamic function ended\r\n\r\n";
+            break;
         case STATIC:
-        std::cout << "Static function called\r\n\r\n";
-        // response = get_response(method, buffer, bytesRead).c_str();
-        std::cout << "ayo hasnum enq sendin\n\n";
-        send(client_fd,  get_response(method, buffer, bytesRead).c_str(), strlen( get_response(method, buffer, bytesRead).c_str()), 0);
-        
+            std::cout << "Static function called\r\n\r\n";
+            // response = get_response(method, buffer, bytesRead).c_str();
+            std::cout << "ayo hasnum enq sendin\n\n";
+            send(client_fd,  get_response(method, buffer, bytesRead).c_str(), strlen( get_response(method, buffer, bytesRead).c_str()), 0);
+            
         break;
     }
     // if (method == "GET")
@@ -670,7 +680,7 @@ std::string Request::get_response(std::string &method, char *buffer, int bytesRe
     std::string res;
     if (method == "GET")
     {
-    std::cout << "hehehe= " << locIndex <<std::endl;
+        std::cout << "🤠hehehe= " << locIndex <<std::endl;
 
         std::cout<<"SERVINDEX: "<<servIndex<<std::endl;
         std::string filePath = getFilepath(uri);

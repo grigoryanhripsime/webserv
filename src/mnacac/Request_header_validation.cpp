@@ -224,8 +224,9 @@ void    Request_header_validation::status_handler()
             uri_share.push_back(token);
         }
     }
+    std::cout<<"🤶🤶🤶\n";
 
-    if (uri_share[0] == "cgi-bin")
+    if (!uri_share.empty() && uri_share[0] == "cgi-bin")
     {
         std::vector<LocationDirective*> locdir = servers[servIndex]->getLocdir();
         int locIndex = servers[servIndex]->get_locIndex();
