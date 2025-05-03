@@ -50,7 +50,7 @@ void DirectiveConfig::directiveValidation()
                 if (itLoc->first != "location")
                     throw DirectiveConfigException("You can't have any other nested directive except for location!");
 
-                if (!itLoc->second->blocks.empty())
+                if (!itLoc->second->blocks.empty() && !(itLoc->second->blocks.size() == 1 && itLoc->second->blocks.find("cgi_extension") != itLoc->second->blocks.end()))
                     throw DirectiveConfigException("location block can't have any block directives inside!");
 
                 // Проверка обязательного path у location
@@ -195,11 +195,12 @@ ServerDirective *DirectiveConfig::fillServers(Directive *serverBlock)//&-@ maqre
 LocationDirective *DirectiveConfig::fillLocationsn(Directive *locationBlock)
 {
     std::multimap<std::string, std::vector<std::string> >::iterator itSimpleDirLoc = locationBlock->simpleDir.begin();
+    std::multimap<std::string, Directive*>::iterator itCGIBlock = locationBlock->blocks.find("cgi_extension");
     LocationDirective *loc = new LocationDirective();
     try{
         for (; itSimpleDirLoc != locationBlock->simpleDir.end(); ++itSimpleDirLoc)
         {
-            if (itSimpleDirLoc->first != "index" && itSimpleDirLoc->first != "error_page" && itSimpleDirLoc->first != "allow_methods" && itSimpleDirLoc->first != "return" && itSimpleDirLoc->second.size() != 1)
+            if (itSimpleDirLoc->first != "index" && itSimpleDirLoc->first != "error_page" && itSimpleDirLoc->first != "allow_methods" && itSimpleDirLoc->first != "return" && itSimpleDirLoc->first != "cgi_extension" && itSimpleDirLoc->second.size() != 1)
                 throw std::runtime_error("There are more than one value for " + itSimpleDirLoc->first);
             int i = 0;
             for (; i < 11; i++)
@@ -223,27 +224,26 @@ LocationDirective *DirectiveConfig::fillLocationsn(Directive *locationBlock)
                     loc->setUpload_dir(itSimpleDirLoc->second[0]);
                     break;
                 case 5:
-                    loc->setCgi_extension(itSimpleDirLoc->second[0]);
+                    loc->setCgi_extension(itSimpleDirLoc->second);
                     break;
                 case 6:
-                    loc->setCgi_path(itSimpleDirLoc->second[0]);
-                    break;
-                case 7:
                     loc->setIndex(itSimpleDirLoc->second);
                     break;                
-                case 8:
+                case 7:
                     loc->setClient_max_body_size(itSimpleDirLoc->second[0]);
                     break;
-                case 9:
+                case 8:
                     loc->setRoot(itSimpleDirLoc->second[0]);
                     break;
-                case 10:
+                case 9:
                     loc->setError_pages(itSimpleDirLoc->second);//mapa,bayc chem patkeracnum vonca petq lcnel,kam vapshe karoxa map-@ poxenq vector?
                     break;
                 default:
                     throw std::runtime_error("Invalid directive for location");
-            }
+            }   
         }
+        if (itCGIBlock != locationBlock->blocks.end()) 
+            loc->setCgi_extension(itCGIBlock->second->simpleDir);
         return loc;
     }
     catch(...)
@@ -304,8 +304,8 @@ void DirectiveConfig::printServers()
             // std::cout << "path = " << (*ot)->getPath() << std::endl;
             std::cout << "autoindex = " << (*ot)->getAutoindex() << std::endl;
             std::cout << "upload_dir = " << (*ot)->getUpload_dir() << std::endl;
-            std::cout << "cgi_extension = " << (*ot)->getCgi_extension() << std::endl;
-            std::cout << "cgi_path = " << (*ot)->getCgi_path() << std::endl;
+            // std::cout << "cgi_extension = " << (*ot)->getCgi_extension() << std::endl;
+            // std::cout << "cgi_path = " << (*ot)->getCgi_path() << std::endl;
     
             
         }

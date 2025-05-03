@@ -6,8 +6,7 @@ LocationDirective::LocationDirective() :
     redirect(),
     autoindex("off"),
     upload_dir(""),
-    cgi_extension(""),
-    cgi_path("") 
+    cgi_extension()
 {
 
         validDirs[0] = "path";
@@ -16,11 +15,10 @@ LocationDirective::LocationDirective() :
         validDirs[3] = "redirect";
         validDirs[4] = "upload_dir";
         validDirs[5] = "cgi_extension";
-        validDirs[6] = "cgi_path";
-        validDirs[7] = "index";
-        validDirs[8] = "client_max_body_size";
-        validDirs[9] = "root";
-        validDirs[10] = "error_pages";
+        validDirs[6] = "index";
+        validDirs[7] = "client_max_body_size";
+        validDirs[8] = "root";
+        validDirs[9] = "error_pages";
 }
 
 std::string LocationDirective::getPath() const { return path; }
@@ -28,8 +26,7 @@ std::vector<std::string> LocationDirective::getAllow_methods() const { return al
 std::map<int, std::string> LocationDirective::getRedirect() { return redirect; }
 std::string LocationDirective::getAutoindex() const { return autoindex; }
 std::string LocationDirective::getUpload_dir() const { return upload_dir; }
-std::string LocationDirective::getCgi_extension() const { return cgi_extension; }
-std::string LocationDirective::getCgi_path() const { return cgi_path; }
+std::string LocationDirective::getCgi_path(const std::string& key) { return cgi_extension[key]; }
 
 LocationDirective::~LocationDirective() {std::cout << "LocationDirective dtor\n";}
 
@@ -58,12 +55,12 @@ void LocationDirective::validate() const
      // Проверка CGI конфигурации
     //    Сервер видит расширение .py
     //    Запускает файл через /usr/bin/python3 hello.py
-    if (!cgi_extension.empty() && cgi_path.empty())//ete extension ka bayc cgi_path chka errora
-        throw std::runtime_error("Location: CGI path required when extension is set");
-    if (cgi_extension.empty() && !cgi_path.empty())//errora nayev hakarak depqy
-        throw std::runtime_error("Location: CGI extension required when path is set");
-    if (!cgi_extension.empty() && cgi_extension[0] != '.')
-        throw std::runtime_error("CGI extension must start with '.' (e.g., '.py')");
+    // if (!cgi_extension.empty() && cgi_path.empty())//ete extension ka bayc cgi_path chka errora
+    //     throw std::runtime_error("Location: CGI path required when extension is set");
+    // if (cgi_extension.empty() && !cgi_path.empty())//errora nayev hakarak depqy
+    //     throw std::runtime_error("Location: CGI extension required when path is set");
+    // if (!cgi_extension.empty() && cgi_extension[0] != '.')
+    //     throw std::runtime_error("CGI extension must start with '.' (e.g., '.py')");
     if (!upload_dir.empty() && upload_dir[0] != '/')
         throw std::runtime_error("Upload directory must be an absolute path (start with '/')");
 }
@@ -177,26 +174,47 @@ void    LocationDirective::setUpload_dir(const std::string& upload_dir)
     this->upload_dir = upload_dir;
 }
 
-void    LocationDirective::setCgi_path(const std::string& cgi_path)
+static void _validateCgi_extension_val(const std::string& cgi_path)
 {
-    // struct stat info;
-    
-    if (cgi_path.size() < 2 || cgi_path[0] != '/')
-        throw std::runtime_error("CGI path must start with '//'" + cgi_path);
-    // if (stat(upload_dir.c_str(), &info) != 0)
-    //     throw std::runtime_error("File does not exist.");
-    // if (!(info.st_mode & S_IFREG))
-    //     throw std::runtime_error("Path is not a file.");///stex partadir pti fayl lini,upload_dir-umel direktoria pti lini(partadir)???????
+    std::clog << "JUPA JUPA\n";
+    if (cgi_path.length() < 2 || cgi_path[0] != '/')
+        throw std::runtime_error("CGI path must start with /" + cgi_path);
     if (access(cgi_path.c_str(), X_OK) != 0)
         throw std::runtime_error("File is not executable.");
-    this->cgi_path = cgi_path;
 }
 
-void    LocationDirective::setCgi_extension(const std::string& extension)
+static void _validateCgi_extension_key(const std::string& extension)
 {
     if (extension.size() < 2 || extension[0] != '.')
         throw std::runtime_error("CGI extension must start with '.'" + extension);
     if (extension.find_first_of(" \t\n*?$&|;<>(){}[]'\"\\") != std::string::npos || isdigit(extension[1]))
         throw std::runtime_error("CGI extension has invalid char in it." + extension);
-    cgi_extension = extension;
+}
+
+void    LocationDirective::setCgi_extension(const std::multimap<std::string, std::vector<std::string> >& extension)
+{
+    std::clog << "JUPA JUPA JUPA\n";
+    for (std::multimap<std::string, std::vector<std::string> >::const_iterator itExt = extension.begin(); itExt != extension.end(); ++itExt) {
+        if (itExt->first.size() < 2 || itExt->second.size() != 1)
+            throw std::runtime_error("CGI extension must look like this with '.py /usr/bin/python3'");
+        std::string key = itExt->first;
+        std::string val = itExt->second[0];
+        std::clog << "val = " << val << "\nkey = " << key;
+        _validateCgi_extension_val(val);
+        _validateCgi_extension_key(key);
+        cgi_extension[key] = val;
+    }
+}
+
+void    LocationDirective::setCgi_extension(const std::vector<std::string>& extension)
+{
+    std::clog << "JUPA JUPA JUPA\n";
+    if (extension.size() != 2)
+        throw std::runtime_error("CGI extension must look like this with '.py /usr/bin/python3'");
+    std::string key = extension[0];
+    std::string val = extension[1];
+    std::clog << "val = " << val << "\nkey = " << key;
+    _validateCgi_extension_val(val);
+    _validateCgi_extension_key(key);
+    cgi_extension[key] = val;
 }

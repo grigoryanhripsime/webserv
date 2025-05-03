@@ -9,6 +9,12 @@
 
 CGI::CGI(Request * const request) : request(request) {}
 
+static const std::string _get_extension(const std::string& str)
+{
+    std::string ext = str.substr(str.find_last_of('.', str.length()));
+    return ext;
+}
+
 CGI::~CGI() {}
 // TODO: change to real parameters
 std::string CGI::CGI_handler()
@@ -22,7 +28,10 @@ std::string CGI::CGI_handler()
     }
     std::vector<LocationDirective *> locdir = server->getLocdir();
     int locIndex = server->get_locIndex();
-    this->interpreter = locdir[locIndex]->getCgi_path(); /* example: "/usr/bin/php-cgi", maybe get all vector of paths and dynamicly set it */
+    std::string ext = _get_extension(locdir[locIndex]->getIndex()[0]);
+    std::clog << "extension = " << ext << "\n";
+    this->interpreter = locdir[locIndex]->getCgi_path(ext); /* example: "/usr/bin/php-cgi", maybe get all vector of paths and dynamicly set it */
+    std::clog << "interpeter = " << interpreter << "\n\n";
     char buff[1024] = {0};
     getcwd(buff, 1024);
     this->script_path = std::string(buff) + locdir[locIndex]->getPath() + '/' + locdir[locIndex]->getIndex()[0]; /* example: "/path/to/script.php" */
