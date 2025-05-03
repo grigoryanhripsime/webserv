@@ -511,8 +511,7 @@ std::string Request::uri_is_directory(std::string filePath)
         // filePath = root + "/web/error404.html";
         error_page_num = 404;
         // filePath = getFilepath(get_servers()[get_servIndex()]->getError_page()[error_page_num]);
-
-        filePath = getFilepath("/web/error404.html");
+        throw std::runtime_error("es el a inchvor exception");
     }
     else if (getFilesInDirectory(filePath) != "NULL")//filePath == str esi el petq chi stugel,verevy ka
     {
@@ -530,42 +529,45 @@ std::string Request::uri_is_directory(std::string filePath)
         // std::string root =  (locdir[locIndex]->getRoot() != "") ? locdir[locIndex]->getRoot() : servers[servIndex]->getRoot();
         // filePath = root + "/web/error403.html";
         error_page_num = 403;
-        filePath = getFilepath("/web/error403.html");
-        return get_need_string_that_we_must_be_pass_send_system_call(filePath);
+        throw std::runtime_error("Error, I dont know of what type");
+        // filePath = getFilepath("/web/error403.html");
+        // return get_need_string_that_we_must_be_pass_send_system_call(filePath);
     }
     else
+        return autoindex(filePath);
+}
+
+std::string Request::autoindex(std::string filePath)
+{
+    std::vector<std::string> files;
+    listFiles(filePath, files);
+
+    std::string listedFiles = "";
+
+    std::vector<std::string>::iterator it = files.begin();
+    std::cout<<"🎩🎩🎩🎩\n";
+    for (; it != files.end(); it++)
     {
-        std::vector<std::string> files;
-        listFiles(filePath, files);
+        std::cout<<*it<<std::endl;
+        std::string server;
+        std::cout<<"😃😃😃\n";
+        if (servers[servIndex]->getServer_name() != "")
+            server = servers[servIndex]->getServer_name();
+        else
+            server = servers[servIndex]->getListen().first;
+        std::stringstream ss_num;
+        ss_num << server << ":" << servers[servIndex]->getListen().second;
 
-        std::string listedFiles = "";
-
-        std::vector<std::string>::iterator it = files.begin();
-        std::cout<<"🎩🎩🎩🎩\n";
-        for (; it != files.end(); it++)
-        {
-            std::cout<<*it<<std::endl;
-            std::string server;
-            std::cout<<"😃😃😃\n";
-            if (servers[servIndex]->getServer_name() != "")
-                server = servers[servIndex]->getServer_name();
-            else
-                server = servers[servIndex]->getListen().first;
-            std::stringstream ss_num;
-            ss_num << server << ":" << servers[servIndex]->getListen().second;
-
-            std::cout<<"🍄🍄🍄 "<<ss_num.str()<<" 🍄🍄🍄"<<std::endl;
-            std::string uri_to_use = "";
-            if (uri != "/") uri_to_use = uri;
-            listedFiles += "<a href=\"http://" + ss_num.str() + uri_to_use + "/" + *it + "\">" + *it + "</a><br>";
-        }
-        std::cout<<"🎩🎩🎩🎩\n";
-
-        std::cout<<listedFiles<<std::endl;
-        std::cout<<"🐞🐞🐞\n";
-        return get_need_string_that_we_must_be_pass_send_system_call(listedFiles);
+        std::cout<<"🍄🍄🍄 "<<ss_num.str()<<" 🍄🍄🍄"<<std::endl;
+        std::string uri_to_use = "";
+        if (uri != "/") uri_to_use = uri;
+        listedFiles += "<a href=\"http://" + ss_num.str() + uri_to_use + "/" + *it + "\">" + *it + "</a><br>";
     }
-    return "";
+    std::cout<<"🎩🎩🎩🎩\n";
+
+    std::cout<<listedFiles<<std::endl;
+    std::cout<<"🐞🐞🐞\n";
+    return get_need_string_that_we_must_be_pass_send_system_call(listedFiles);
 }
 
 std::string Request::constructingResponce(std::string filePath)
@@ -613,10 +615,10 @@ void Request::handleClientRequest(int client_fd) {
     Request_header_validation request_header_validation(servers);
     try 
     {
-        method = request_header_validation.if_received_request_valid(*this, buffer);
+        std::cout<<"🫧🫧🫧 meka hasel em\n";
+        request_header_validation.if_received_request_valid(*this, buffer);
         request_header_validation.fill_headers_map(headers);
         //checking if http request header is correct
-        std::cout<<"🫧🫧🫧 meka hasel em\n";
         servIndex = request_header_validation.get_servIndex();
         uri = request_header_validation.get_uri();
         ////////////////////////////////////    
@@ -626,54 +628,32 @@ void Request::handleClientRequest(int client_fd) {
         std::cout << "hehehe= " << locIndex <<std::endl;
         //checking if http request header is correct
         request_header_validation.status_handler();
+        CGI cgi(this);
+        // const char *response;
+        switch(request_header_validation.get_status()) {
+            case DYNAMIC:
+                std::cout << "Dynamic function called\r\n\r\n";
+                // response = cgi.CGI_handler().c_str();
+                // std::cout << response << "\n\n";
+                send(client_fd, cgi.CGI_handler().c_str(), strlen(cgi.CGI_handler().c_str()), 0);
+                break;
+            case STATIC:
+                std::cout << "Static function called\r\n\r\n";
+                // response = get_response(method, buffer, bytesRead).c_str();
+                std::cout << "ayo hasnum enq sendin\n\n";
+                send(client_fd,  get_response(method, buffer, bytesRead).c_str(), strlen(get_response(method, buffer, bytesRead).c_str()), 0);
+                break;
+        }
     } catch (std::exception &e) {
-        std::cout<<"🧑‍⚖️🧑‍⚖️🧑‍⚖️\n"<<error_page_num<<std::endl;
-        request_header_validation.set_status(status_type(ERROR));
+        if (uri == "/favicon.ico")
+            return;
+        std::string filename = servers[servIndex]->getError_pages().find(error_page_num)->second;
+        std::string filePath = servers[servIndex]->getRoot() + "/" + filename;
+        std::cout<<"💃🏼💃🏼💃🏼 "<<filePath<<std::endl;
+        std::string res = get_need_string_that_we_must_be_pass_send_system_call(filePath);
+        std::cout<<res<<std::endl;
+        send(client_fd, res.c_str(), res.size(), 0);
     }
-
-    CGI cgi(this);
-    // const char *response;
-    switch(request_header_validation.get_status()) {
-        case DYNAMIC:
-            std::cout << "Dynamic function called\r\n\r\n";
-            // response = cgi.CGI_handler().c_str();
-            // std::cout << response << "\n\n";
-            send(client_fd, cgi.CGI_handler().c_str(), strlen(cgi.CGI_handler().c_str()), 0);
-            std::cout << "Dynamic function ended\r\n\r\n";
-            break;
-        case STATIC:
-            std::cout << "Static function called\r\n\r\n";
-            // response = get_response(method, buffer, bytesRead).c_str();
-            std::cout << "ayo hasnum enq sendin\n\n";
-            send(client_fd,  get_response(method, buffer, bytesRead).c_str(), strlen( get_response(method, buffer, bytesRead).c_str()), 0);
-            break;
-        case ERROR:
-            std::cout<<"el miiii\n";
-            std::cout<<error_page_num<<" hehe "<< servIndex <<" \n";
-            std::map<int, std::string>::const_iterator it = servers[servIndex]->getError_pages().begin();
-            for (; it != servers[servIndex]->getError_pages().end(); ++it) {
-                std::cout<<"👼🏽👼🏽👼🏽" << it->first << " => " << it->second << std::endl;
-            }
-            std::string filename = servers[servIndex]->getError_pages().find(error_page_num)->second;
-            std::string filePath = servers[servIndex]->getRoot() + filename;
-            std::cout<<"💃🏼💃🏼💃🏼 "<<filePath<<std::endl;
-            // std::string res = constructingResponce(servers[servIndex]->getRoot + servers[servIndex]->getError_page().get(405));
-            // send(client_fd,  , 0);
-            break;
-    }
-    // if (method == "GET")
-    // {
-    // std::cout << "hehehe= " << locIndex <<std::endl;
-
-    //     std::cout<<"SERVINDEX: "<<servIndex<<std::endl;
-    //     std::string filePath = getFilepath(uri);
-    //    std::string res = constructingResponce(filePath);
-    //     std::cout<<"-----------------------------------\n";
-    //     std::cout<<res;
-    //     std::cout<<"-----------------------------------\n";
-    //     // const char *response = res.c_str();
-    //     send(client_fd,  res.c_str(), strlen( res.c_str()), 0);
-    // }
     if (if_http_is_valid(buffer) < 0)
     {
         error_page_num = 505;
