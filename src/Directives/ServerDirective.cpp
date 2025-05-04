@@ -41,7 +41,8 @@ ServerDirective::~ServerDirective()
 {
     std::cout << "ServerDirective dtor is called\n";
     for (std::vector<LocationDirective*>::iterator it = locdir.begin(); it != locdir.end(); ++it)
-        delete *it;
+        if (*it)
+            delete *it;
 }
 
 /////////////setters//////////////

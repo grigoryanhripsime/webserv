@@ -43,6 +43,7 @@ private:
 public:
     Request(std::vector<ServerDirective *> servers);
     ~Request(){};
+    
     void    fill_status_message();
     std::string handle_multipart_upload(const std::string &upload_dir);
     std::string handle_simple_post(const std::string &upload_dir);
@@ -64,6 +65,7 @@ public:
     void handleClientRequest(int client_fd);
     int if_http_is_valid(char *c_buffer);
     std::string getFilepath(std::string uri);
+
     std::string urlDecode(const std::string &str);
     void parseUrlEncodedForm(const std::string &body);
     std::string get_method() const{return method;}
@@ -87,7 +89,7 @@ public:
     std::string autoindex(std::string filePath);
 
     std::string handleDelete(std::string filePath);
-
+    bool    deleteDirectory(const std::string& dirPath);
 };
 
 
