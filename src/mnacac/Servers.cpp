@@ -96,6 +96,7 @@ void Servers::runLoop()
                 if (!isServer)
                 {
                     try{
+                        std::clog << "Reached to this point\n\n";
                         Request request(config->get_servers());
                         std::cout << "kanchvav" << std::endl;
                         request.handleClientRequest(sockfd);

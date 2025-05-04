@@ -38,11 +38,6 @@ std::string    Request_header_validation::if_received_request_valid(Request &req
     {
         req.set_error_page_num(405);
         throw std::runtime_error("senc method chunenq mer allow_methods-um-> 405 Method Not Allowed.\n");//return 77;
-        // std::string filePath = servers[servIndex]->getRoot() + "/web/error405.html";
-        // std::string res = get_need_string_that_we_must_be_pass_send_system_call(filePath);
-        // const char *response = res.c_str();
-        // send(client_fd, response, strlen(response), 0);
-        // //en fileparhy= i erku toxyba + send-@
     }
     return method;
 }
@@ -104,7 +99,7 @@ std::string    Request_header_validation::validation_of_the_first_line(Request &
     servers[servIndex]->setLocIndex(locIndex);//set locIndex
     if (locIndex < 0)
     {
-        req.set_error_page_num(405);//zdes kakoe cifr dat?
+        req.set_error_page_num(404);//zdes kakoe cifr dat?
          
         std::cout << "yavni bacaskaanaaaaaa\n";
 

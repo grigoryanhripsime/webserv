@@ -1,7 +1,41 @@
 #include "Request.hpp"
 
-Request::Request(std::vector<ServerDirective *> servers)
+void    Request::fill_status_message()
 {
+    // status_message.insert(std::pair<int, std::string>(200, "OK"));
+    status_message[200] = "OK";//GET
+    status_message[201] = "CREATED";//POST
+    status_message[204] = "No Content";//DELETE
+    status_message[206] = "Partial Content";//Partial content delivered (e.g., for Range requests).
+    
+    status_message[301] = "Moved Permanently";//Resource permanently moved (e.g., redirect to a new URL).
+    status_message[302] = "Found";//Resource temporarily moved (common for redirects)
+    status_message[303] = "See Other";//Redirect to another URL (e.g., after POST).
+    status_message[304] = "Not Modified";//Resource unchanged (e.g., for caching with If-Modified-Since).
+    status_message[307] = "Temporary Redirect";//Temporary redirect, same method as original request
+    status_message[308] = "Permanent Redirect";//Permanent redirect, same method as original request
+
+    status_message[400] = "BAD REQUEST";//Invalid request syntax or parameters.
+    status_message[401] = "UNAUTHORIZED";//Authentication required (e.g., missing or invalid credentials).
+    status_message[403] = "FORBIDDEN";//Client lacks permission to access the resource
+    status_message[404] = "NOT FOUND";//
+    status_message[405] = "METHOD NOT ALLOWED";//
+    status_message[408] = "REQUEST TIMEOUT";//Client took too long to send the request.petqa vor?
+    status_message[413] = "PAYLOAD TOO LARGE";//
+    status_message[415] = "UNSUPPORTED MEDIA TYPE";//POST
+
+    // Critical 5xx Server Error
+    status_message[500] = "INTERNAL SERVER ERROR";//Generic server error (e.g., unexpected crash or CGI failure)
+    status_message[501] = "NOT IMPLEMENTED";//Server does not support the requested method.,petqa vor?
+    status_message[502] = "BAD GATEWAY";//Invalid response from an upstream server (e.g., CGI or proxy).
+    status_message[503] = "SERVICE UNAVAILABLE";//Server temporarily unavailable (e.g., overloaded or maintenance)..petqa vor?  
+    status_message[504] = "GATEWAY TIMEOUT";//Upstream server timed out (e.g., slow CGI script).petqa vor?  
+    status_message[505] = "HTTP VERSION NOT SUPPORTED";
+}
+
+Request::Request(std::vector<ServerDirective *> servers){
+    std::clog << "Reached to this point\n\n";
+
     this->servers = servers;
     // client_fd = -1;
     servIndex = -1;
@@ -10,6 +44,9 @@ Request::Request(std::vector<ServerDirective *> servers)
     uri = "";//GET-i hamar
     file_type = "text/plain";//default
     query = "";
+    error_page_num = 0;
+    std::clog << "Reached to this point\n\n";
+    fill_status_message();
 }
 
 /////////////POST
@@ -120,14 +157,19 @@ std::string Request::post_method_tasovka(char *buffer, int bytesRead) {
     }
 
     // Build HTTP response
+    std::cout << "hargeli errpr page->" << error_page_num<<std::endl;
+    std::stringstream ss2;
+    ss2 << error_page_num;
     std::stringstream ss;
-    ss << "HTTP/1.1 200 OK\r\n"//200 texy dnenq error_oage_NUm(yani vorpes status code?te  henc 200e toxem?)
+    ss << "HTTP/1.1 " + ss2.str() + " " + status_message[error_page_num] + "\r\n"//200 texy dnenq error_oage_NUm(yani vorpes status code?te  henc 200e toxem?)
        << "Content-Length: " << response_body.size() << "\r\n"
        << "Content-Type: " << get_content_type() + "\r\n"
     //    << "Content-Type: text/plain\r\n"
        << "\r\n"
        << response_body;
 
+
+    std::cout << "TPENQ->" << "HTTP/1.1" + ss2.str() + " " + status_message[error_page_num] + "\r\n";
     return ss.str();
 }
 
@@ -141,7 +183,7 @@ void Request::parse_post_request(char *buffer, int bytesRead)
     size_t body_start = buf_str.find("\r\n\r\n");
 
     // Сбрасываем код ошибки
-    error_page_num = 0;
+    // error_page_num = 0;
 
     if (body_start != std::string::npos) {
         // Извлекаем тело запроса (включая все \r\n)
@@ -334,9 +376,9 @@ void Request::create_directories(const std::string &path)
 }//esi ashxatuma bayc mihat haskanal vonca ashxatum:)))))
 
 
-//////////////GET
 bool Request::pathExists(const std::string& path)
 {
+    std::cout << "chanaparh->" <<path <<std::endl;
     return (access(path.c_str(), F_OK) != -1);
 }
 
@@ -417,8 +459,10 @@ std::string Request::get_need_string_that_we_must_be_pass_send_system_call(std::
 
 
     // После обработки можешь отправить ответ:
-
-    std::string header = "HTTP/1.1 200 OK\r\nContent-Length: ";
+    std::stringstream ss2;
+    ss2 << error_page_num;//error_page_num type is int
+    std::cout << "EMOJI" << status_message[error_page_num] << std::endl;
+    std::string header = "HTTP/1.1 " + ss2.str() + " " + status_message[error_page_num] + "\r\nContent-Length: ";
 
     std::string whiteSpaces = "\r\n\r\n";
 
@@ -593,6 +637,7 @@ std::string Request::constructingResponce(std::string filePath)
         return uri_is_directory(filePath);
     return "";
 }
+
 void Request::handleClientRequest(int client_fd) {
     std::cout << "SIZEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEee=" << SIZE<<std::endl;
     char buffer[SIZE] = {0};
@@ -624,6 +669,11 @@ void Request::handleClientRequest(int client_fd) {
         //checking if http request header is correct
         servIndex = request_header_validation.get_servIndex();
         uri = request_header_validation.get_uri();
+        // if (if_http_is_valid(buffer) < 0)
+        // {
+        //     error_page_num = 505;
+        //     throw std::runtime_error("505 HTTP Version Not Supported.");
+        // }
         ////////////////////////////////////    
         // std::string filePath = servers[0]->getRoot() + servers[0]->getLocdir()[0]->getPath() + "/" + servers[0]->getLocdir()[0]->getIndex()[1];
         std::cout << "methoooooooood = " << method <<std::endl;
@@ -636,15 +686,13 @@ void Request::handleClientRequest(int client_fd) {
         switch(request_header_validation.get_status()) {
             case DYNAMIC:
                 std::cout << "Dynamic function called\r\n\r\n";
-                // response = cgi.CGI_handler().c_str();
-                // std::cout << response << "\n\n";
                 send(client_fd, cgi.CGI_handler().c_str(), strlen(cgi.CGI_handler().c_str()), 0);
                 break;
             case STATIC:
                 std::cout << "Static function called\r\n\r\n";
-                // response = get_response(method, buffer, bytesRead).c_str();
                 std::cout << "ayo hasnum enq sendin\n\n";
-                send(client_fd,  get_response(method, buffer, bytesRead).c_str(), strlen(get_response(method, buffer, bytesRead).c_str()), 0);
+                std::string esiminch = get_response(method, buffer, bytesRead);
+                send(client_fd, esiminch.c_str(), strlen(esiminch.c_str()), 0);
                 break;
         }
     } catch (std::exception &e) {
@@ -654,40 +702,114 @@ void Request::handleClientRequest(int client_fd) {
         std::string filePath = servers[servIndex]->getRoot() + "/" + filename;
         std::cout<<"💃🏼💃🏼💃🏼 "<<filePath<<std::endl;
         std::string res = get_need_string_that_we_must_be_pass_send_system_call(filePath);
-        std::cout<<res<<std::endl;
+        // std::cout<<res<<std::endl;
         send(client_fd, res.c_str(), res.size(), 0);
     }
-    if (if_http_is_valid(buffer) < 0)
+    // if (if_http_is_valid(buffer) < 0)
+    // {
+    //     error_page_num = 505;
+    //     std::cout << "505 HTTP Version Not Supported.\n";
+    // }
+}
+
+std::string Request::handleDelete(std::string filePath)
+{
+    std::cout << uri <<"PTI MTNIIIIIIIIIIII\n";
+    // Clean filePath (remove trailing '?' like in constructingResponce)
+    if (!filePath.empty() && filePath[filePath.size() - 1] == '?')
+        filePath = filePath.substr(0, filePath.size() - 1);
+
+    // Check if the method is allowed (based on location directive)
+    std::vector<LocationDirective*> locdir = servers[servIndex]->getLocdir();
+    int locIndex = servers[servIndex]->get_locIndex();
+    std::vector<std::string> allowedMethods = locdir[locIndex]->getAllow_methods();
+    bool methodAllowed = false;
+    for (size_t i = 0; i < allowedMethods.size(); ++i)
     {
-        error_page_num = 505;
-        std::cout << "505 HTTP Version Not Supported.\n";
+        if (allowedMethods[i] == "DELETE")
+        {
+            methodAllowed = true;
+            break;
+        }
     }
+    if (!methodAllowed)
+    {
+        error_page_num = 405;
+        throw std::runtime_error("DELETE method not allowed for this location");
+    }
+    
+    // Check if path exists
+    if (!pathExists(filePath))
+    {
+        std::cout<<"eheeeeeeeeeee\n";
+        error_page_num = 404;
+        throw std::runtime_error("File does not exist");
+    }
+    std::cout << "MEEEEEEEEEEEEEEEEEERRRRRRRRRRRRRRRRRRRRRRAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCc\n";
+
+    // Check if it's a file (not a directory)
+    if (!isFile(filePath))
+    {
+        error_page_num = 403;
+        throw std::runtime_error("Cannot delete directories");
+    }
+
+    // Attempt to delete the file
+    if (unlink(filePath.c_str()) != 0)
+    {
+        // Check errno for specific errors
+        if (errno == EACCES || errno == EPERM)
+        {
+            error_page_num = 403;
+            throw std::runtime_error("Permission denied for deletion");
+        }
+        else
+        {
+            error_page_num = 500;
+            throw std::runtime_error("Failed to delete file");
+        }
+    }
+    std::cout << "XXXXXXXXXXXXXXXIIIIIIIIIIIIIIIIIIIII CCCCCCCCCCHHHHHHHHHHHHIIIIIIIIIIIIIII   hasnum stex\n\n";
+    // Successful deletion: return 204 No Content with empty body
+    std::string response = "HTTP/1.1 " + std::string("204 ") + status_message[error_page_num] + "\r\n";
+    response += "Content-Length: 0\r\n";
+    response += "\r\n";
+    
+    return response;
 }
 
 std::string Request::get_response(std::string &method, char *buffer, int bytesRead)
 {
     // function for static methods
     std::cout<<"reached here\n";
+    std::cout <<"🦈🦈🦈 "<< buffer<<std::endl;
     std::string res;
     if (method == "GET")
     {
-        std::cout << "🤠hehehe= " << locIndex <<std::endl;
-
-        std::cout<<"SERVINDEX: "<<servIndex<<std::endl;
+        error_page_num = 200;
         std::string filePath = getFilepath(uri);
         res = constructingResponce(filePath);
         std::cout<<"-----------------------------------\n";
-        std::cout<<res;
+        // std::cout<<res;
         std::cout<<"-----------------------------------\n";
     }
     else if(method == "POST")
     {
+        error_page_num = 201;
         std::cout << "uri = " << uri << std::endl;
         std::cout << "whic =" << servers[servIndex]->get_locIndex()<<std::endl;
         res = post_method_tasovka(buffer, bytesRead);
     }
-    // else if (method == "DELETE")
-    //
+    else if (method == "DELETE")
+    {
+        error_page_num = 204; // Default to success
+        std::string filePath = getFilepath(uri);
+        std::cout<<"2 angam\n";
+        res = handleDelete(filePath);
+        std::cout << "-----------------------------------\n";
+        std::cout << res;
+        std::cout << "-----------------------------------\n";
+    }
     return res;
 }
 
