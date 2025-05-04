@@ -376,9 +376,9 @@ void Request::create_directories(const std::string &path)
 }//esi ashxatuma bayc mihat haskanal vonca ashxatum:)))))
 
 
-//////////////GET
 bool Request::pathExists(const std::string& path)
 {
+    std::cout << "chanaparh->" <<path <<std::endl;
     return (access(path.c_str(), F_OK) != -1);
 }
 
@@ -634,6 +634,7 @@ std::string Request::constructingResponce(std::string filePath)
         return uri_is_directory(filePath);
     return "";
 }
+
 void Request::handleClientRequest(int client_fd) {
     std::cout << "SIZEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEee=" << SIZE<<std::endl;
     char buffer[SIZE] = {0};
@@ -687,9 +688,8 @@ void Request::handleClientRequest(int client_fd) {
             case STATIC:
                 std::cout << "Static function called\r\n\r\n";
                 std::cout << "ayo hasnum enq sendin\n\n";
-        std::cout<< get_response(method, buffer, bytesRead)<<std::endl;
-
-                send(client_fd,  get_response(method, buffer, bytesRead).c_str(), strlen(get_response(method, buffer, bytesRead).c_str()), 0);
+                std::string esiminch = get_response(method, buffer, bytesRead);
+                send(client_fd, esiminch.c_str(), strlen(esiminch.c_str()), 0);
                 break;
         }
     } catch (std::exception &e) {
@@ -699,7 +699,7 @@ void Request::handleClientRequest(int client_fd) {
         std::string filePath = servers[servIndex]->getRoot() + "/" + filename;
         std::cout<<"💃🏼💃🏼💃🏼 "<<filePath<<std::endl;
         std::string res = get_need_string_that_we_must_be_pass_send_system_call(filePath);
-        std::cout<<res<<std::endl;
+        // std::cout<<res<<std::endl;
         send(client_fd, res.c_str(), res.size(), 0);
     }
     // if (if_http_is_valid(buffer) < 0)
@@ -709,10 +709,77 @@ void Request::handleClientRequest(int client_fd) {
     // }
 }
 
+std::string Request::handleDelete(std::string filePath)
+{
+    std::cout << uri <<"PTI MTNIIIIIIIIIIII\n";
+    // Clean filePath (remove trailing '?' like in constructingResponce)
+    if (!filePath.empty() && filePath[filePath.size() - 1] == '?')
+        filePath = filePath.substr(0, filePath.size() - 1);
+
+    // Check if the method is allowed (based on location directive)
+    std::vector<LocationDirective*> locdir = servers[servIndex]->getLocdir();
+    int locIndex = servers[servIndex]->get_locIndex();
+    std::vector<std::string> allowedMethods = locdir[locIndex]->getAllow_methods();
+    bool methodAllowed = false;
+    for (size_t i = 0; i < allowedMethods.size(); ++i)
+    {
+        if (allowedMethods[i] == "DELETE")
+        {
+            methodAllowed = true;
+            break;
+        }
+    }
+    if (!methodAllowed)
+    {
+        error_page_num = 405;
+        throw std::runtime_error("DELETE method not allowed for this location");
+    }
+    
+    // Check if path exists
+    if (!pathExists(filePath))
+    {
+        std::cout<<"eheeeeeeeeeee\n";
+        error_page_num = 404;
+        throw std::runtime_error("File does not exist");
+    }
+    std::cout << "MEEEEEEEEEEEEEEEEEERRRRRRRRRRRRRRRRRRRRRRAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCc\n";
+
+    // Check if it's a file (not a directory)
+    if (!isFile(filePath))
+    {
+        error_page_num = 403;
+        throw std::runtime_error("Cannot delete directories");
+    }
+
+    // Attempt to delete the file
+    if (unlink(filePath.c_str()) != 0)
+    {
+        // Check errno for specific errors
+        if (errno == EACCES || errno == EPERM)
+        {
+            error_page_num = 403;
+            throw std::runtime_error("Permission denied for deletion");
+        }
+        else
+        {
+            error_page_num = 500;
+            throw std::runtime_error("Failed to delete file");
+        }
+    }
+    std::cout << "XXXXXXXXXXXXXXXIIIIIIIIIIIIIIIIIIIII CCCCCCCCCCHHHHHHHHHHHHIIIIIIIIIIIIIII   hasnum stex\n\n";
+    // Successful deletion: return 204 No Content with empty body
+    std::string response = "HTTP/1.1 " + std::string("204 ") + status_message[error_page_num] + "\r\n";
+    response += "Content-Length: 0\r\n";
+    response += "\r\n";
+    
+    return response;
+}
+
 std::string Request::get_response(std::string &method, char *buffer, int bytesRead)
 {
     // function for static methods
     std::cout<<"reached here\n";
+    std::cout <<"🦈🦈🦈 "<< buffer<<std::endl;
     std::string res;
     if (method == "GET")
     {
@@ -720,7 +787,7 @@ std::string Request::get_response(std::string &method, char *buffer, int bytesRe
         std::string filePath = getFilepath(uri);
         res = constructingResponce(filePath);
         std::cout<<"-----------------------------------\n";
-        std::cout<<res;
+        // std::cout<<res;
         std::cout<<"-----------------------------------\n";
     }
     else if(method == "POST")
@@ -730,8 +797,16 @@ std::string Request::get_response(std::string &method, char *buffer, int bytesRe
         std::cout << "whic =" << servers[servIndex]->get_locIndex()<<std::endl;
         res = post_method_tasovka(buffer, bytesRead);
     }
-    // else if (method == "DELETE")
-    //
+    else if (method == "DELETE")
+    {
+        error_page_num = 204; // Default to success
+        std::string filePath = getFilepath(uri);
+        std::cout<<"2 angam\n";
+        res = handleDelete(filePath);
+        std::cout << "-----------------------------------\n";
+        std::cout << res;
+        std::cout << "-----------------------------------\n";
+    }
     return res;
 }
 

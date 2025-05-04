@@ -84,6 +84,7 @@ public:
 
     std::string autoindex(std::string filePath);
 
+    std::string handleDelete(std::string filePath);
 
 };
 
