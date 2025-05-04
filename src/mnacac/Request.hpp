@@ -20,6 +20,7 @@ typedef std::map<std::string, std::string>  headers_map;
 class Request
 {
 private:
+    std::map<int, std::string> status_message;
     std::vector<ServerDirective *> servers;
     int servIndex;
     int locIndex;
@@ -41,6 +42,7 @@ private:
 public:
     Request(std::vector<ServerDirective *> servers);
     ~Request(){};
+    void    fill_status_message();
     std::string handle_multipart_upload(const std::string &upload_dir);
     std::string handle_simple_post(const std::string &upload_dir);
     void create_directories(const std::string &path);

@@ -1,7 +1,41 @@
 #include "Request.hpp"
 
-Request::Request(std::vector<ServerDirective *> servers)
+void    Request::fill_status_message()
 {
+    // status_message.insert(std::pair<int, std::string>(200, "OK"));
+    status_message[200] = "OK";//GET
+    status_message[201] = "CREATED";//POST
+    status_message[204] = "No Content";//DELETE
+    status_message[206] = "Partial Content";//Partial content delivered (e.g., for Range requests).
+    
+    status_message[301] = "Moved Permanently";//Resource permanently moved (e.g., redirect to a new URL).
+    status_message[302] = "Found";//Resource temporarily moved (common for redirects)
+    status_message[303] = "See Other";//Redirect to another URL (e.g., after POST).
+    status_message[304] = "Not Modified";//Resource unchanged (e.g., for caching with If-Modified-Since).
+    status_message[307] = "Temporary Redirect";//Temporary redirect, same method as original request
+    status_message[308] = "Permanent Redirect";//Permanent redirect, same method as original request
+
+    status_message[400] = "BAD REQUEST";//Invalid request syntax or parameters.
+    status_message[401] = "UNAUTHORIZED";//Authentication required (e.g., missing or invalid credentials).
+    status_message[403] = "FORBIDDEN";//Client lacks permission to access the resource
+    status_message[404] = "NOT FOUND";//
+    status_message[405] = "METHOD NOT ALLOWED";//
+    status_message[408] = "REQUEST TIMEOUT";//Client took too long to send the request.petqa vor?
+    status_message[413] = "PAYLOAD TOO LARGE";//
+    status_message[415] = "UNSUPPORTED MEDIA TYPE";//POST
+
+    // Critical 5xx Server Error
+    status_message[500] = "INTERNAL SERVER ERROR";//Generic server error (e.g., unexpected crash or CGI failure)
+    status_message[501] = "NOT IMPLEMENTED";//Server does not support the requested method.,petqa vor?
+    status_message[502] = "BAD GATEWAY";//Invalid response from an upstream server (e.g., CGI or proxy).
+    status_message[503] = "SERVICE UNAVAILABLE";//Server temporarily unavailable (e.g., overloaded or maintenance)..petqa vor?  
+    status_message[504] = "GATEWAY TIMEOUT";//Upstream server timed out (e.g., slow CGI script).petqa vor?  
+    status_message[505] = "HTTP VERSION NOT SUPPORTED";
+}
+
+Request::Request(std::vector<ServerDirective *> servers){
+    std::clog << "Reached to this point\n\n";
+
     this->servers = servers;
     // client_fd = -1;
     servIndex = -1;
@@ -10,6 +44,9 @@ Request::Request(std::vector<ServerDirective *> servers)
     uri = "";//GET-i hamar
     file_type = "text/plain";//default
     query = "";
+    error_page_num = 0;
+    std::clog << "Reached to this point\n\n";
+    fill_status_message();
 }
 
 /////////////POST
@@ -120,14 +157,19 @@ std::string Request::post_method_tasovka(char *buffer, int bytesRead) {
     }
 
     // Build HTTP response
+    std::cout << "hargeli errpr page->" << error_page_num<<std::endl;
+    std::stringstream ss2;
+    ss2 << error_page_num;
     std::stringstream ss;
-    ss << "HTTP/1.1 200 OK\r\n"//200 texy dnenq error_oage_NUm(yani vorpes status code?te  henc 200e toxem?)
+    ss << "HTTP/1.1 " + ss2.str() + " " + status_message[error_page_num] + "\r\n"//200 texy dnenq error_oage_NUm(yani vorpes status code?te  henc 200e toxem?)
        << "Content-Length: " << response_body.size() << "\r\n"
        << "Content-Type: " << get_content_type() + "\r\n"
     //    << "Content-Type: text/plain\r\n"
        << "\r\n"
        << response_body;
 
+
+    std::cout << "TPENQ->" << "HTTP/1.1" + ss2.str() + " " + status_message[error_page_num] + "\r\n";
     return ss.str();
 }
 
@@ -141,7 +183,7 @@ void Request::parse_post_request(char *buffer, int bytesRead)
     size_t body_start = buf_str.find("\r\n\r\n");
 
     // Сбрасываем код ошибки
-    error_page_num = 0;
+    // error_page_num = 0;
 
     if (body_start != std::string::npos) {
         // Извлекаем тело запроса (включая все \r\n)
@@ -415,8 +457,10 @@ std::string Request::get_need_string_that_we_must_be_pass_send_system_call(std::
 
 
     // После обработки можешь отправить ответ:
-
-    std::string header = "HTTP/1.1 200 OK\r\nContent-Length: ";
+    std::stringstream ss2;
+    ss2 << error_page_num;//error_page_num type is int
+    std::cout << "EMOJI" << status_message[error_page_num] << std::endl;
+    std::string header = "HTTP/1.1 " + ss2.str() + " " + status_message[error_page_num] + "\r\nContent-Length: ";
 
     std::string whiteSpaces = "\r\n\r\n";
 
@@ -621,6 +665,11 @@ void Request::handleClientRequest(int client_fd) {
         //checking if http request header is correct
         servIndex = request_header_validation.get_servIndex();
         uri = request_header_validation.get_uri();
+        // if (if_http_is_valid(buffer) < 0)
+        // {
+        //     error_page_num = 505;
+        //     throw std::runtime_error("505 HTTP Version Not Supported.");
+        // }
         ////////////////////////////////////    
         // std::string filePath = servers[0]->getRoot() + servers[0]->getLocdir()[0]->getPath() + "/" + servers[0]->getLocdir()[0]->getIndex()[1];
         std::cout << "methoooooooood = " << method <<std::endl;
@@ -633,14 +682,13 @@ void Request::handleClientRequest(int client_fd) {
         switch(request_header_validation.get_status()) {
             case DYNAMIC:
                 std::cout << "Dynamic function called\r\n\r\n";
-                // response = cgi.CGI_handler().c_str();
-                // std::cout << response << "\n\n";
                 send(client_fd, cgi.CGI_handler().c_str(), strlen(cgi.CGI_handler().c_str()), 0);
                 break;
             case STATIC:
                 std::cout << "Static function called\r\n\r\n";
-                // response = get_response(method, buffer, bytesRead).c_str();
                 std::cout << "ayo hasnum enq sendin\n\n";
+        std::cout<< get_response(method, buffer, bytesRead)<<std::endl;
+
                 send(client_fd,  get_response(method, buffer, bytesRead).c_str(), strlen(get_response(method, buffer, bytesRead).c_str()), 0);
                 break;
         }
@@ -654,11 +702,11 @@ void Request::handleClientRequest(int client_fd) {
         std::cout<<res<<std::endl;
         send(client_fd, res.c_str(), res.size(), 0);
     }
-    if (if_http_is_valid(buffer) < 0)
-    {
-        error_page_num = 505;
-        std::cout << "505 HTTP Version Not Supported.\n";
-    }
+    // if (if_http_is_valid(buffer) < 0)
+    // {
+    //     error_page_num = 505;
+    //     std::cout << "505 HTTP Version Not Supported.\n";
+    // }
 }
 
 std::string Request::get_response(std::string &method, char *buffer, int bytesRead)
@@ -668,6 +716,7 @@ std::string Request::get_response(std::string &method, char *buffer, int bytesRe
     std::string res;
     if (method == "GET")
     {
+        error_page_num = 200;
         std::string filePath = getFilepath(uri);
         res = constructingResponce(filePath);
         std::cout<<"-----------------------------------\n";
@@ -676,6 +725,7 @@ std::string Request::get_response(std::string &method, char *buffer, int bytesRe
     }
     else if(method == "POST")
     {
+        error_page_num = 201;
         std::cout << "uri = " << uri << std::endl;
         std::cout << "whic =" << servers[servIndex]->get_locIndex()<<std::endl;
         res = post_method_tasovka(buffer, bytesRead);
