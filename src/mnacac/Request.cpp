@@ -668,9 +668,6 @@ std::string Request::get_response(std::string &method, char *buffer, int bytesRe
     std::string res;
     if (method == "GET")
     {
-        std::cout << "🤠hehehe= " << locIndex <<std::endl;
-
-        std::cout<<"SERVINDEX: "<<servIndex<<std::endl;
         std::string filePath = getFilepath(uri);
         res = constructingResponce(filePath);
         std::cout<<"-----------------------------------\n";

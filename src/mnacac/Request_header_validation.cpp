@@ -104,7 +104,7 @@ std::string    Request_header_validation::validation_of_the_first_line(Request &
     servers[servIndex]->setLocIndex(locIndex);//set locIndex
     if (locIndex < 0)
     {
-        req.set_error_page_num(405);//zdes kakoe cifr dat?
+        req.set_error_page_num(404);//zdes kakoe cifr dat?
          
         std::cout << "yavni bacaskaanaaaaaa\n";
 
