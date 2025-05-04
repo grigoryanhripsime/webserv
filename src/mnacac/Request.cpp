@@ -661,6 +661,7 @@ void Request::handleClientRequest(int client_fd) {
     std::cout << std::string(buffer, bytesRead) << std::endl;
 
     Request_header_validation request_header_validation(servers);
+    std::string response;
     try 
     {
         std::cout<<"🫧🫧🫧 meka hasel em\n";
@@ -682,17 +683,17 @@ void Request::handleClientRequest(int client_fd) {
         //checking if http request header is correct
         request_header_validation.status_handler();
         CGI cgi(this);
-        // const char *response;
         switch(request_header_validation.get_status()) {
             case DYNAMIC:
                 std::cout << "Dynamic function called\r\n\r\n";
-                send(client_fd, cgi.CGI_handler().c_str(), strlen(cgi.CGI_handler().c_str()), 0);
+                response = cgi.CGI_handler();
+                send(client_fd, response.c_str(), strlen(response.c_str()), 0);
                 break;
             case STATIC:
                 std::cout << "Static function called\r\n\r\n";
                 std::cout << "ayo hasnum enq sendin\n\n";
-                std::string esiminch = get_response(method, buffer, bytesRead);
-                send(client_fd, esiminch.c_str(), strlen(esiminch.c_str()), 0);
+                response = get_response(method, buffer, bytesRead);
+                send(client_fd, response.c_str(), strlen(response.c_str()), 0);
                 break;
         }
     } catch (std::exception &e) {
@@ -701,9 +702,9 @@ void Request::handleClientRequest(int client_fd) {
         std::string filename = servers[servIndex]->getError_pages().find(error_page_num)->second;
         std::string filePath = servers[servIndex]->getRoot() + "/" + filename;
         std::cout<<"💃🏼💃🏼💃🏼 "<<filePath<<std::endl;
-        std::string res = get_need_string_that_we_must_be_pass_send_system_call(filePath);
+        response = get_need_string_that_we_must_be_pass_send_system_call(filePath);
         // std::cout<<res<<std::endl;
-        send(client_fd, res.c_str(), res.size(), 0);
+        send(client_fd, response.c_str(), response.size(), 0);
     }
     // if (if_http_is_valid(buffer) < 0)
     // {
