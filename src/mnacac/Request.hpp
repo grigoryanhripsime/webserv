@@ -80,6 +80,8 @@ public:
     std::vector<ServerDirective *> get_servers() const {return servers;}
     std::string get_uri() const{return uri;}
 
+    std::string get_cwd();
+
     void    set_query(std::string query){this->query = query;}
     void    set_error_page_num(int error_num){this->error_page_num = error_num;}
     void    set_servIndex(int servIndex) {this->servIndex = servIndex;}

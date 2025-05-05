@@ -913,3 +913,16 @@ std::string Request::getFilepath(std::string uri)
     std::string filePath = root + uri;
     return filePath;
 }
+
+#define CWD_BUFF_SIZE 1024
+
+std::string Request::get_cwd()
+{
+    char buff[CWD_BUFF_SIZE] = {0};
+    
+    if (getcwd(buff, CWD_BUFF_SIZE)) {
+        perror("getcwd");
+    }
+
+    return std::string(buff);
+}

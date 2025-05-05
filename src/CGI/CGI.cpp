@@ -7,7 +7,7 @@
 #include <fcntl.h>
 #include <cstring>
 
-CGI::CGI(Request * const request) : request(request) {}
+CGI::CGI(Request * const request) : request(request) {root = request->get_cwd();}
 
 std::string CGI::_get_index(const std::vector<std::string> &index, const std::string& path)
 {
@@ -27,34 +27,29 @@ static const std::string _get_extension(const std::string& str)
 }
 
 CGI::~CGI() {}
-// TODO: change to real parameters
+
 std::string CGI::CGI_handler()
 {
-    // this->request = request;         /* In place of this need class/struct/strings for method, content length and type, query string, body and headers */
     int serv_index = request->get_servIndex();
     std::vector<ServerDirective *> servers = request->get_servers();
     ServerDirective * server = servers[serv_index];
     if (server == NULL) {
         return "";
     }
-    this->path_info = request->get_uri();     /* example: "" */
+    this->path_info = request->get_uri();
     std::vector<LocationDirective *> locdir = server->getLocdir();
     int locIndex = server->get_locIndex();
     std::string index = _get_index(locdir[locIndex]->getIndex(), locdir[locIndex]->getPath());
     std::string ext = _get_extension(index);
-    std::clog << "extension = " << ext << "\n";
-    this->interpreter = locdir[locIndex]->getCgi_path(ext); /* example: "/usr/bin/php-cgi", maybe get all vector of paths and dynamicly set it */
-    std::clog << "interpeter = " << interpreter << "\n\n";
-    char buff[1024] = {0};
-    getcwd(buff, 1024);
-    this->script_path = std::string(buff) + locdir[locIndex]->getPath() + '/' + index; /* example: "/path/to/script.php" */
-    this->script_name = locdir[locIndex]->getPath() + '/' + index; /* example: "/cgi-bin/script.php" */
+    this->interpreter = locdir[locIndex]->getCgi_path(ext);
+    this->script_path = root + locdir[locIndex]->getPath() + '/' + index;
+    this->script_name = locdir[locIndex]->getPath() + '/' + index;
     std::ostringstream oss;
     oss << server->getListen().second;
-    this->server_name = server->getServer_name(); /* example: "example.com" */
-    this->server_port = oss.str(); /* example: "80" */
-    this->remote_addr = server->getListen().first; /* example: "127.0.0.1" */
-    this->output.clear();            /* this string may go to some getter for error/exception message */
+    this->server_name = server->getServer_name();
+    this->server_port = oss.str();
+    this->remote_addr = server->getListen().first;
+    this->output.clear();
     
     CGI_parse();
 
@@ -69,28 +64,25 @@ std::string CGI::CGI_handler()
 
 void CGI::CGI_parse() {
     env.clear();
-    #if 1 // TODO: get real info
     env.push_back("REDIRECT_STATUS=200");
 	env.push_back("GATEWAY_INTERFACE=CGI/1.1");
     env.push_back("REQUEST_METHOD=" + request->get_method());
     env.push_back("SCRIPT_NAME=" + script_name);
-    char buff[1024] = {0};
-    getcwd(buff, 1024);
-    env.push_back("SCRIPT_FILENAME=" + std::string(buff) + script_name); // Why?
+    env.push_back("SCRIPT_FILENAME=" + root + script_name);
 	std::ostringstream oss;
     std::string content_type = request->get_content_type();
     oss << (content_type == "POST" ? request->get_content_length() : 0);
     env.push_back("CONTENT_LENGTH=" + oss.str());
     env.push_back("CONTENT_TYPE=" + content_type);
-    env.push_back("PATH_INFO=" + path_info); // URI
-    env.push_back("QUERY_STRING=" + request->get_query()); // URI+QUERY
-    env.push_back("REQUEST_URI=" + request->get_uri() + request->get_query()); // URI+QUERY
+    env.push_back("PATH_INFO=" + path_info);
+    env.push_back("QUERY_STRING=" + request->get_query());
+    env.push_back("REQUEST_URI=" + request->get_uri() + request->get_query());
     env.push_back("SERVER_NAME=" + server_name);
     env.push_back("SERVER_PORT=" + server_port);
     env.push_back("REMOTE_ADDR=" + remote_addr);
 	env.push_back("SERVER_PROTOCOL=HTTP/1.1");
 	env.push_back("SERVER_SOFTWARE=Weebserv/1.0");
-    #endif
+    
     headers_map headers = request->get_headers();
     for (std::map<std::string, std::string>::const_iterator it = headers.begin();
          it != headers.end(); ++it) {
@@ -129,7 +121,7 @@ void CGI::CGI_exec() {
         std::cout << "FAILD FORK\n\n";
         return;
     }
-    if (pid == 0) { // Child process
+    if (pid == 0) {
         close(stdin_pipe[1]);
         close(stdout_pipe[0]);
         dup2(stdin_pipe[0], 0);
@@ -162,7 +154,7 @@ void CGI::CGI_exec() {
         std::string error = "Status: 500 Internal Server Error\r\nContent-Type: text/plain\r\n\r\nFailed to execute script";
         write(1, error.c_str(), error.size());
         _exit(1);
-    } else { // Parent process
+    } else {
         close(stdin_pipe[0]);
         close(stdout_pipe[1]);
 
@@ -182,7 +174,6 @@ void CGI::CGI_exec() {
         int status;
         waitpid(pid, &status, 0);
 
-        // Parse the script output to form a proper HTTP response
         std::string status_line = "200 OK";
         std::map<std::string, std::string> headers;
         std::string body;
@@ -190,9 +181,7 @@ void CGI::CGI_exec() {
         if (header_end == std::string::npos) {
             header_end = output.find("\n\n");
             if (header_end == std::string::npos) {
-                output.clear(); // Signal error
-                std::cout << "FAILD SCRIPT OUTPUT\n\n";
-
+                output.clear();
                 return;
             } else {
                 header_end += 2;
@@ -220,7 +209,7 @@ void CGI::CGI_exec() {
         }
 
         if (headers.find("Content-Type") == headers.end() && !body.empty()) {
-            output.clear(); // Signal error
+            output.clear();
             return;
         }
 
@@ -242,16 +231,3 @@ void CGI::CGI_err() {
     response << "Internal Server Error: CGI execution failed";
     output = response.str();
 }
-// // Example usage (replace with your server's integration logic)
-// int main() {
-//     Request req;
-//     req.method = "POST";
-//     req.query_string = "id=123";
-//     req.content_type = "application/x-www-form-urlencoded";
-//     req.content_length = 7;
-//     req.body = "foo=bar";
-//     req.headers["User-Agent"] = "CustomClient/1.0";
-//     handle_cgi(req, "/usr/bin/php-cgi", "/path/to/script.php", "/cgi-bin/script.php", "",
-//                "example.com", "80", "127.0.0.1");
-//     return 0;
-// }

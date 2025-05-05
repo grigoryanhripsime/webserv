@@ -28,6 +28,7 @@ private:
     std::string remote_addr;
     std::vector<std::string> env;
     std::string output;
+    std::string root;
     
     std::string _get_index(const std::vector<std::string> &index, const std::string& path);
 public:
