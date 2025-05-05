@@ -74,6 +74,7 @@ void Request_header_validation::fill_headers_map(headers_map &headers)
     // }
 }
 
+
 std::string    Request_header_validation::validation_of_the_first_line(Request &req, std::string line)
 {
     // if (servIndex < 0 || static_cast<size_t>(servIndex) >= servers.size()) {
@@ -92,6 +93,7 @@ std::string    Request_header_validation::validation_of_the_first_line(Request &
         throw std::runtime_error("error page piti bacvi, headeri error a");
     }
     uri = result[1];
+
     req.set_uri(uri);
     if (uri == "/favicon.ico")
         return "";
@@ -136,13 +138,20 @@ int Request_header_validation::have_this_uri_in_our_current_server(int servIndex
     int which_location = -1;
     std::string path;
     size_t length = 0;
+    if (uri[uri.size() - 1] == '/')
+        uri.erase(uri.size() - 1);
     std::cout << "mihat joekqn hastat chisht uri a->" << uri <<  std::endl;
     for(size_t i = 0; i < vec_locations.size(); ++i)
     {
         path = vec_locations[i]->getPath();
+        if (path[path.size() - 1] == '/')
+            path.erase(path.size() - 1);
         std::cout << "yntacik locpath = " << path << std::endl;
         if (path.size() > uri.size())
+        {
+            std::cout << "sax stuc che?\n";
             continue ;
+        }
         size_t tmpLength = 0;
         size_t j;
         for (j = 1; j < uri.size() && path[j] == uri[j]; ++j)//1ic em sksum vortevdemi simvoli saxi mot /a linelu

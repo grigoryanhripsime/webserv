@@ -215,7 +215,7 @@ LocationDirective *DirectiveConfig::fillLocationsn(ServerDirective *serv, Direct
             switch (i)
             {
                 case 0:
-                    loc->setPath(itSimpleDirLoc->second[0]);
+                    loc->setPath(itSimpleDirLoc->second[0], serv);
                     break;
                 case 1:
                     loc->setAllow_methods(itSimpleDirLoc->second);//vectora dra hamar

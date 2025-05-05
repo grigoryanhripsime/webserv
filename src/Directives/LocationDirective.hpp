@@ -25,7 +25,7 @@ class LocationDirective : public AGeneralDirective
         cgi_ext_type cgi_extension;
         /////////setters//////////
     public:
-        void    setPath(const std::string& path);
+        void    setPath(const std::string& path, ServerDirective *serv);
         void    setAllow_methods(std::vector<std::string> methods);
         void    setAutoindex(const std::string& off_or_on);
         void    setRedirect(std::vector<std::string> red);
@@ -53,5 +53,6 @@ class LocationDirective : public AGeneralDirective
         ///////path validacia
         bool isValidLocationPath(const std::string& path);
         int validateRedirect(std::string codeStr, std::string url);
+        int is_not_inserted(ServerDirective *serv, const std::string& path);
 
 };

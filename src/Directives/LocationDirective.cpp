@@ -97,11 +97,25 @@ bool LocationDirective::isValidLocationPath(const std::string& path) {
     return true;
 }
 
-void    LocationDirective::setPath(const std::string& path)
+int LocationDirective::is_not_inserted(ServerDirective *serv, const std::string& path)
+{
+    std::vector<LocationDirective *> locs = serv->getLocdir();
+    
+    for(size_t i = 0; i < locs.size(); ++i)
+    {
+        if (locs[i]->getPath() == path)
+            return -1;
+    }
+    return 1;
+}
+
+void    LocationDirective::setPath(const std::string& path, ServerDirective *serv)
 {
     std::cout<<path<<std::endl;
     if (!isValidLocationPath(path))
         throw std::runtime_error("path conatin unnecessary symbol");
+    if (is_not_inserted(serv, path) == -1)
+        throw std::runtime_error("in server can not be tha same location paths");
     this->path = path;
 }
 

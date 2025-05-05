@@ -41,6 +41,7 @@ bool AGeneralDirective::is_valid_index_value(std::string value)
     return true;
 }
 
+
 void    AGeneralDirective::setIndex(const std::vector<std::string> indexVec)
 {
     index.clear();
