@@ -9,6 +9,7 @@
 #include <algorithm>
 
 class LocationDirective;
+
 class ServerDirective : public AGeneralDirective
 {
     private:

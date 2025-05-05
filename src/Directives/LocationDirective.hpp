@@ -1,6 +1,7 @@
 #pragma once
 #include <stdexcept>
 #include "AGeneralDirective.hpp"
+#include "ServerDirective.hpp"
 #include <vector>
 #include <map>
 #include <set>
@@ -9,6 +10,8 @@
 #include <unistd.h>    // Для access(), W_OK, X_OK
 
 typedef std::map<std::string, std::string> cgi_ext_type;
+
+class ServerDirective;
 
 class LocationDirective : public AGeneralDirective
 {
@@ -33,10 +36,10 @@ class LocationDirective : public AGeneralDirective
     public:
         std::string validDirs[10]; //= {"path", "allow_methods", "autoindex", "redirect", "upload_dir", "cgi_extension", "cgi_path", "index", "client_max_body_size", "root", "error_pages"};//khaneq private esi
         
-        LocationDirective();
+        LocationDirective(ServerDirective *serv);
         ~LocationDirective();
         virtual void validate() const;  // для валидации значений
-        void setIndex(const std::vector<std::string>& indexVec);
+        void setIndex(const std::vector<std::string> indexVec);
         
         //getters////
         std::string getPath() const;

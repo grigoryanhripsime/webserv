@@ -1,24 +1,25 @@
 #include"LocationDirective.hpp"
+#include "ServerDirective.hpp"
 #include <iostream>
 
-LocationDirective::LocationDirective() :
+LocationDirective::LocationDirective(ServerDirective *serv) :
     path(""),
     redirect(),
     autoindex("off"),
     upload_dir(""),
     cgi_extension()
 {
-
-        validDirs[0] = "path";
-        validDirs[1] = "allow_methods";
-        validDirs[2] = "autoindex";
-        validDirs[3] = "redirect";
-        validDirs[4] = "upload_dir";
-        validDirs[5] = "cgi_extension";
-        validDirs[6] = "index";
-        validDirs[7] = "client_max_body_size";
-        validDirs[8] = "root";
-        validDirs[9] = "error_pages";
+    this->index = serv->getIndex();
+    validDirs[0] = "path";
+    validDirs[1] = "allow_methods";
+    validDirs[2] = "autoindex";
+    validDirs[3] = "redirect";
+    validDirs[4] = "upload_dir";
+    validDirs[5] = "cgi_extension";
+    validDirs[6] = "index";
+    validDirs[7] = "client_max_body_size";
+    validDirs[8] = "root";
+    validDirs[9] = "error_pages";
 }
 
 std::string LocationDirective::getPath() const { return path; }
@@ -55,8 +56,9 @@ void LocationDirective::validate() const
         throw std::runtime_error("Upload directory must be an absolute path (start with '/')");
 }
 
-void    LocationDirective::setIndex(const std::vector<std::string>& indexVec)
+void    LocationDirective::setIndex(const std::vector<std::string> indexVec)
 {
+    index.clear();
     std::vector<std::string>::const_iterator it = indexVec.begin();
     for(; it != indexVec.end(); ++it)
     {

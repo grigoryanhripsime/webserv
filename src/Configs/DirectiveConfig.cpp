@@ -57,7 +57,7 @@ void DirectiveConfig::directiveValidation()
                 if (itLoc->second->simpleDir.find("path") == itLoc->second->simpleDir.end())
                     throw DirectiveConfigException("Location directive must have 'path' specified!");
 
-                LocationDirective *loc = fillLocationsn(itLoc->second);
+                LocationDirective *loc = fillLocationsn(serv, itLoc->second);
                 serv->setLocDir(loc);
             } 
             servers.push_back(serv);
@@ -192,11 +192,11 @@ ServerDirective *DirectiveConfig::fillServers(Directive *serverBlock)//&-@ maqre
     }
 }
 
-LocationDirective *DirectiveConfig::fillLocationsn(Directive *locationBlock)
+LocationDirective *DirectiveConfig::fillLocationsn(ServerDirective *serv, Directive *locationBlock)
 {
     std::multimap<std::string, std::vector<std::string> >::iterator itSimpleDirLoc = locationBlock->simpleDir.begin();
     std::multimap<std::string, Directive*>::iterator itCGIBlock = locationBlock->blocks.find("cgi_extension");
-    LocationDirective *loc = new LocationDirective();
+    LocationDirective *loc = new LocationDirective(serv);
     try{
         for (; itSimpleDirLoc != locationBlock->simpleDir.end(); ++itSimpleDirLoc)
         {
@@ -288,10 +288,10 @@ void DirectiveConfig::printServers()
         std::vector<LocationDirective*>::iterator ot = locdir.begin();
         for(; ot != locdir.end(); ++ot)
         {
-            for(std::vector<std::string>::iterator ott = (*ot)->getIndex().begin(); ott != (*ot)->getIndex().end(); ++ott)
-            {
-                std::cout << "index = " << *ott << std::endl;
-            }
+            // for(std::vector<std::string>::iterator ott = (*ot)->getIndex().begin(); ott != (*ot)->getIndex().end(); ++ott)
+            // {
+            //     std::cout << "index = " << *ott << std::endl;
+            // }
             std::cout << "path = " << (*ot)->getPath() << std::endl;
             ////////
             std::map<int, std::string> red  = (*ot)->getRedirect();

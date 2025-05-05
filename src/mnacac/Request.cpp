@@ -787,6 +787,8 @@ std::string Request::get_response(std::string &method, char *buffer, int bytesRe
     std::string res;
     if (method == "GET")
     {
+        for (size_t i = 0; i < servers[servIndex]->getLocdir()[servers[servIndex]->get_locIndex()]->getIndex().size(); i++)
+            std::cout<<"🌧🌧🌧🌧 "<<servers[servIndex]->getLocdir()[servers[servIndex]->get_locIndex()]->getIndex()[i]<<std::endl;
         error_page_num = 200;
         std::string filePath = getFilepath(uri);
         res = constructingResponce(filePath);

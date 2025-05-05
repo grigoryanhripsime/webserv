@@ -3,6 +3,7 @@
 
 ServerDirective::ServerDirective()
 {
+    index.push_back("index.html");
     listen.first = "0.0.0.0";
     listen.second = -1;
     server_name = "";
