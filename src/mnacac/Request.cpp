@@ -37,15 +37,13 @@ Request::Request(std::vector<ServerDirective *> servers){
     std::clog << "Reached to this point\n\n";
 
     this->servers = servers;
-    // client_fd = -1;
     servIndex = -1;
     locIndex = -1;
     method = "";
     uri = "";//GET-i hamar
     file_type = "text/plain";//default
     query = "";
-    error_page_num = 0;
-    std::clog << "Reached to this point\n\n";
+    error_page_num = -1;
     fill_status_message();
 }
 
@@ -103,12 +101,6 @@ std::string Request::post_method_tasovka(char *buffer, int bytesRead) {
     int locIndex = servers[servIndex]->get_locIndex();
     std::cout << "matryyyyyyyyyyyyy>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << buffer<<std::endl;
     parse_post_request(buffer, bytesRead);
-    
-    // Handle error cases first
-    if (error_page_num == 413) {
-        std::string filePath = getFilepath("/web/error413.html");
-        return get_need_string_that_we_must_be_pass_send_system_call(filePath);
-    }
 
     std::string response_body;
     std::string upload_dir = locdir[locIndex]->getUpload_dir();
@@ -131,8 +123,10 @@ std::string Request::post_method_tasovka(char *buffer, int bytesRead) {
         std::cout << "VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV\n";
         if (upload_dir.empty())
         {
-            std::string filePath = getFilepath("/web/error403.html");
-            return get_need_string_that_we_must_be_pass_send_system_call(filePath);
+            error_page_num = 403;
+            throw std::runtime_error("upload_dir is empty");
+            // std::string filePath = getFilepath("/web/error403.html");
+            // return get_need_string_that_we_must_be_pass_send_system_call(filePath);
         }
         // Process upload directory path
         std::string root = (locdir[locIndex]->getRoot() != "") ? locdir[locIndex]->getRoot() : servers[servIndex]->getRoot();
@@ -163,7 +157,7 @@ std::string Request::post_method_tasovka(char *buffer, int bytesRead) {
     std::stringstream ss;
     ss << "HTTP/1.1 " + ss2.str() + " " + status_message[error_page_num] + "\r\n"//200 texy dnenq error_oage_NUm(yani vorpes status code?te  henc 200e toxem?)
        << "Content-Length: " << response_body.size() << "\r\n"
-       << "Content-Type: " << get_content_type() + "\r\n"
+       << "Content-Type: " << get_content_type() + "\r\n"//bayc voncor esi petq chi
     //    << "Content-Type: text/plain\r\n"
        << "\r\n"
        << response_body;
@@ -246,7 +240,9 @@ void Request::set_contentLength(std::string line)
     std::vector<LocationDirective*> locdir = servers[servIndex]->getLocdir();
     int locIndex = servers[servIndex]->get_locIndex();
     if (contentLength > locdir[locIndex]->getBodySize()) {
-        error_page_num = 413; // Request Entity Too Large
+        // set_error_page_num(413);
+        error_page_num = 413;
+        throw std::runtime_error("Contet Length is higher than our config max body size.");
     }
 }
 
@@ -258,7 +254,8 @@ std::string Request::handle_multipart_upload(const std::string &upload_dir)
     std::string filename;
     if (boundary.empty()) {
         error_page_num = 400;
-        return "Error: No boundary found for multipart/form-data";
+        throw std::runtime_error("Error: No boundary found for multipart/form-data");//mihat haskanal lava throw-ov te return-ov??
+        // return "Error: No boundary found for multipart/form-data";
     }
 
     std::string body = post_body;
@@ -277,10 +274,7 @@ std::string Request::handle_multipart_upload(const std::string &upload_dir)
         // Извлекаем заголовки части
         size_t header_end = body.find("\r\n\r\n");
         if (header_end == std::string::npos)
-        {
-            std::cout << "continue??\n";
             continue;
-        }
         headers = body.substr(0, header_end);
         std::cout << "headers->" << headers << std::endl<<std::endl;
 
@@ -311,15 +305,16 @@ std::string Request::handle_multipart_upload(const std::string &upload_dir)
             int fd = open(file_path.c_str(), O_CREAT | O_WRONLY | O_TRUNC, 0644);
             if (fd == -1) {
                 error_page_num = 500;
-                return "Error: Failed to open file for writing";
+                throw std::runtime_error("Error: Failed to open file for writing");//nuyny stex haskanal,vorova lav throw or return
+                // return "Error: Failed to open file for writing";
             }
-            std::cout << "new fd = " << fd <<std::endl;
             ssize_t written = write(fd, file_content.c_str(), file_content.size());
             close(fd);
 
             if (written == -1 || static_cast<size_t>(written) != file_content.size()) {
                 error_page_num = 500;
-                return "Error: Failed to write file";
+                  throw std::runtime_error("Error: Failed to write file");
+                // return "Error: Failed to write file";
             }
 
             response += "Uploaded: " + filename + "\n";
@@ -344,7 +339,8 @@ std::string Request::handle_simple_post(const std::string &upload_dir)
     int fd = open(file_path.c_str(), O_CREAT | O_WRONLY | O_TRUNC, 0644);
     if (fd == -1) {
         error_page_num = 500;
-        return "Error: Failed to open file for writing";
+        throw std::runtime_error("Error: Failed to open file for writing");
+        // return "Error: Failed to open file for writing";
     }
 
     ssize_t written = write(fd, post_body.c_str(), post_body.size());
@@ -352,6 +348,7 @@ std::string Request::handle_simple_post(const std::string &upload_dir)
 
     if (written == -1 || static_cast<size_t>(written) != post_body.size()) {
         error_page_num = 500;
+        throw std::runtime_error("Error: Failed to write POST data");
         return "Error: Failed to write POST data";
     }
 
@@ -496,9 +493,10 @@ std::string Request::uri_is_file(std::string filePath)
     {
         std::cout << "error page???????\n";
         error_page_num = 404;
+        throw std::runtime_error("not right location");
         // std::string root =  (locdir[locIndex]->getRoot() != "") ? locdir[locIndex]->getRoot() : servers[servIndex]->getRoot();
         // filePath = root + "/web/error404.html";
-        filePath = getFilepath("/web/error404.html");
+        // filePath = getFilepath("/web/error404.html");
     }
     //////////
     std::cout << "ete esi tpvela uremn jokela vor fayla\n";
@@ -666,16 +664,11 @@ void Request::handleClientRequest(int client_fd) {
     {
         std::cout<<"🫧🫧🫧 meka hasel em\n";
         request_header_validation.if_received_request_valid(*this, buffer);
+        // std::cout << "OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO\n";
         request_header_validation.fill_headers_map(headers);
         //checking if http request header is correct
         servIndex = request_header_validation.get_servIndex();
-        uri = request_header_validation.get_uri();
-        // if (if_http_is_valid(buffer) < 0)
-        // {
-        //     error_page_num = 505;
-        //     throw std::runtime_error("505 HTTP Version Not Supported.");
-        // }
-        ////////////////////////////////////    
+        uri = request_header_validation.get_uri();  
         // std::string filePath = servers[0]->getRoot() + servers[0]->getLocdir()[0]->getPath() + "/" + servers[0]->getLocdir()[0]->getIndex()[1];
         std::cout << "methoooooooood = " << method <<std::endl;
         locIndex = servers[servIndex]->get_locIndex();
@@ -711,16 +704,73 @@ void Request::handleClientRequest(int client_fd) {
     //     error_page_num = 505;
     //     std::cout << "505 HTTP Version Not Supported.\n";
     // }
+    // esi voncor petq chi stex,vortev ynde aranqayin Hripsimei grac funkcianeric mekum stugvuma http1-i momenty
+}
+
+bool Request::deleteDirectory(const std::string& dirPath)
+{
+    DIR* dir = opendir(dirPath.c_str());
+    struct dirent* entry;
+    bool success = true;
+
+    if (!dir)
+    {
+        // Failed to open directory
+        return false;
+    }
+
+    // Iterate over directory contents
+    while ((entry = readdir(dir)) != NULL)
+    {
+        // Skip "." and ".." entries
+        if (std::string(entry->d_name) == "." || std::string(entry->d_name) == "..")
+            continue;
+
+        // Construct full path for the entry
+        std::string entryPath = dirPath + "/" + entry->d_name;
+
+        // Check if entry is a file or directory
+        if (isFile(entryPath))
+        {
+            // Delete file
+            if (unlink(entryPath.c_str()) != 0)
+            {
+                success = false;
+                break;
+            }
+        }
+        else if (isDirectory(entryPath))
+        {
+            // Recursively delete subdirectory
+            if (!deleteDirectory(entryPath))
+            {
+                success = false;
+                break;
+            }
+        }
+    }
+
+    closedir(dir);
+
+    // If all contents were deleted, remove the empty directory
+    if (success)
+    {
+        if (rmdir(dirPath.c_str()) != 0)
+        {
+            success = false;
+        }
+    }
+
+    return success;
 }
 
 std::string Request::handleDelete(std::string filePath)
 {
-    std::cout << uri <<"PTI MTNIIIIIIIIIIII\n";
     // Clean filePath (remove trailing '?' like in constructingResponce)
     if (!filePath.empty() && filePath[filePath.size() - 1] == '?')
         filePath = filePath.substr(0, filePath.size() - 1);
 
-    // Check if the method is allowed (based on location directive)
+    // Check if DELETE is allowed in the location directive
     std::vector<LocationDirective*> locdir = servers[servIndex]->getLocdir();
     int locIndex = servers[servIndex]->get_locIndex();
     std::vector<std::string> allowedMethods = locdir[locIndex]->getAllow_methods();
@@ -738,44 +788,50 @@ std::string Request::handleDelete(std::string filePath)
         error_page_num = 405;
         throw std::runtime_error("DELETE method not allowed for this location");
     }
-    
+
     // Check if path exists
     if (!pathExists(filePath))
     {
-        std::cout<<"eheeeeeeeeeee\n";
         error_page_num = 404;
-        throw std::runtime_error("File does not exist");
+        throw std::runtime_error("Path does not exist");
     }
-    std::cout << "MEEEEEEEEEEEEEEEEEERRRRRRRRRRRRRRRRRRRRRRAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCc\n";
 
-    // Check if it's a file (not a directory)
-    if (!isFile(filePath))
+    // Check write permission
+    if (access(filePath.c_str(), W_OK) != 0)
     {
         error_page_num = 403;
-        throw std::runtime_error("Cannot delete directories");
+        throw std::runtime_error("Permission denied for deletion");
     }
 
-    // Attempt to delete the file
-    if (unlink(filePath.c_str()) != 0)
+    // Handle file or directory deletion
+    if (isFile(filePath))
     {
-        // Check errno for specific errors
-        if (errno == EACCES || errno == EPERM)
-        {
-            error_page_num = 403;
-            throw std::runtime_error("Permission denied for deletion");
-        }
-        else
+        // Delete single file
+        if (unlink(filePath.c_str()) != 0)
         {
             error_page_num = 500;
             throw std::runtime_error("Failed to delete file");
         }
     }
-    std::cout << "XXXXXXXXXXXXXXXIIIIIIIIIIIIIIIIIIIII CCCCCCCCCCHHHHHHHHHHHHIIIIIIIIIIIIIII   hasnum stex\n\n";
-    // Successful deletion: return 204 No Content with empty body
-    std::string response = "HTTP/1.1 " + std::string("204 ") + status_message[error_page_num] + "\r\n";
+    else if (isDirectory(filePath))
+    {
+        // Recursively delete directory
+        if (!deleteDirectory(filePath))
+        {
+            error_page_num = 500;
+            throw std::runtime_error("Failed to delete directory");
+        }
+    }
+    else
+    {
+        error_page_num = 403;
+        throw std::runtime_error("Path is neither a file nor a directory");
+    }
+
+    // Successful deletion: return 204 No Content
+    std::string response = "HTTP/1.1 204 " + status_message[error_page_num] + "\r\n";
     response += "Content-Length: 0\r\n";
     response += "\r\n";
-    
     return response;
 }
 

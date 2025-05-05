@@ -8,8 +8,11 @@ std::map<std::pair<std::string, int>, std::vector<int> > DirectiveConfig::get_un
 DirectiveConfig::~DirectiveConfig()
 {
     std::cout << "DirectiveConfig dtor is called\n";
-    for (std::vector<ServerDirective*>::iterator it = servers.begin(); it != servers.end(); ++it)
-        delete *it;
+    std::vector<ServerDirective*>::iterator it = servers.begin();
+    for (; it != servers.end(); ++it)
+        if (*it)
+            delete *it;
+        // delete[] *it;
 }
 
 void DirectiveConfig::directiveValidation()
@@ -42,6 +45,7 @@ void DirectiveConfig::directiveValidation()
 
             // ServerDirective *serv = NULL;
             serv = fillServers(serverBlock);//chem jokum inchnel lcnelu
+            std::clog << "STE CHPTI HASNI\n\n";
             ////////////////////////////////////////////////
             // 3.3. Проверка location блоков
             std::multimap<std::string, Directive*>::iterator itLoc = serverBlock->blocks.begin();
@@ -74,13 +78,15 @@ void DirectiveConfig::directiveValidation()
         }
         else
         {
+            if_config_has_more_servers__whether_each_server_has_name_when_they_have_the_same_ip_and_port(servers);
+
             std::cout << "axpeeeeeeeeeeeeeeeeeeeeeeeeer\n";
         }
     }
     catch(...)
     {
-        if (serv) 
-            delete serv;//es toxy prkec????))))))))
+        // if (serv) 
+        //     delete serv;//es toxy prkec????))))))))
         throw ;
     }
 ///////////////sharunakeli

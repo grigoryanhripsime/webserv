@@ -11,6 +11,7 @@ AGeneralDirective::AGeneralDirective() : client_max_body_size(1048576), root("")
     error_pages[403] = "error_pages/403.html";
     error_pages[404] = "error_pages/404.html";
     error_pages[405] = "error_pages/405.html";
+    error_pages[413] = "error_pages/413.html";
     error_pages[500] = "error_pages/500.html";//yani defaultov menq karanq unenanq vor errorin inch eja hamapatasxan
 }
 

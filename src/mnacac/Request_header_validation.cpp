@@ -31,7 +31,9 @@ std::string    Request_header_validation::if_received_request_valid(Request &req
         req.set_error_page_num(500); // Internal Server Error for invalid server index
         throw std::runtime_error("Invalid server index");
     }
+    
     method = validation_of_the_first_line(req, lines[0]);
+    std::cout << "OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO\n";
     req.set_method(method);
     // std::cout << "ific araj->" << locIndex<<std::endl;
     if (method != "GET" && method != "POST" && method != "DELETE") 
@@ -39,6 +41,7 @@ std::string    Request_header_validation::if_received_request_valid(Request &req
         req.set_error_page_num(405);
         throw std::runtime_error("senc method chunenq mer allow_methods-um-> 405 Method Not Allowed.\n");//return 77;
     }
+    
     return method;
 }
 
@@ -97,7 +100,8 @@ std::string    Request_header_validation::validation_of_the_first_line(Request &
         req.set_query(uri.substr(harcakanInd + 1));
     int locIndex = have_this_uri_in_our_current_server(servIndex);//esi arajin toxi uri masi pahna
     servers[servIndex]->setLocIndex(locIndex);//set locIndex
-    if (locIndex < 0)
+    std::cout << "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee->"<<result[0] <<std::endl;
+    if (locIndex < 0)//&& result[0] != "DELETE",senc che vortev mez location polyubomu petqa voprtev metodery menak location-in en patkanum////////////////////////
     {
         req.set_error_page_num(404);//zdes kakoe cifr dat?
          
