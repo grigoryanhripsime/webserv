@@ -13,6 +13,7 @@ class LocationDirective;
 class ServerDirective : public AGeneralDirective
 {
     private:
+        std::map<int, std::string> error_pages;
         // std::string listen;//no default=>REQUIRE,   Must define port (no default)
         std::pair<std::string, int> listen;//<ipAdress, port>
         std::string server_name;//allow but not required
@@ -21,6 +22,7 @@ class ServerDirective : public AGeneralDirective
 
     public:
         //setters
+        void    setError_pages(std::vector<std::string> pages);
         void    setListen(const std::string& ipAndPort);
         void    setServer_name(const std::string& name);
         void    setLocDir(LocationDirective *loc);
@@ -33,6 +35,7 @@ class ServerDirective : public AGeneralDirective
         virtual void validate() const;  // для валидации значений
 
         ///getter///
+        std::map<int, std::string>& getError_pages();
         std::vector<LocationDirective*>& getLocdir();
         std::pair<std::string, int> getListen() const;
         std::string getServer_name() const;

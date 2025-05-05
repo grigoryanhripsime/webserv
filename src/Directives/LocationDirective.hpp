@@ -34,7 +34,7 @@ class LocationDirective : public AGeneralDirective
         void    setCgi_extension(const std::vector<std::string>& extension);
 
     public:
-        std::string validDirs[10]; //= {"path", "allow_methods", "autoindex", "redirect", "upload_dir", "cgi_extension", "cgi_path", "index", "client_max_body_size", "root", "error_pages"};//khaneq private esi
+        std::string validDirs[9]; //= {"path", "allow_methods", "autoindex", "redirect", "upload_dir", "cgi_extension", "cgi_path", "index", "client_max_body_size", "root", "error_pages"};//khaneq private esi
         
         LocationDirective(ServerDirective *serv);
         ~LocationDirective();

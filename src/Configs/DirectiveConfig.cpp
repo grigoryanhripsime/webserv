@@ -241,9 +241,6 @@ LocationDirective *DirectiveConfig::fillLocationsn(ServerDirective *serv, Direct
                 case 8:
                     loc->setRoot(itSimpleDirLoc->second[0]);
                     break;
-                case 9:
-                    loc->setError_pages(itSimpleDirLoc->second);//mapa,bayc chem patkeracnum vonca petq lcnel,kam vapshe karoxa map-@ poxenq vector?
-                    break;
                 default:
                     throw std::runtime_error("Invalid directive for location");
             }   

@@ -5,17 +5,16 @@
 AGeneralDirective::AGeneralDirective() : client_max_body_size(1048576), root("")//error_pages()senc grenq hena vor chgrenq meka nuyn datarki ahy chi?asacs enq jnjenq eta
 {
     // index.push_back("index.html");//vor default talis enq u en setteri mej vor push_back enq anum,es default arjeqy chem jnjum zut vric(1-rd indexic) avelacnum em,uje himnakan procesi jmk stigel ete vec-i size-@ meca 1ic toist baci defaultic config fayli mej arjeqa tvac exe,ignorenq et deafult arjeqy u 2rd elemntic(1-rd indexic) sksenq man gal faylery
-    error_pages[400] = "error_pages/400.html";
-    error_pages[401] = "error_pages/401.html";
-    error_pages[402] = "error_pages/402.html";
-    error_pages[403] = "error_pages/403.html";
-    error_pages[404] = "error_pages/404.html";
-    error_pages[405] = "error_pages/405.html";
-    error_pages[413] = "error_pages/413.html";
-    error_pages[500] = "error_pages/500.html";//yani defaultov menq karanq unenanq vor errorin inch eja hamapatasxan
+    // error_pages[400] = "error_pages/400.html";
+    // error_pages[401] = "error_pages/401.html";
+    // error_pages[402] = "error_pages/402.html";
+    // error_pages[403] = "error_pages/403.html";
+    // error_pages[404] = "error_pages/404.html";
+    // error_pages[405] = "error_pages/405.html";
+    // error_pages[413] = "error_pages/413.html";
+    // error_pages[500] = "error_pages/500.html";//yani defaultov menq karanq unenanq vor errorin inch eja hamapatasxan
 }
 
-std::map<int, std::string>& AGeneralDirective::getError_pages() { return error_pages; }
 std::vector<std::string> AGeneralDirective::getIndex() { return index; } 
 size_t  AGeneralDirective::getBodySize() { return client_max_body_size; }
 
@@ -147,34 +146,34 @@ bool AGeneralDirective::is_all_letters(const std::string& str) {
 }
 ///////////////////////
 
-void    AGeneralDirective::setError_pages(std::vector<std::string> pages)
-{
-    //hmi ste pti jokenq qanisn en tiv qansin enq string,orinak`error_pages 500 502 503 504 /50x.html;
-    // map[500] = /50x.html;
-    // map[502] = /50x.html;
-    // map[503] = /50x.html;
-    //....senc pti lini
-    std::vector<std::string>::iterator it = pages.begin();
-    std::cout << "gres-?" << *(pages.end() - 1) << std::endl;
-    if (is_valid_index_value(*(pages.end() - 1)) == false)
-        throw std::runtime_error("Invalid last value(path) of error_page" + (*(pages.end() - 1)));
-    for(; it != pages.end() - 1; ++it)
-    {
-        if ((*it).find_first_not_of("0123456789") != std::string::npos)
-            throw std::runtime_error("Error page number contain other simbols except digits` " + (*it));
-        std::stringstream ss(*it);
-        int ind;
-        if (isAllDigits(*it))
-        {
-            ss >> ind;
-            //stugel indexi hamar vor error page-eri tverina patkanum te che
-            if (ind < 300 || ind >= 600)//коды 1xx и 2xx обычно не перенаправляются на error_page).
-                throw std::runtime_error("part of error page number is incorrect");
-            error_pages[ind] = pages[pages.size() - 1];
-            ss.clear();
-        }
-        else
-            throw std::runtime_error("error_page values must be only digits except last");
-    }
-}
+// void    AGeneralDirective::setError_pages(std::vector<std::string> pages)
+// {
+//     //hmi ste pti jokenq qanisn en tiv qansin enq string,orinak`error_pages 500 502 503 504 /50x.html;
+//     // map[500] = /50x.html;
+//     // map[502] = /50x.html;
+//     // map[503] = /50x.html;
+//     //....senc pti lini
+//     std::vector<std::string>::iterator it = pages.begin();
+//     std::cout << "gres-?" << *(pages.end() - 1) << std::endl;
+//     if (is_valid_index_value(*(pages.end() - 1)) == false)
+//         throw std::runtime_error("Invalid last value(path) of error_page" + (*(pages.end() - 1)));
+//     for(; it != pages.end() - 1; ++it)
+//     {
+//         if ((*it).find_first_not_of("0123456789") != std::string::npos)
+//             throw std::runtime_error("Error page number contain other simbols except digits` " + (*it));
+//         std::stringstream ss(*it);
+//         int ind;
+//         if (isAllDigits(*it))
+//         {
+//             ss >> ind;
+//             //stugel indexi hamar vor error page-eri tverina patkanum te che
+//             if (ind < 300 || ind >= 600)//коды 1xx и 2xx обычно не перенаправляются на error_page).
+//                 throw std::runtime_error("part of error page number is incorrect");
+//             error_pages[ind] = pages[pages.size() - 1];
+//             ss.clear();
+//         }
+//         else
+//             throw std::runtime_error("error_page values must be only digits except last");
+//     }
+// }
 /////////////////////////////////////////////////////////////////

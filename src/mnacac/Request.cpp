@@ -693,8 +693,21 @@ void Request::handleClientRequest(int client_fd) {
         if (uri == "/favicon.ico")
             return;
         std::string filename = servers[servIndex]->getError_pages().find(error_page_num)->second;
-        std::string filePath = servers[servIndex]->getRoot() + "/" + filename;
+        std::string root =  (servers[servIndex]->getLocdir()[locIndex]->getRoot() != "") ? servers[servIndex]->getLocdir()[locIndex]->getRoot() : servers[servIndex]->getRoot();
+        std::string filePath = root + "/" + filename;
         std::cout<<"💃🏼💃🏼💃🏼 "<<filePath<<std::endl;
+        //stex hastat error page-i vaxtova gali
+        if (pathExists(filePath) == false ||  !isFile(filePath))
+        {
+            char root_char[1024] = {0};
+            getcwd(root_char, 1024);
+            std::stringstream ss;
+            ss << error_page_num;
+            servers[servIndex]->getError_pages()[error_page_num] = ss.str() + ".html";
+            filePath = std::string(root_char) + "/error_pages/" + ss.str() + ".html";
+            std::cout << "YSIG->>>>>" << filePath << std::endl;
+
+        }
         response = get_need_string_that_we_must_be_pass_send_system_call(filePath);
         // std::cout<<res<<std::endl;
         send(client_fd, response.c_str(), response.size(), 0);

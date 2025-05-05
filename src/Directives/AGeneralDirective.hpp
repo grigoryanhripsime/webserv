@@ -13,7 +13,7 @@ protected:
     size_t client_max_body_size;//Optional but recommended.ham kara serverum lini ham locationum     bool,    default: 1MB (или другое разумное значение)
  
     std::string root;//can be overridden in location, required dlya servera no mojet bit pustoy na locatione
-    std::map<int, std::string> error_pages;//type-@ yst deepseeki ,  default: стандартные страницы ошибок сервера
+    // std::map<int, std::string> error_pages;//type-@ yst deepseeki ,  default: стандартные страницы ошибок сервера
 public:
     //////////setters////////////
     bool isAllDigits(const std::string& str);

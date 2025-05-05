@@ -19,7 +19,6 @@ LocationDirective::LocationDirective(ServerDirective *serv) :
     validDirs[6] = "index";
     validDirs[7] = "client_max_body_size";
     validDirs[8] = "root";
-    validDirs[9] = "error_pages";
 }
 
 std::string LocationDirective::getPath() const { return path; }
@@ -58,7 +57,8 @@ void LocationDirective::validate() const
 
 void    LocationDirective::setIndex(const std::vector<std::string> indexVec)
 {
-    index.clear();
+    index.clear();//nerkayacnem incha katarvum->amenaskzbic serverin patkanox index-neri vectorum lcnum enq serverin patkanox index directivi valuenery(std::string)(nkatenq vor LocationDirective-i ctor-um menq ira index-neri vectory veragrum enq server-i index-neri vectorin)
+    // sa arvuma nra hamar vor ete location-um trvaca index directive-@ jnjenq serveri hamar push arac index-nery vortev ete location-um ka index uremn pti chogtagorcvi serveri index-nery,u ete locationum ka index-ner u menq frum enq bayc chenq qtnum tenc fayl get anelu hamar,pti 403 error ta vochte eta serveri index-neri vrov fra ytex man ga,serveri vrov fralua en jmk erb vor location-um bacakayi index directivy
     std::vector<std::string>::const_iterator it = indexVec.begin();
     for(; it != indexVec.end(); ++it)
     {

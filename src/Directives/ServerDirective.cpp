@@ -3,7 +3,7 @@
 
 ServerDirective::ServerDirective()
 {
-    index.push_back("index.html");
+    index.push_back("index.html");//qani vor stex default-ov push enq anum index.html-n ,setIndex-i mej clear enq anum vectory vortev ete kanchvela setIndex serveri hamar uremn inqy uni index directiv=>default depqy el chi ogtagorcvelu
     listen.first = "0.0.0.0";
     listen.second = -1;
     server_name = "";
@@ -14,12 +14,22 @@ ServerDirective::ServerDirective()
     validDirs[3] = "client_max_body_size";
     validDirs[4] = "root";
     validDirs[5] = "error_page";
-}
 
+    error_pages[400] = "error_pages/400.html";
+    error_pages[401] = "error_pages/401.html";
+    error_pages[402] = "error_pages/402.html";
+    error_pages[403] = "error_pages/403.html";
+    error_pages[404] = "error_pages/404.html";
+    error_pages[405] = "error_pages/405.html";
+    error_pages[413] = "error_pages/413.html";
+    error_pages[500] = "error_pages/500.html";
+}
+std::map<int, std::string>& ServerDirective::getError_pages() { return error_pages; }
 std::vector<LocationDirective*>& ServerDirective::getLocdir() { return locdir; }
 std::pair<std::string, int> ServerDirective::getListen() const { return listen; }
 std::string ServerDirective::getServer_name() const { return server_name; }
 int ServerDirective::get_locIndex() const { return locIndex; }
+
 
 void ServerDirective::validate() const
 {
@@ -47,6 +57,33 @@ ServerDirective::~ServerDirective()
 }
 
 /////////////setters//////////////
+
+void    ServerDirective::setError_pages(std::vector<std::string> pages)
+{
+
+    std::vector<std::string>::iterator it = pages.begin();
+    std::cout << "gres-?" << *(pages.end() - 1) << std::endl;
+    if (is_valid_index_value(*(pages.end() - 1)) == false)
+        throw std::runtime_error("Invalid last value(path) of error_page" + (*(pages.end() - 1)));
+    for(; it != pages.end() - 1; ++it)
+    {
+        if ((*it).find_first_not_of("0123456789") != std::string::npos)
+            throw std::runtime_error("Error page number contain other simbols except digits` " + (*it));
+        std::stringstream ss(*it);
+        int ind;
+        if (isAllDigits(*it))
+        {
+            ss >> ind;
+            //stugel indexi hamar vor error page-eri tverina patkanum te che
+            if (ind < 300 || ind >= 600)//коды 1xx и 2xx обычно не перенаправляются на error_page).
+                throw std::runtime_error("part of error page number is incorrect");
+            error_pages[ind] = pages[pages.size() - 1];
+            ss.clear();
+        }
+        else
+            throw std::runtime_error("error_page values must be only digits except last");
+    }
+}
 ////////////////listen validacia/////////
 int     ServerDirective::ip_part_contain_correct_integers(std::string ip_part)
 {
