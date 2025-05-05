@@ -16,6 +16,7 @@
 
 typedef std::map<std::string, std::string>  headers_map;
 #define SIZE (1 << 14)
+#define CWD_BUFF_SIZE (1 << 10)
 
 class Request
 {

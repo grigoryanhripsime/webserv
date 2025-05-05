@@ -16,7 +16,8 @@ std::string CGI::_get_index(const std::vector<std::string> &index, const std::st
             return index[i];
         }
     }
-    throw std::runtime_error("Location: autoindex must be 'on' or 'off'");
+    request->set_error_page_num(502);
+    throw std::runtime_error("Invalid index, no such file");
 }
 
 static const std::string _get_extension(const std::string& str)
@@ -33,9 +34,6 @@ std::string CGI::CGI_handler()
     int serv_index = request->get_servIndex();
     std::vector<ServerDirective *> servers = request->get_servers();
     ServerDirective * server = servers[serv_index];
-    if (server == NULL) {
-        return "";
-    }
     this->path_info = request->get_uri();
     std::vector<LocationDirective *> locdir = server->getLocdir();
     int locIndex = server->get_locIndex();
@@ -58,7 +56,6 @@ std::string CGI::CGI_handler()
     if (output.empty()) {
         CGI_err();
     }
-    std::cout << output << " = OUTPUT\n\n";
     return output;
 }
 
@@ -118,7 +115,6 @@ void CGI::CGI_exec() {
         close(stdin_pipe[1]);
         close(stdout_pipe[0]);
         close(stdout_pipe[1]);
-        std::cout << "FAILD FORK\n\n";
         return;
     }
     if (pid == 0) {
@@ -153,7 +149,7 @@ void CGI::CGI_exec() {
 
         std::string error = "Status: 500 Internal Server Error\r\nContent-Type: text/plain\r\n\r\nFailed to execute script";
         write(1, error.c_str(), error.size());
-        _exit(1);
+        exit(1);
     } else {
         close(stdin_pipe[0]);
         close(stdout_pipe[1]);
