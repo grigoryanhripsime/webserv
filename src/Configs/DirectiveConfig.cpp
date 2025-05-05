@@ -252,6 +252,7 @@ LocationDirective *DirectiveConfig::fillLocationsn(ServerDirective *serv, Direct
     catch(...)
     {
         delete loc;
+        delete serv;
         throw ;
     }
 }
