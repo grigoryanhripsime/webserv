@@ -101,16 +101,16 @@ std::string    Request_header_validation::validation_of_the_first_line(Request &
     if (harcakanInd != std::string::npos)
         req.set_query(uri.substr(harcakanInd + 1));
     int locIndex = have_this_uri_in_our_current_server(servIndex);//esi arajin toxi uri masi pahna
-    servers[servIndex]->setLocIndex(locIndex);//set locIndex
     std::cout << "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee->"<<result[0] <<std::endl;
     if (locIndex < 0)//&& result[0] != "DELETE",senc che vortev mez location polyubomu petqa voprtev metodery menak location-in en patkanum////////////////////////
     {
         req.set_error_page_num(404);//zdes kakoe cifr dat?
-         
+        
         std::cout << "yavni bacaskaanaaaaaa\n";
-
+        
         throw std::runtime_error("error page pti bacvi browser-um");//es hmi exception em qcum vor segfault chta,bayc heto pti zut error page-@ bacenq
     }
+    servers[servIndex]->setLocIndex(locIndex);//set locIndex
     //TODO: add check for server's index
     //////////////////////////////
 

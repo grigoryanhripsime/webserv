@@ -693,7 +693,7 @@ void Request::handleClientRequest(int client_fd) {
         if (uri == "/favicon.ico")
             return;
         std::string filename = servers[servIndex]->getError_pages().find(error_page_num)->second;
-        std::string root =  (servers[servIndex]->getLocdir()[locIndex]->getRoot() != "") ? servers[servIndex]->getLocdir()[locIndex]->getRoot() : servers[servIndex]->getRoot();
+        std::string root =  servers[servIndex]->getRoot();
         std::string filePath = root + "/" + filename;
         std::cout<<"💃🏼💃🏼💃🏼 "<<filePath<<std::endl;
         //stex hastat error page-i vaxtova gali
