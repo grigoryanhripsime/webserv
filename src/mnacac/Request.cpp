@@ -125,8 +125,6 @@ std::string Request::post_method_tasovka(char *buffer, int bytesRead) {
         {
             error_page_num = 403;
             throw std::runtime_error("upload_dir is empty");
-            // std::string filePath = getFilepath("/web/error403.html");
-            // return get_need_string_that_we_must_be_pass_send_system_call(filePath);
         }
         // Process upload directory path
         std::string root = this->get_cwd();
@@ -421,7 +419,6 @@ std::string Request::getFilesInDirectory(std::string &path)
             }
         }
     }
-    
     closedir(dir);
     return "NULL";
 }
@@ -491,7 +488,6 @@ std::string Request::uri_is_file(std::string filePath)
     currentIndex = find_in_index_vectors_this_string(left_part_of_filePath, locdir[locIndex]->getIndex());
     if (currentIndex < 0)
     {
-        std::cout << "error page???????\n";
         error_page_num = 404;
         throw std::runtime_error("not right location");
         // std::string root =  this->get_cwd();
@@ -536,12 +532,12 @@ std::string Request::uri_is_directory(std::string filePath)
     std::cout << "ete esi tpvela uremn jokela vor DIREKTORIAya\n";
     if (filePath[filePath.size() - 1] != '/')
         filePath += '/';
-    ////////krknvouma 
     std::vector<LocationDirective*> locdir = servers[servIndex]->getLocdir();
-    int locIndex = servers[servIndex]->get_locIndex();
-    std::string root =  this->get_cwd();
-    std::cout << "rooooooooooooooot = " << root << std::endl;
-    std::string str = root + locdir[locIndex]->getPath();
+    std::string str = getFilepath(locdir[locIndex]->getPath());
+    // int locIndex = servers[servIndex]->get_locIndex();
+    // std::string root =  (locdir[locIndex]->getRoot() != "") ? locdir[locIndex]->getRoot() : servers[servIndex]->getRoot();
+    // std::cout << "rooooooooooooooot = " << root << std::endl;
+    // std::string str = root + locdir[locIndex]->getPath();
     // size_t i = 0;
     if (str[str.size() - 1] == '?')
         str = str.substr(0, str.size() - 1);
@@ -552,10 +548,7 @@ std::string Request::uri_is_directory(std::string filePath)
     ////////////////
     if (filePath != str)
     {
-        // std::string root =  this->get_cwd();
-        // filePath = root + "/web/error404.html";
         error_page_num = 404;
-        // filePath = getFilepath(get_servers()[get_servIndex()]->getError_page()[error_page_num]);
         throw std::runtime_error("es el a inchvor exception");
     }
     else if (getFilesInDirectory(filePath) != "NULL")//filePath == str esi el petq chi stugel,verevy ka
@@ -564,19 +557,14 @@ std::string Request::uri_is_directory(std::string filePath)
             filePath += '/' + getFilesInDirectory(filePath);
         else
             filePath += getFilesInDirectory(filePath);
-            
         std::cout << "/ enq morace hastat->" << filePath << std::endl;
         return get_need_string_that_we_must_be_pass_send_system_call(filePath);
     }
     std::cout << "👽ba incha->" << locdir[locIndex]->getAutoindex() << std::endl;
     if (filePath == str && locdir[locIndex]->getAutoindex() == "off")
     {
-        // std::string root =  this->get_cwd();
-        // filePath = root + "/web/error403.html";
         error_page_num = 403;
         throw std::runtime_error("Error, I dont know of what type");
-        // filePath = getFilepath("/web/error403.html");
-        // return get_need_string_that_we_must_be_pass_send_system_call(filePath);
     }
     else
         return autoindex(filePath);
@@ -626,11 +614,7 @@ std::string Request::constructingResponce(std::string filePath)
         throw std::runtime_error(" путь не существует или нет прав на доступ(файл/директория)");
     }
     if (isFile(filePath)) //Если ты проверяешь путь и он:❌ не существует — верни ошибку 404 Not Found
-    {
-        //stex pti stugenq ardyoq mer locationi index i valuneri mej ka tvyal fayly te che
-        //////////
         return uri_is_file(filePath);
-    }
     else if (isDirectory(filePath))
         return uri_is_directory(filePath);
     return "";
@@ -860,8 +844,7 @@ std::string Request::get_response(std::string &method, char *buffer, int bytesRe
         for (size_t i = 0; i < servers[servIndex]->getLocdir()[servers[servIndex]->get_locIndex()]->getIndex().size(); i++)
             std::cout<<"🌧🌧🌧🌧 "<<servers[servIndex]->getLocdir()[servers[servIndex]->get_locIndex()]->getIndex()[i]<<std::endl;
         error_page_num = 200;
-        // if (servers[servIndex]->getLocdir()[servers[servIndex]->get_locIndex()]->getIndex().empty())
-        //     return generateRedirectResponse(servers[servIndex]->getLocdir()[servers[servIndex]->get_locIndex()]3->getRedirect()[301]);
+        //////redirecti masna//////
         if (!servers[servIndex]->getLocdir()[servers[servIndex]->get_locIndex()]->getRedirect().empty())
         {
             std::cout<<"🦓🦓🦓🦓🦓\n";
@@ -869,7 +852,8 @@ std::string Request::get_response(std::string &method, char *buffer, int bytesRe
             std::cout << "hresssss-> " << error_page_num << std::endl;
             return generateRedirectResponse(servers[servIndex]->getLocdir()[servers[servIndex]->get_locIndex()]->getRedirect().begin()->second);
         }
-            std::string filePath = getFilepath(uri);
+        ////////////////////////////////
+        std::string filePath = getFilepath(uri);
         res = constructingResponce(filePath);
         std::cout<<"-----------------------------------\n";
         // std::cout<<res;
@@ -915,7 +899,7 @@ int Request::if_http_is_valid(char *c_buffer)
     return 1;
 }
 
-std::string Request::getFilepath(std::string uri)
+std::string Request::getFilepath(std::string needly_atribute)
 {
     std::vector<LocationDirective*> locdir = servers[servIndex]->getLocdir();
     int locIndex = servers[servIndex]->get_locIndex();
@@ -942,18 +926,6 @@ std::string Request::generateRedirectResponse(std::string filePath) {
     response += "Content-Length: 0\r\n";
     response += "Connection: keep-alive\r\n";
     response += "\r\n";
-    // response = "GET / HTTP/1.1\r\n";
-    // response += "Host: " + filePath + "\r\n";
-    // response += "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36\r\n";
-    // response += "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8\r\n";
-    // response += "Accept-Language: en-US,en;q=0.5\r\n";
-    // response += "Accept-Encoding: gzip, deflate, br\r\n";
-    // response += "Connection: keep-alive\r\n";
-    // response += "Upgrade-Insecure-Requests: 1\r\n";
-    // response += "Sec-Fetch-Dest: document\r\n";
-    // response += "Sec-Fetch-Mode: navigate\r\n";
-    // response += "Sec-Fetch-Site: none\r\n";
-    // response += "Sec-Fetch-User: ?1\r\n";
     return response;
 }
 
