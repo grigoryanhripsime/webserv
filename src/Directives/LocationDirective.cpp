@@ -13,7 +13,7 @@ LocationDirective::LocationDirective(ServerDirective *serv) :
     validDirs[0] = "path";
     validDirs[1] = "allow_methods";
     validDirs[2] = "autoindex";
-    validDirs[3] = "redirect";
+    validDirs[3] = "return";
     validDirs[4] = "upload_dir";
     validDirs[5] = "cgi_extension";
     validDirs[6] = "index";
@@ -143,7 +143,7 @@ int LocationDirective::validateRedirect(std::string codeStr, std::string url)
         throw std::runtime_error("Invalid HTTP code " + codeStr);
     std::stringstream ss(codeStr);
     int code;
-    if (ss >> code)
+    if (!(ss >> code))
         throw std::runtime_error("Invalid HTTP code " + codeStr);
     if (code < 100 || code >= 600)
         throw std::runtime_error("Status code must be 1xx-5xx.");
@@ -155,7 +155,7 @@ int LocationDirective::validateRedirect(std::string codeStr, std::string url)
     }
     if ((code < 300 || code >= 400) && (url.empty() && url.size() > 1024))
             throw std::runtime_error("Custom response text too long (max 1KB).");    
-    return true;   
+    return code;   
 }
         
 void    LocationDirective::setRedirect(std::vector<std::string> red)

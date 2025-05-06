@@ -686,6 +686,7 @@ void Request::handleClientRequest(int client_fd) {
                 std::cout << "Static function called\r\n\r\n";
                 std::cout << "ayo hasnum enq sendin\n\n";
                 response = get_response(method, buffer, bytesRead);
+                std::cout<<response<<std::endl;
                 send(client_fd, response.c_str(), strlen(response.c_str()), 0);
                 break;
         }
@@ -859,7 +860,16 @@ std::string Request::get_response(std::string &method, char *buffer, int bytesRe
         for (size_t i = 0; i < servers[servIndex]->getLocdir()[servers[servIndex]->get_locIndex()]->getIndex().size(); i++)
             std::cout<<"🌧🌧🌧🌧 "<<servers[servIndex]->getLocdir()[servers[servIndex]->get_locIndex()]->getIndex()[i]<<std::endl;
         error_page_num = 200;
-        std::string filePath = getFilepath(uri);
+        // if (servers[servIndex]->getLocdir()[servers[servIndex]->get_locIndex()]->getIndex().empty())
+        //     return generateRedirectResponse(servers[servIndex]->getLocdir()[servers[servIndex]->get_locIndex()]3->getRedirect()[301]);
+        if (!servers[servIndex]->getLocdir()[servers[servIndex]->get_locIndex()]->getRedirect().empty())
+        {
+            std::cout<<"🦓🦓🦓🦓🦓\n";
+            error_page_num = servers[servIndex]->getLocdir()[servers[servIndex]->get_locIndex()]->getRedirect().begin()->first;
+            std::cout << "hresssss-> " << error_page_num << std::endl;
+            return generateRedirectResponse(servers[servIndex]->getLocdir()[servers[servIndex]->get_locIndex()]->getRedirect().begin()->second);
+        }
+            std::string filePath = getFilepath(uri);
         res = constructingResponce(filePath);
         std::cout<<"-----------------------------------\n";
         // std::cout<<res;
@@ -924,3 +934,32 @@ std::string Request::get_cwd()
 
     return std::string(buff);
 }
+
+
+//redirect////
+std::string Request::generateRedirectResponse(std::string filePath) {
+    std::string response;
+    std::stringstream ss;
+    ss << error_page_num;
+    response += "HTTP/1.1 " + ss.str() + " ";
+   
+    response += status_message[error_page_num] + "\r\n";
+    response += "Location: " + filePath + "\r\n";
+    response += "Content-Length: 0\r\n";
+    response += "Connection: keep-alive\r\n";
+    response += "\r\n";
+    // response = "GET / HTTP/1.1\r\n";
+    // response += "Host: " + filePath + "\r\n";
+    // response += "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36\r\n";
+    // response += "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8\r\n";
+    // response += "Accept-Language: en-US,en;q=0.5\r\n";
+    // response += "Accept-Encoding: gzip, deflate, br\r\n";
+    // response += "Connection: keep-alive\r\n";
+    // response += "Upgrade-Insecure-Requests: 1\r\n";
+    // response += "Sec-Fetch-Dest: document\r\n";
+    // response += "Sec-Fetch-Mode: navigate\r\n";
+    // response += "Sec-Fetch-Site: none\r\n";
+    // response += "Sec-Fetch-User: ?1\r\n";
+    return response;
+}
+
