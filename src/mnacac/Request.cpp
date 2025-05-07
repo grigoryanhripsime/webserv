@@ -101,7 +101,21 @@ std::string Request::post_method_tasovka(char *buffer, int bytesRead) {
     int locIndex = servers[servIndex]->get_locIndex();
     std::cout << "matryyyyyyyyyyyyy>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << buffer<<std::endl;
     parse_post_request(buffer, bytesRead);
-
+    ////////////////////////////////
+    bool supported_media_type = false;
+    if (MainContentType.find("application/x-www-form-urlencoded") != std::string::npos ||
+        MainContentType.find("multipart/form-data") != std::string::npos)
+        supported_media_type = true;
+    // Optionally, support text/plain and application/octet-stream
+    if (MainContentType.find("text/plain") != std::string::npos ||
+        MainContentType.find("application/octet-stream") != std::string::npos)
+        supported_media_type = true;
+    if (!supported_media_type)
+    {
+        error_page_num = 415;
+        throw std::runtime_error("Unsupported media type: " + MainContentType);
+    }
+    /////////////////////////////////
     std::string response_body;
     std::string upload_dir = locdir[locIndex]->getUpload_dir();
     
@@ -255,7 +269,12 @@ std::string Request::handle_multipart_upload(const std::string &upload_dir)
         throw std::runtime_error("Error: No boundary found for multipart/form-data");//mihat haskanal lava throw-ov te return-ov??
         // return "Error: No boundary found for multipart/form-data";
     }
-
+    ///////////Check if upload_dir exists and is writable//////////////
+    if (!isDirectory(upload_dir) || access(upload_dir.c_str(), W_OK) != 0) {
+        error_page_num = 403;
+        throw std::runtime_error("Upload directory does not exist or is not writable");
+    }
+    /////////////////////////////////////////////
     std::string body = post_body;
     std::string response = "Files uploaded successfully:\n";
     size_t pos = 0;
@@ -290,15 +309,17 @@ std::string Request::handle_multipart_upload(const std::string &upload_dir)
             filename = headers.substr(filename_pos, filename_end - filename_pos);
         }
         std::cout << "FILENAME-> "<< filename << std::endl;
-        if (!filename.empty()) {
+        if (!filename.empty())
+        {
             // Извлекаем содержимое файла
             file_content = body.substr(0, part_end - 2); // Удаляем \r\n
 
             file_path = upload_dir + "/" + filename;
 
             std::cout << "FILE PATH->" << file_path <<std::endl;
+            
             std::string dir_path = file_path.substr(0, file_path.find_last_of('/'));
-            create_directories(dir_path);
+            create_directories(dir_path);//backend
 
             int fd = open(file_path.c_str(), O_CREAT | O_WRONLY | O_TRUNC, 0644);
             if (fd == -1) {
@@ -332,6 +353,12 @@ std::string Request::handle_multipart_upload(const std::string &upload_dir)
 // Обработка простых POST-запросов (не multipart)
 std::string Request::handle_simple_post(const std::string &upload_dir)
 {
+    ///////////Check if upload_dir exists and is writable
+    if (!isDirectory(upload_dir) || access(upload_dir.c_str(), W_OK) != 0) {
+        error_page_num = 403;
+        throw std::runtime_error("Upload directory does not exist or is not writable");
+    }
+    ////////////////////////////////////////////////////
     // Сохраняем тело POST в файл post_data.txt в upload_dir
     std::string file_path = upload_dir + "/post_data.txt";
     int fd = open(file_path.c_str(), O_CREAT | O_WRONLY | O_TRUNC, 0644);
@@ -470,10 +497,11 @@ std::string Request::get_need_string_that_we_must_be_pass_send_system_call(std::
 std::string Request::uri_is_file(std::string filePath)
 {
     std::vector<LocationDirective*> locdir = servers[servIndex]->getLocdir();
-    int locIndex = servers[servIndex]->get_locIndex(); 
-    std::cout << "locindexxxxxxxxxxx = " <<   locIndex<< std::endl;
-    std::string root =  this->get_cwd();
-    std::string str = root + locdir[locIndex]->getPath();
+    std::string str = getFilepath(locdir[locIndex]->getPath());
+    // int locIndex = servers[servIndex]->get_locIndex(); 
+    // std::cout << "locindexxxxxxxxxxx = " <<   locIndex<< std::endl;
+    // std::string root =  this->get_cwd();
+    // std::string str = root + locdir[locIndex]->getPath();
     std::cout << "strse havasraaaaa->>>>>>>" << str << std::endl;
     size_t i = 0;
     for (; i < filePath.size() && i < str.size() && filePath[i] == str[i]; ++i)
@@ -849,8 +877,23 @@ std::string Request::get_response(std::string &method, char *buffer, int bytesRe
         {
             std::cout<<"🦓🦓🦓🦓🦓\n";
             error_page_num = servers[servIndex]->getLocdir()[servers[servIndex]->get_locIndex()]->getRedirect().begin()->first;
-            std::cout << "hresssss-> " << error_page_num << std::endl;
-            return generateRedirectResponse(servers[servIndex]->getLocdir()[servers[servIndex]->get_locIndex()]->getRedirect().begin()->second);
+            std::string filePath = servers[servIndex]->getLocdir()[servers[servIndex]->get_locIndex()]->getRedirect().begin()->second;
+            std::cout << "es chem du es->" << filePath.substr(0,8) << std::endl;
+            // if (filePath.substr(0,8) != "https://" && filePath.substr(0,8) != "http://")
+            // {
+            //         std::string server;
+            //         if (servers[servIndex]->getServer_name() != "")
+            //             server = servers[servIndex]->getServer_name();
+            //         else
+            //             server = servers[servIndex]->getListen().first;
+            //         std::stringstream ss_num;
+            //         ss_num << server << ":" << servers[servIndex]->getListen().second;
+            //         ss_num >> server;
+            //         std::cout << "uuuuuuuuuuuuuuuuuuuu->"<<server << std::endl;
+            //         filePath = "http://" + server + filePath; 
+            // }
+            std::cout << "vayara->" <<filePath <<std::endl;
+            return generateRedirectResponse(filePath);
         }
         ////////////////////////////////
         std::string filePath = getFilepath(uri);
@@ -902,15 +945,15 @@ int Request::if_http_is_valid(char *c_buffer)
 std::string Request::getFilepath(std::string needly_atribute)
 {
     std::vector<LocationDirective*> locdir = servers[servIndex]->getLocdir();
-    int locIndex = servers[servIndex]->get_locIndex();
+    // int locIndex = servers[servIndex]->get_locIndex();
     std::string root = this->get_cwd();
-    std::string filePath = root + uri;
+    std::string filePath = root + needly_atribute;
     return filePath;
 }
 
 std::string Request::get_cwd()
 {
-    return (locdir[locIndex]->getRoot() != "") ? locdir[locIndex]->getRoot() : servers[servIndex]->getRoot();
+    return (servers[servIndex]->getLocdir()[locIndex]->getRoot() != "") ? servers[servIndex]->getLocdir()[locIndex]->getRoot() : servers[servIndex]->getRoot();
 }
 
 
