@@ -809,22 +809,22 @@ std::string Request::handleDelete(std::string filePath)
 
     // Check if DELETE is allowed in the location directive
     std::vector<LocationDirective*> locdir = servers[servIndex]->getLocdir();
-    int locIndex = servers[servIndex]->get_locIndex();
-    std::vector<std::string> allowedMethods = locdir[locIndex]->getAllow_methods();
-    bool methodAllowed = false;
-    for (size_t i = 0; i < allowedMethods.size(); ++i)
-    {
-        if (allowedMethods[i] == "DELETE")
-        {
-            methodAllowed = true;
-            break;
-        }
-    }
-    if (!methodAllowed)
-    {
-        error_page_num = 405;
-        throw std::runtime_error("DELETE method not allowed for this location");
-    }
+    // int locIndex = servers[servIndex]->get_locIndex();
+    // std::vector<std::string> allowedMethods = locdir[locIndex]->getAllow_methods();
+    // bool methodAllowed = false;
+    // for (size_t i = 0; i < allowedMethods.size(); ++i)
+    // {
+    //     if (allowedMethods[i] == "DELETE")
+    //     {
+    //         methodAllowed = true;
+    //         break;
+    //     }
+    // }
+    // if (!methodAllowed)
+    // {
+    //     error_page_num = 405;
+    //     throw std::runtime_error("DELETE method not allowed for this location");
+    // }
 
     // Check if path exists
     if (!pathExists(filePath))

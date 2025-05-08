@@ -169,7 +169,7 @@ void CGI::CGI_exec() {
 
         int status;
         waitpid(pid, &status, 0);
-
+ 
         std::string status_line = "200 OK";
         std::map<std::string, std::string> headers;
         std::string body;
