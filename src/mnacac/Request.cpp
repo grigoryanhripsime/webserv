@@ -436,7 +436,6 @@ std::string Request::getFilesInDirectory(std::string &path)
     while ((entry = readdir(dir)) != NULL)
     {
         std::string name = entry->d_name;
-        std::cout << "direktoriayi meji faylery->" << name << std::endl;
         if (name != "." && name != "..")
             dirFiles.push_back(name);
     }
@@ -561,8 +560,6 @@ void Request::listFiles(std::string path, std::vector<std::string> &files)
 
 std::string Request::uri_is_directory(std::string filePath)
 {
-    std::cout << "direktoriayi vaxt filepathy ekela->" << filePath << std::endl;
-    std::cout << "ete esi tpvela uremn jokela vor DIREKTORIAya\n";
     if (filePath[filePath.size() - 1] != '/')
         filePath += '/';
     std::vector<LocationDirective*> locdir = servers[servIndex]->getLocdir();
@@ -576,9 +573,6 @@ std::string Request::uri_is_directory(std::string filePath)
         str = str.substr(0, str.size() - 1);
     if (str[str.size() - 1] != '/')
         str += '/';
-    std::cout << "fiiiiiiiiiiiiiile->" << filePath << std::endl;
-    std::cout << "strne senc mometa->" << str << std::endl;
-    ////////////////
     if (filePath != str)
     {
         error_page_num = 404;
@@ -590,10 +584,8 @@ std::string Request::uri_is_directory(std::string filePath)
             filePath += '/' + getFilesInDirectory(filePath);
         else
             filePath += getFilesInDirectory(filePath);
-        std::cout << "/ enq morace hastat->" << filePath << std::endl;
         return get_need_string_that_we_must_be_pass_send_system_call(filePath);
     }
-    std::cout << "👽ba incha->" << locdir[locIndex]->getAutoindex() << std::endl;
     if (filePath == str && locdir[locIndex]->getAutoindex() == "off")
     {
         error_page_num = 403;
@@ -638,7 +630,6 @@ std::string Request::autoindex(std::string filePath)
 
 std::string Request::constructingResponce(std::string filePath)
 {
-    std::cout << "filepath === " << filePath << std::endl;
     if (filePath[filePath.size() - 1] == '?')
         filePath = filePath.substr(0, filePath.size() - 1);
     if (pathExists(filePath) == false)
@@ -695,7 +686,6 @@ void Request::handleClientRequest(int client_fd) {
                 break;
             case STATIC:
                 response = get_response(method, buffer, bytesRead);
-                std::cout<<response<<std::endl;
                 send(client_fd, response.c_str(), strlen(response.c_str()), 0);
                 break;
         }
@@ -859,22 +849,16 @@ std::string Request::handleDelete(std::string filePath)
 std::string Request::get_response(std::string &method, char *buffer, int bytesRead)
 {
     // function for static methods
-    std::cout<<"reached here\n";
-    std::cout <<"🦈🦈🦈 "<< buffer<<std::endl;
     std::string res;
     if (method == "GET")
     {
-        for (size_t i = 0; i < servers[servIndex]->getLocdir()[servers[servIndex]->get_locIndex()]->getIndex().size(); i++)
-            std::cout<<"🌧🌧🌧🌧 "<<servers[servIndex]->getLocdir()[servers[servIndex]->get_locIndex()]->getIndex()[i]<<std::endl;
         error_page_num = 200;
         // request_header_validation.check_this_metdod_has_in_appropriate_server(method, locIndex);
         //////redirecti masna//////
         if (!servers[servIndex]->getLocdir()[servers[servIndex]->get_locIndex()]->getRedirect().empty())
         {
-            std::cout<<"🦓🦓🦓🦓🦓\n";
             error_page_num = servers[servIndex]->getLocdir()[servers[servIndex]->get_locIndex()]->getRedirect().begin()->first;
             std::string filePath = servers[servIndex]->getLocdir()[servers[servIndex]->get_locIndex()]->getRedirect().begin()->second;
-            std::cout << "es chem du es->" << filePath.substr(0,8) << std::endl;
             // if (filePath.substr(0,8) != "https://" && filePath.substr(0,8) != "http://")
             // {
             //         std::string server;
@@ -888,22 +872,16 @@ std::string Request::get_response(std::string &method, char *buffer, int bytesRe
             //         std::cout << "uuuuuuuuuuuuuuuuuuuu->"<<server << std::endl;
             //         filePath = "http://" + server + filePath; 
             // }
-            std::cout << "vayara->" <<filePath <<std::endl;
             return generateRedirectResponse(filePath);
         }
         ////////////////////////////////
         std::string filePath = getFilepath(uri);
         res = constructingResponce(filePath);
-        std::cout<<"-----------------------------------\n";
-        // std::cout<<res;
-        std::cout<<"-----------------------------------\n";
     }
     else if(method == "POST")
     {
         error_page_num = 201;
         // request_header_validation.check_this_metdod_has_in_appropriate_server(method, locIndex);
-        std::cout << "uri = " << uri << std::endl;
-        std::cout << "whic =" << servers[servIndex]->get_locIndex()<<std::endl;
         res = post_method_tasovka(buffer, bytesRead);
     }
     else if (method == "DELETE")
@@ -911,11 +889,7 @@ std::string Request::get_response(std::string &method, char *buffer, int bytesRe
         error_page_num = 204; // Default to success
         // request_header_validation.check_this_metdod_has_in_appropriate_server(method, locIndex);
         std::string filePath = getFilepath(uri);
-        std::cout<<"2 angam\n";
         res = handleDelete(filePath);
-        std::cout << "-----------------------------------\n";
-        std::cout << res;
-        std::cout << "-----------------------------------\n";
     }
     return res;
 }

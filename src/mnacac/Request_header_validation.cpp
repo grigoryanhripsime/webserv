@@ -168,14 +168,11 @@ int Request_header_validation::have_this_uri_in_our_current_server(int servIndex
 int Request_header_validation::check_this_metdod_has_in_appropriate_server(std::string method, int which_location)
 {
     LocationDirective* locdir;
-    std::cout << "hasav stxe\n";
-    std::cout << "which_location = " << which_location << std::endl;
     locdir = servers[servIndex]->getLocdir()[which_location];
     // std::cout << "tvyal locdir" << locdir->getPath() << std::endl;
     std::vector<std::string> allow_methods = locdir->getAllow_methods();
     for(size_t i = 0; i < allow_methods.size(); ++i)
     {
-        std::cout << "curent metodne->" << allow_methods[i] << std::endl;
         if (allow_methods[i] == method)
             return 1;//ka
     }
