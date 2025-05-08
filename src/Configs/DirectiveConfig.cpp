@@ -7,7 +7,7 @@ std::map<std::pair<std::string, int>, std::vector<int> > DirectiveConfig::get_un
 
 DirectiveConfig::~DirectiveConfig()
 {
-    std::cout << "DirectiveConfig dtor is called\n";
+    // std::cout << "DirectiveConfig dtor is called\n";
     std::vector<ServerDirective*>::iterator it = servers.begin();
     for (; it != servers.end(); ++it)
         if (*it)
@@ -45,8 +45,7 @@ void DirectiveConfig::directiveValidation()
 
             // ServerDirective *serv = NULL;
             serv = fillServers(serverBlock);//chem jokum inchnel lcnelu
-            std::clog << "STE CHPTI HASNI\n\n";
-            ////////////////////////////////////////////////
+
             // 3.3. Проверка location блоков
             std::multimap<std::string, Directive*>::iterator itLoc = serverBlock->blocks.begin();
             for (; itLoc != serverBlock->blocks.end(); ++itLoc)
@@ -67,7 +66,6 @@ void DirectiveConfig::directiveValidation()
             servers.push_back(serv);
 
         }
-        std::cout << "axpeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeer\n";
         if (servers.size() > 1)
         {
             if_config_has_more_servers__whether_each_server_has_name_when_they_have_the_same_ip_and_port(servers);
@@ -77,11 +75,8 @@ void DirectiveConfig::directiveValidation()
             //Armany asec vor ete nuyn ip port unen 1ic avel serverver configi error tanq,lav chi vor nayum enq ete anunnery tarber enq asum enq lav 
         }
         else
-        {
             if_config_has_more_servers__whether_each_server_has_name_when_they_have_the_same_ip_and_port(servers);
-
-            std::cout << "axpeeeeeeeeeeeeeeeeeeeeeeeeer\n";
-        }
+        Logger::printStatus("INFO", "General validation of servers has passed successfully?!");
     }
     catch(...)
     {
@@ -134,19 +129,17 @@ void DirectiveConfig::if_config_has_more_servers__whether_each_server_has_name_w
         else
             itMap->second.push_back(i);
     }
-    // 127.0.0.1:8080         0 2 3
-    // 172.19.183.204:8089    1 4
  
-    std::map<std::pair<std::string, int>, std::vector<int> >::iterator pr = unique_listens.begin();
-    for (; pr != unique_listens.end(); ++pr)
-    {
-        std::cout << "ip and port->" << (*pr).first.first << " " << (*pr).first.second << std::endl;
-        std::vector<int> vec = (*pr).second;
-        std::cout << "krknvox ip ev porteri indexnery->";
-        for(size_t i = 0; i < vec.size(); ++i)
-            std::cout << vec[i] << " ";
-        std::cout << std::endl;
-    }
+    // std::map<std::pair<std::string, int>, std::vector<int> >::iterator pr = unique_listens.begin();
+    // for (; pr != unique_listens.end(); ++pr)
+    // {
+    //     std::cout << "ip and port->" << (*pr).first.first << " " << (*pr).first.second << std::endl;
+    //     std::vector<int> vec = (*pr).second;
+    //     std::cout << "krknvox ip ev porteri indexnery->";
+    //     for(size_t i = 0; i < vec.size(); ++i)
+    //         std::cout << vec[i] << " ";
+    //     std::cout << std::endl;
+    // }
 }
 
 

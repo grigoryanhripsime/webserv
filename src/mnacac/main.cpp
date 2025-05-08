@@ -17,16 +17,15 @@ int main(int argc, char *argv[])
         std::string strFile = fileReader.getFileStr();
         
         TokenConfig tokenConfig(strFile);
-        std::cout << "file->" << strFile << std::endl;
+        // std::cout << "file->" << strFile << std::endl;
         tokenConfig.fillingDirectives();
         //printf the all directives`blocks and simple
-        tokenConfig.printDirective(tokenConfig.getDirectives(), 0);
+        // tokenConfig.printDirective(tokenConfig.getDirectives(), 0);
+        Logger::printStatus("INFO", "Parsing of configuration file completed!");
         DirectiveConfig dirConf(tokenConfig.getDirectives());
-        std::cout << "sksesinq\n\n\n";
         dirConf.directiveValidation();
-        dirConf.printServers();
+        // dirConf.printServers();
         ////////////
-        std::cout << "ahavoran\n\n\n\n\n";
     //     std::map<std::pair<std::string, int>, std::vector<int> >::iterator pr = dirConf.get_unique_listens().begin();
     // for (; pr != dirConf.get_unique_listens().end(); ++pr)
     // {

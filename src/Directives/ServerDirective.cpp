@@ -62,7 +62,6 @@ void    ServerDirective::setError_pages(std::vector<std::string> pages)
 {
 
     std::vector<std::string>::iterator it = pages.begin();
-    std::cout << "gres-?" << *(pages.end() - 1) << std::endl;
     if (is_valid_index_value(*(pages.end() - 1)) == false)
         throw std::runtime_error("Invalid last value(path) of error_page" + (*(pages.end() - 1)));
     for(; it != pages.end() - 1; ++it)

@@ -5,6 +5,7 @@
 #include "LocationDirective.hpp"
 class ServerDirective;
 #include "Directive.hpp"
+#include "Logger.hpp"
 class Directive;
 
 class DirectiveConfig

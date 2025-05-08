@@ -2,32 +2,22 @@
 #include<iostream>
 
 //1048576 == 1MB
-AGeneralDirective::AGeneralDirective() : client_max_body_size(1048576), root("")//error_pages()senc grenq hena vor chgrenq meka nuyn datarki ahy chi?asacs enq jnjenq eta
-{
-    // index.push_back("index.html");//vor default talis enq u en setteri mej vor push_back enq anum,es default arjeqy chem jnjum zut vric(1-rd indexic) avelacnum em,uje himnakan procesi jmk stigel ete vec-i size-@ meca 1ic toist baci defaultic config fayli mej arjeqa tvac exe,ignorenq et deafult arjeqy u 2rd elemntic(1-rd indexic) sksenq man gal faylery
-    // error_pages[400] = "error_pages/400.html";
-    // error_pages[401] = "error_pages/401.html";
-    // error_pages[402] = "error_pages/402.html";
-    // error_pages[403] = "error_pages/403.html";
-    // error_pages[404] = "error_pages/404.html";
-    // error_pages[405] = "error_pages/405.html";
-    // error_pages[413] = "error_pages/413.html";
-    // error_pages[500] = "error_pages/500.html";//yani defaultov menq karanq unenanq vor errorin inch eja hamapatasxan
-}
+AGeneralDirective::AGeneralDirective() : client_max_body_size(1048576), root("") {}
 
 std::vector<std::string> AGeneralDirective::getIndex() { return index; } 
 size_t  AGeneralDirective::getBodySize() { return client_max_body_size; }
 
-AGeneralDirective::~AGeneralDirective(){std::cout << "AGeneralDirective dtor is called\n";}
+AGeneralDirective::~AGeneralDirective()
+{
+    // std::cout << "AGeneralDirective dtor is called\n";
+}
+
 /////////////index/////////////////
 bool AGeneralDirective::is_valid_index_value(std::string value)
 {
-    std::cout << "elav = " << value << std::endl;
-    {
-        size_t ind = value.find('.');
-        if (value[0] == '.' || (ind != std::string::npos && !is_all_letters(value.substr(ind + 1, value.size()))))
-            throw std::runtime_error("Innvalid value(poxir message-@)" + value);
-    }
+    size_t ind = value.find('.');
+    if (value[0] == '.' || (ind != std::string::npos && !is_all_letters(value.substr(ind + 1, value.size()))))
+        throw std::runtime_error("Innvalid value(poxir message-@)" + value);
     if (isAllDigits(value) || value.empty() || value[0] == '/' || value[value.size() - 1] == '/'
         || value.find("//") != std::string::npos)
         return false;

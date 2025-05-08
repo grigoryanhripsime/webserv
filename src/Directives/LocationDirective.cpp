@@ -111,7 +111,6 @@ int LocationDirective::is_not_inserted(ServerDirective *serv, const std::string&
 
 void    LocationDirective::setPath(const std::string& path, ServerDirective *serv)
 {
-    std::cout<<path<<std::endl;
     if (!isValidLocationPath(path))
         throw std::runtime_error("path conatin unnecessary symbol");
     if (is_not_inserted(serv, path) == -1)
