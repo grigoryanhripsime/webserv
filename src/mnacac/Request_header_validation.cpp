@@ -124,7 +124,8 @@ std::string    Request_header_validation::validation_of_the_first_line(Request &
     if (check_this_metdod_has_in_appropriate_server(result[0], locIndex) < 0)
     {
         req.set_error_page_num(405);
-        std::runtime_error("error page: header");
+        std::cout << "stexic em helnum brats\n\n";
+        throw std::runtime_error("this method not allowed in appropriate location");
     }
 
     ////////////////////////////////////////
@@ -138,13 +139,13 @@ int Request_header_validation::have_this_uri_in_our_current_server(int servIndex
     int which_location = -1;
     std::string path;
     size_t length = 0;
-    if (uri[uri.size() - 1] == '/')
+    if (uri[uri.size() - 1] == '/' && uri.size() != 1)
         uri.erase(uri.size() - 1);
     std::cout << "mihat joekqn hastat chisht uri a->" << uri <<  std::endl;
     for(size_t i = 0; i < vec_locations.size(); ++i)
     {
         path = vec_locations[i]->getPath();
-        if (path[path.size() - 1] == '/')
+        if (path[path.size() - 1] == '/' && path.size() != 1)
             path.erase(path.size() - 1);
         std::cout << "yntacik locpath = " << path << std::endl;
         if (path.size() > uri.size())

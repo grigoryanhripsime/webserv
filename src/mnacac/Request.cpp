@@ -270,11 +270,11 @@ std::string Request::handle_multipart_upload(const std::string &upload_dir)
         // return "Error: No boundary found for multipart/form-data";
     }
     ///////////Check if upload_dir exists and is writable//////////////
-    // if (!isDirectory(upload_dir) || access(upload_dir.c_str(), W_OK) != 0) {
-    //     std::cout << "stEx hasav\n" << upload_dir;
-    //     error_page_num = 403;
-    //     throw std::runtime_error("Upload directory does not exist or is not writable");
-    // }
+    if (!isDirectory(upload_dir) || access(upload_dir.c_str(), W_OK) != 0) {
+        std::cout << "stEx hasav\n" << upload_dir;
+        error_page_num = 403;
+        throw std::runtime_error("Upload directory does not exist or is not writable");
+    }
     /////////////////////////////////////////////
     std::string body = post_body;
     std::string response = "Files uploaded successfully:\n";
@@ -883,6 +883,7 @@ std::string Request::get_response(std::string &method, char *buffer, int bytesRe
         for (size_t i = 0; i < servers[servIndex]->getLocdir()[servers[servIndex]->get_locIndex()]->getIndex().size(); i++)
             std::cout<<"🌧🌧🌧🌧 "<<servers[servIndex]->getLocdir()[servers[servIndex]->get_locIndex()]->getIndex()[i]<<std::endl;
         error_page_num = 200;
+        // request_header_validation.check_this_metdod_has_in_appropriate_server(method, locIndex);
         //////redirecti masna//////
         if (!servers[servIndex]->getLocdir()[servers[servIndex]->get_locIndex()]->getRedirect().empty())
         {
@@ -916,6 +917,7 @@ std::string Request::get_response(std::string &method, char *buffer, int bytesRe
     else if(method == "POST")
     {
         error_page_num = 201;
+        // request_header_validation.check_this_metdod_has_in_appropriate_server(method, locIndex);
         std::cout << "uri = " << uri << std::endl;
         std::cout << "whic =" << servers[servIndex]->get_locIndex()<<std::endl;
         res = post_method_tasovka(buffer, bytesRead);
@@ -923,6 +925,7 @@ std::string Request::get_response(std::string &method, char *buffer, int bytesRe
     else if (method == "DELETE")
     {
         error_page_num = 204; // Default to success
+        // request_header_validation.check_this_metdod_has_in_appropriate_server(method, locIndex);
         std::string filePath = getFilepath(uri);
         std::cout<<"2 angam\n";
         res = handleDelete(filePath);
