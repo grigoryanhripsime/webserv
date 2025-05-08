@@ -167,16 +167,8 @@ void    LocationDirective::setRedirect(std::vector<std::string> red)
 
 void    LocationDirective::setUpload_dir(const std::string& upload_dir)
 {
-    // struct stat info;
-
     if (upload_dir.size() > 1 && upload_dir[upload_dir.size() - 1] == '/')
-        throw std::runtime_error("Upload dir must not have / at the end." + upload_dir);
-    // if (stat(upload_dir.c_str(), &info) != 0)
-    //     throw std::runtime_error("Directory does not exist." + upload_dir);
-    // if (!(info.st_mode & S_IFDIR))
-    //     throw std::runtime_error("Path is not a directory.");
-    // if (access(upload_dir.c_str(), W_OK) != 0)
-    //     throw std::runtime_error("Directory is not writable.");//bacel comentyyyyy
+        throw std::runtime_error("Upload dir must not have / at the end." + upload_dir);//jnjelem en checkeri pahy vortev et arden post metodi mejem anum,vortev sa aveli shat vochte configi xndira ayl post metodi!
     this->upload_dir = upload_dir;
 }
 

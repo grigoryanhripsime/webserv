@@ -270,17 +270,18 @@ std::string Request::handle_multipart_upload(const std::string &upload_dir)
         // return "Error: No boundary found for multipart/form-data";
     }
     ///////////Check if upload_dir exists and is writable//////////////
-    if (!isDirectory(upload_dir) || access(upload_dir.c_str(), W_OK) != 0) {
-        error_page_num = 403;
-        throw std::runtime_error("Upload directory does not exist or is not writable");
-    }
+    // if (!isDirectory(upload_dir) || access(upload_dir.c_str(), W_OK) != 0) {
+    //     std::cout << "stEx hasav\n" << upload_dir;
+    //     error_page_num = 403;
+    //     throw std::runtime_error("Upload directory does not exist or is not writable");
+    // }
     /////////////////////////////////////////////
     std::string body = post_body;
     std::string response = "Files uploaded successfully:\n";
     size_t pos = 0;
 
     // Создаем директорию, если она не существует
-    mkdir(upload_dir.c_str(), 0755);
+    // mkdir(upload_dir.c_str(), 0755);//esi pakvuma
 
     while ((pos = body.find(boundary)) != std::string::npos)
     {
@@ -311,6 +312,11 @@ std::string Request::handle_multipart_upload(const std::string &upload_dir)
         std::cout << "FILENAME-> "<< filename << std::endl;
         if (!filename.empty())
         {
+            if (filename.find("/") != std::string::npos || filename.find("..") != std::string::npos) {
+                error_page_num = 400;
+                std::cout << "VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVAAAAAAAAAAAAAAAAAAAAAAAAAAAt chi\n";
+                throw std::runtime_error("Filename contains invalid characters");
+            }//vor senc ban chkarana lini`../malicious.txt kam /src/file.txt nginx-nela kanxum filename-i mej sirectory unenaly,bayc chjoka xi,bayc secure mcnelu hamara arvum
             // Извлекаем содержимое файла
             file_content = body.substr(0, part_end - 2); // Удаляем \r\n
 
@@ -319,8 +325,8 @@ std::string Request::handle_multipart_upload(const std::string &upload_dir)
             std::cout << "FILE PATH->" << file_path <<std::endl;
             
             std::string dir_path = file_path.substr(0, file_path.find_last_of('/'));
-            create_directories(dir_path);//backend
-
+            // create_directories(dir_path);//backend,ESI POXVUMA DARNUM CHECK_DIRECTORIES
+            check_directories(dir_path);
             int fd = open(file_path.c_str(), O_CREAT | O_WRONLY | O_TRUNC, 0644);
             if (fd == -1) {
                 error_page_num = 500;
@@ -348,6 +354,28 @@ std::string Request::handle_multipart_upload(const std::string &upload_dir)
     std::cout << "FILE_PATH ->" << file_path <<std::endl;
     std::cout << "RESSSSSSSPONSE->" << response << std::endl;
     return response;
+}
+
+
+void Request::check_directories(const std::string& dir_path)
+{
+    if (dir_path.empty()) {
+        error_page_num = 403;
+        throw std::runtime_error("Invalid directory path");
+    }
+    struct stat st;
+    if (stat(dir_path.c_str(), &st) != 0) {
+        error_page_num = 403;
+        throw std::runtime_error("Directory does not exist: " + dir_path);
+    }
+    if (!S_ISDIR(st.st_mode)) {
+        error_page_num = 403;
+        throw std::runtime_error("Path is not a directory: " + dir_path);
+    }
+    if (access(dir_path.c_str(), W_OK) != 0) {
+        error_page_num = 403;
+        throw std::runtime_error("Directory is not writable: " + dir_path);
+    }
 }
 
 // Обработка простых POST-запросов (не multipart)
@@ -379,23 +407,6 @@ std::string Request::handle_simple_post(const std::string &upload_dir)
 
     return "POST data saved successfully";
 }
-
-// Вспомогательная функция для рекурсивного создания директорий
-void Request::create_directories(const std::string &path)
- {
-    std::string current_path;
-    for (size_t i = 0; i < path.size(); ++i) {
-        if (path[i] == '/') {
-            if (!current_path.empty()) {
-                mkdir(current_path.c_str(), 0755);
-            }
-        }
-        current_path += path[i];
-    }
-    if (!current_path.empty()) {
-        mkdir(current_path.c_str(), 0755);
-    }
-}//esi ashxatuma bayc mihat haskanal vonca ashxatum:)))))
 
 
 bool Request::pathExists(const std::string& path)

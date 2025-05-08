@@ -698,3 +698,16 @@ BODY_STARTS_HERE...
 
 
 kogda content-type application/x-www-form-urlencoded upload_dir ispolzuyetca na nginxe?
+
+
+
+
+
+NGINX’s upload module (ngx_http_upload_module) requires an existing, writable directory; does not create directories automatically.
+
+yst groki hangecinq nran vor nginx-@ post-i mej vochte stexcuma papkanery ayl zut stuguma ete kan u permisson ery toshnia nor sarauma et txt kam jpg fayly
+dra hamar vochte kogtagorcenq create_directories ayl check_directories hamel kxusapenq mkdir ogtagorceluc,aysinqn posty ashxatacbelu hamar meqn mincev cragiry run anely pti mtnenq dzerov sarqenq papkanery ete upload_dir-@ /sub/dir/stex senc enq uzum listening
+
+
+
+curl is a command-line tool used to transfer data to or from a server using various protocols, including HTTP.
