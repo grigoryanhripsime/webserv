@@ -84,15 +84,13 @@ void Servers::runLoop()
                 if (!isServer)
                 {
                     try{
-                        std::clog << "Reached to this point\n\n";
                         Request request(config->get_servers());
-                        std::cout << "kanchvav" << std::endl;
                         request.handleClientRequest(sockfd);
                         requests.push_back(request);
                     }
                     catch(std::exception& e)
                     {
-                        std::cout << "EXception: " << e.what() << std::endl;
+                        std::cout << "EXception: " << e.what() << std::endl; //TODO: maybe just open an error page or remove catcho, so if the server isnot valid programm stoped
                     }
                 }
             }
@@ -126,9 +124,11 @@ void Servers::acceptClient(int server_fd)
     ev.data.fd = client_fd;
     if (epoll_ctl(epfd, EPOLL_CTL_ADD, client_fd, &ev) == -1) {
         std::cerr << "Failed to add client socket to epoll" << std::endl;
-        close(client_fd);
+        close(client_fd); // TODO: maybe we could throw an exception?
     } else {
-        std::cout << "Accepted new client connection: fd " << client_fd << std::endl;
+        std::stringstream ss;
+        ss <<"Accepted new client connection: fd "<<client_fd;
+        Logger::printStatus("INFO", ss.str());
     }
 }
 

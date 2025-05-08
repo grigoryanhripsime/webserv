@@ -33,9 +33,9 @@ std::string    Request_header_validation::if_received_request_valid(Request &req
     }
     
     method = validation_of_the_first_line(req, lines[0]);
-    std::cout << "OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO\n";
+    if (!method.empty())
+        Logger::printStatus("INFO", "Method of the request is: " + method);
     req.set_method(method);
-    // std::cout << "ific araj->" << locIndex<<std::endl;
     if (method != "GET" && method != "POST" && method != "DELETE") 
     {
         req.set_error_page_num(405);
@@ -93,66 +93,53 @@ std::string    Request_header_validation::validation_of_the_first_line(Request &
         throw std::runtime_error("error page piti bacvi, headeri error a");
     }
     uri = result[1];
-
+    Logger::printStatus("INFO", "URI used to connect to server: " + uri);
     req.set_uri(uri);
     if (uri == "/favicon.ico")
+    {
+        Logger::printStatus("WARNING", "The request is from favicon");
         return "";
+    }
     size_t harcakanInd = uri.find('?');//stugel,norem avelacre
     if (harcakanInd != std::string::npos)
         req.set_query(uri.substr(harcakanInd + 1));
     int locIndex = have_this_uri_in_our_current_server(servIndex);//esi arajin toxi uri masi pahna
-    std::cout << "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee->"<<result[0] <<std::endl;
     if (locIndex < 0)//&& result[0] != "DELETE",senc che vortev mez location polyubomu petqa voprtev metodery menak location-in en patkanum////////////////////////
     {
         req.set_error_page_num(404);//zdes kakoe cifr dat?
-        
-        std::cout << "yavni bacaskaanaaaaaa\n";
-        
         throw std::runtime_error("error page pti bacvi browser-um");//es hmi exception em qcum vor segfault chta,bayc heto pti zut error page-@ bacenq
     }
     servers[servIndex]->setLocIndex(locIndex);//set locIndex
-    //TODO: add check for server's index
-    //////////////////////////////
 
     if (result[2] != "HTTP/1.1" && result[2] != "HTTP/2")
     {
         req.set_error_page_num(505);
-        throw std::runtime_error("error page:: headery     sxal a");
+        throw std::runtime_error("error page:: headery sxal a");
     }
     
-    ///////////////////////////////
     if (check_this_metdod_has_in_appropriate_server(result[0], locIndex) < 0)
     {
         req.set_error_page_num(405);
-        std::cout << "stexic em helnum brats\n\n";
         throw std::runtime_error("this method not allowed in appropriate location");
     }
-
-    ////////////////////////////////////////
     return result[0];
 }
 
 int Request_header_validation::have_this_uri_in_our_current_server(int servIndex)
 {
-    std::cout << "servIndex->" << servIndex << std::endl;
     std::vector<LocationDirective*> vec_locations = servers[servIndex]->getLocdir();
     int which_location = -1;
     std::string path;
     size_t length = 0;
     if (uri[uri.size() - 1] == '/' && uri.size() != 1)
         uri.erase(uri.size() - 1);
-    std::cout << "mihat joekqn hastat chisht uri a->" << uri <<  std::endl;
     for(size_t i = 0; i < vec_locations.size(); ++i)
     {
         path = vec_locations[i]->getPath();
         if (path[path.size() - 1] == '/' && path.size() != 1)
             path.erase(path.size() - 1);
-        std::cout << "yntacik locpath = " << path << std::endl;
         if (path.size() > uri.size())
-        {
-            std::cout << "sax stuc che?\n";
             continue ;
-        }
         size_t tmpLength = 0;
         size_t j;
         for (j = 1; j < uri.size() && path[j] == uri[j]; ++j)//1ic em sksum vortevdemi simvoli saxi mot /a linelu
@@ -170,10 +157,9 @@ int Request_header_validation::have_this_uri_in_our_current_server(int servIndex
             which_location = i;
         }
     }
-    std::cout << "vitoge which_locastin = " << which_location << std::endl;
     if (which_location == -1)
     {
-        std::cout << "CHfind location path\n\n\n";
+        Logger::printStatus("WARNING", "Oops, the location is not located in this server");
         return -1;
     }
     return which_location;
@@ -201,14 +187,12 @@ int Request_header_validation::getServerThatWeConnectTo(std::string line)
     std::string serverName = line.substr(6);
     serverName = serverName.substr(0, serverName.find(":"));
 
+    Logger::printStatus("INFO", "Specified servername: " + serverName);
     for (size_t i = 0; i < servers.size(); i++)
     {
         if (servers[i]->getServer_name() == serverName)
         //    || serverName == servers[i]->getListen().first)
-        {
-            std::cout << "chishta Vrds\n";
             return i;
-        }
     }
     for (size_t i = 0; i < servers.size(); i++)
     {
@@ -217,7 +201,6 @@ int Request_header_validation::getServerThatWeConnectTo(std::string line)
     }//arandzin for-erov em grel nra hamar vortev`
     //ete unenq nuyn ip-ov ev port-ov serverner bayc tvelenq server_name apa zaprosty etalua et name-ov serverin
     //bayc ete unenq nuyn ip-ov ev port-ov serverner bayc chenq tvel server_name apa zaprosty etalua arajin et ip-ov u prot-ov serverin
-    std::cout << "en vat depqna\n";
     return 0;//xi 0????????????????????vor chisht anunov server chunenq pti meka arajin exac serverin eta requesty te -1 reurn anum u ynde stugum em eroor page bacem 500
 }
 
@@ -233,17 +216,17 @@ void    Request_header_validation::status_handler()
             uri_share.push_back(token);
         }
     }
-    std::cout<<"🤶🤶🤶\n";
-
     if (!uri_share.empty() && uri_share[0] == "cgi-bin")
     {
         std::vector<LocationDirective*> locdir = servers[servIndex]->getLocdir();
-        int locIndex = servers[servIndex]->get_locIndex();
-        std::cout << "bebeeeeeeeeeeeeeeeeeeeeeee = " << locIndex<<std::endl;
         // LocationDirective *loc = locdir[locIndex];
         status = DYNAMIC;
+        Logger::printStatus("INFO", "The request is DYNAMIC");
+
     }
     else
+    {
         status = STATIC;
-    std::cout << "\r\n\r\n" << status << "\r\n\r\n";
+        Logger::printStatus("INFO", "The request is STATIC");
+    }
  }

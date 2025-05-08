@@ -31,7 +31,6 @@ class Request_header_validation
         status_type get_status() const {return status; }  
 
         void    status_handler();
-        void validate_uri(const std::string& uri_str);
         Request_header_validation(std::vector<ServerDirective *> servers);
         std::string    if_received_request_valid(Request &req, char *c_buffer);
         std::string    validation_of_the_first_line(Request &req, std::string line);
@@ -39,6 +38,4 @@ class Request_header_validation
         int check_this_metdod_has_in_appropriate_server(std::string method, int which_location);
         int getServerThatWeConnectTo(std::string line);
         void fill_headers_map(headers_map &headers);
-
-
 };

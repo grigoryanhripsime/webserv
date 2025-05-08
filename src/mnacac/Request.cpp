@@ -33,9 +33,8 @@ void    Request::fill_status_message()
     status_message[505] = "HTTP VERSION NOT SUPPORTED";
 }
 
-Request::Request(std::vector<ServerDirective *> servers){
-    std::clog << "Reached to this point\n\n";
-
+Request::Request(std::vector<ServerDirective *> servers)
+{
     this->servers = servers;
     servIndex = -1;
     locIndex = -1;
@@ -411,7 +410,6 @@ std::string Request::handle_simple_post(const std::string &upload_dir)
 
 bool Request::pathExists(const std::string& path)
 {
-    std::cout << "chanaparh->" <<path <<std::endl;
     return (access(path.c_str(), F_OK) != -1);
 }
 
@@ -479,7 +477,6 @@ std::string Request::get_need_string_that_we_must_be_pass_send_system_call(std::
     std::stringstream ss;
     if (filePath.find("</a>") == std::string::npos)
     {
-        std::cout<<filePath<<"    🦔🦔🦔    \n";
         std::ifstream file(filePath.c_str());
         if (!file)
             std::cerr << "Failed to open file" << std::endl;
@@ -493,11 +490,8 @@ std::string Request::get_need_string_that_we_must_be_pass_send_system_call(std::
     // После обработки можешь отправить ответ:
     std::stringstream ss2;
     ss2 << error_page_num;//error_page_num type is int
-    std::cout << "EMOJI" << status_message[error_page_num] << std::endl;
     std::string header = "HTTP/1.1 " + ss2.str() + " " + status_message[error_page_num] + "\r\nContent-Length: ";
-
     std::string whiteSpaces = "\r\n\r\n";
-
     std::stringstream ss1;
     ss1 << ss.str().size();
 
@@ -660,54 +654,46 @@ std::string Request::constructingResponce(std::string filePath)
 }
 
 void Request::handleClientRequest(int client_fd) {
-    std::cout << "SIZEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEee=" << SIZE<<std::endl;
     char buffer[SIZE] = {0};
-    std::cout << "vvvvv\n";
     ssize_t bytesRead = read(client_fd, buffer, sizeof(buffer));
-    std::cout << "mda = " << bytesRead<<std::endl;
     if (bytesRead == -1) {
-        std::cerr << "Error reading from client socket" << std::endl;
+        std::cerr << "Error reading from client socket" << std::endl; // TODO: maybe exception?
         epoll_ctl(epfd, EPOLL_CTL_DEL, client_fd, NULL); // 🔻 Удаляем из epoll
         close(client_fd); // Закрываем сокет при ошибке
         return;
     }
     else if (bytesRead == 0) {
-        std::cout << "Client disconnected: fd " << client_fd << std::endl;
+        std::stringstream ss;
+        ss<<"Client disconnected: fd " << client_fd;
+        Logger::printStatus("INFO", ss.str());
         epoll_ctl(epfd, EPOLL_CTL_DEL, client_fd, NULL); // 🔻 Удаляем из epoll
         close(client_fd); // Закрываем сокет, если клиент отключился
         return;
     }
 
-    // Здесь ты можешь обработать запрос клиента
-    std::cout << std::string(buffer, bytesRead) << std::endl;
+    // // Здесь ты можешь обработать запрос клиента
+    // std::cout << std::string(buffer, bytesRead) << std::endl;
 
     Request_header_validation request_header_validation(servers);
     std::string response;
     try 
     {
-        std::cout<<"🫧🫧🫧 meka hasel em\n";
         request_header_validation.if_received_request_valid(*this, buffer);
-        // std::cout << "OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO\n";
         request_header_validation.fill_headers_map(headers);
         //checking if http request header is correct
-        servIndex = request_header_validation.get_servIndex();
-        uri = request_header_validation.get_uri();  
+        // servIndex = request_header_validation.get_servIndex();
+        // uri = request_header_validation.get_uri();  
         // std::string filePath = servers[0]->getRoot() + servers[0]->getLocdir()[0]->getPath() + "/" + servers[0]->getLocdir()[0]->getIndex()[1];
-        std::cout << "methoooooooood = " << method <<std::endl;
         locIndex = servers[servIndex]->get_locIndex();
-        std::cout << "hehehe= " << locIndex <<std::endl;
         //checking if http request header is correct
         request_header_validation.status_handler();
         CGI cgi(this);
         switch(request_header_validation.get_status()) {
             case DYNAMIC:
-                std::cout << "Dynamic function called\r\n\r\n";
                 response = cgi.CGI_handler();
                 send(client_fd, response.c_str(), strlen(response.c_str()), 0);
                 break;
             case STATIC:
-                std::cout << "Static function called\r\n\r\n";
-                std::cout << "ayo hasnum enq sendin\n\n";
                 response = get_response(method, buffer, bytesRead);
                 std::cout<<response<<std::endl;
                 send(client_fd, response.c_str(), strlen(response.c_str()), 0);
@@ -716,21 +702,19 @@ void Request::handleClientRequest(int client_fd) {
     } catch (std::exception &e) {
         if (uri == "/favicon.ico")
             return;
+        Logger::printStatus("ERROR", e.what());
         std::string filename = servers[servIndex]->getError_pages().find(error_page_num)->second;
         std::string root =  servers[servIndex]->getRoot();
         std::string filePath = root + "/" + filename;
-        std::cout<<"💃🏼💃🏼💃🏼 "<<filePath<<std::endl;
-        //stex hastat error page-i vaxtova gali
         if (pathExists(filePath) == false ||  !isFile(filePath))
         {
+            Logger::printStatus("WARNING", "The error page from config file couldn't be reached!");
             char root_char[1024] = {0};
             getcwd(root_char, 1024);
             std::stringstream ss;
             ss << error_page_num;
             servers[servIndex]->getError_pages()[error_page_num] = ss.str() + ".html";
             filePath = std::string(root_char) + "/error_pages/" + ss.str() + ".html";
-            std::cout << "YSIG->>>>>" << filePath << std::endl;
-
         }
         response = get_need_string_that_we_must_be_pass_send_system_call(filePath);
         // std::cout<<res<<std::endl;

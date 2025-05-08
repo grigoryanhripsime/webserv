@@ -56,6 +56,7 @@ std::string CGI::CGI_handler()
     if (output.empty()) {
         CGI_err();
     }
+    Logger::printStatus("INFO", "CGI has completed it's mission successfully!");
     return output;
 }
 
