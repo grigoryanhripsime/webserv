@@ -8,7 +8,7 @@
 #include <fcntl.h>
 #include <cstring>
 
-CGI::CGI(Request * const request) : request(request) {root = request->get_cwd();}
+CGI::CGI(Request * const request) : request(request) {}
 
 std::string CGI::_get_index(const std::vector<std::string> &index, const std::string& path)
 {
@@ -31,6 +31,7 @@ CGI::~CGI() {}
 
 std::string CGI::CGI_handler()
 {
+    root = request->get_cwd();
     int serv_index = request->get_servIndex();
     std::vector<ServerDirective *> servers = request->get_servers();
     ServerDirective * server = servers[serv_index];

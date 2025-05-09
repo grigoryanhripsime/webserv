@@ -43,6 +43,7 @@ Request::Request(std::vector<ServerDirective *> servers)
     file_type = "text/plain";//default
     query = "";
     error_page_num = -1;
+    f_favicon = false;
     fill_status_message();
 }
 
@@ -93,6 +94,11 @@ void Request::parseUrlEncodedForm(const std::string &body)
         
         pos = (amp_pos == std::string::npos) ? body.length() : amp_pos + 1;
     }
+}
+
+void Request::is_favicon()
+{
+    f_favicon = true;
 }
 
 std::string Request::post_method_tasovka(char *buffer, int bytesRead) {
@@ -645,9 +651,25 @@ std::string Request::constructingResponce(std::string filePath)
     return "";
 }
 
+static void    send_response(int client_fd, std::string response, int epfd)
+{
+    ssize_t bytesSent = send(client_fd, response.c_str(), response.size(), 0);
+    if (bytesSent == -1) {
+        std::cerr << "Error sending response to client" << std::endl;
+        epoll_ctl(epfd, EPOLL_CTL_DEL, client_fd, NULL);
+        close(client_fd);
+        return;
+    }
+    if (bytesSent < (ssize_t)response.size()) {
+        std::cerr << "Partial send, sent " << bytesSent << " of " << response.size() << " bytes" << std::endl;
+        //grenq return ;?
+    }
+}
+
 void Request::handleClientRequest(int client_fd) {
     char buffer[SIZE] = {0};
-    ssize_t bytesRead = read(client_fd, buffer, sizeof(buffer));
+    // ssize_t bytesRead = read(client_fd, buffer, sizeof(buffer));
+    ssize_t bytesRead = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
     if (bytesRead == -1) {
         std::cerr << "Error reading from client socket" << std::endl; // TODO: maybe exception?
         epoll_ctl(epfd, EPOLL_CTL_DEL, client_fd, NULL); // 🔻 Удаляем из epoll
@@ -672,10 +694,6 @@ void Request::handleClientRequest(int client_fd) {
     {
         request_header_validation.if_received_request_valid(*this, buffer);
         request_header_validation.fill_headers_map(headers);
-        //checking if http request header is correct
-        // servIndex = request_header_validation.get_servIndex();
-        // uri = request_header_validation.get_uri();  
-        // std::string filePath = servers[0]->getRoot() + servers[0]->getLocdir()[0]->getPath() + "/" + servers[0]->getLocdir()[0]->getIndex()[1];
         locIndex = servers[servIndex]->get_locIndex();
         //checking if http request header is correct
         request_header_validation.status_handler();
@@ -683,18 +701,34 @@ void Request::handleClientRequest(int client_fd) {
         switch(request_header_validation.get_status()) {
             case DYNAMIC:
                 response = cgi.CGI_handler();
-                send(client_fd, response.c_str(), strlen(response.c_str()), 0);
+                // send(client_fd, response.c_str(), strlen(response.c_str()), 0);
                 break;
             case STATIC:
-            std::cout << buffer<<std::endl;
+            std::clog << buffer<<std::endl;
                 response = get_response(method, buffer, bytesRead);
                 std::cout << "paho->" << response.size() << std::endl;
-                send(client_fd, response.c_str(), strlen(response.c_str()), 0);
+                // send(client_fd, response.c_str(), strlen(response.c_str()), 0);
                 break;
         }
+        send_response(client_fd, response, epfd);
+        // ssize_t bytesSent = send(client_fd, response.c_str(), response.size(), 0);
+        // if (bytesSent == -1) {
+        //     std::cerr << "Error sending response to client" << std::endl;
+        //     epoll_ctl(epfd, EPOLL_CTL_DEL, client_fd, NULL);
+        //     close(client_fd);
+        //     return;
+        // }
+        // if (bytesSent < (ssize_t)response.size()) {
+        //     std::cerr << "Partial send, sent " << bytesSent << " of " << response.size() << " bytes" << std::endl;
+        //     //grenq return ;?
+        // }
     } catch (std::exception &e) {
-        if (uri == "/favicon.ico")
-            return;
+        // if (uri == "/favicon.ico")
+        // {
+            
+        //     // send_response(client_fd, response, epfd);
+        //     return;
+        // }
         Logger::printStatus("ERROR", e.what());
         std::string filename = servers[servIndex]->getError_pages().find(error_page_num)->second;
         std::string root =  servers[servIndex]->getRoot();
@@ -711,7 +745,8 @@ void Request::handleClientRequest(int client_fd) {
         }
         response = get_need_string_that_we_must_be_pass_send_system_call(filePath);
         // std::cout<<res<<std::endl;
-        send(client_fd, response.c_str(), response.size(), 0);
+        send_response(client_fd, response, epfd);
+        // send(client_fd, response.c_str(), response.size(), 0);
     }
     // if (if_http_is_valid(buffer) < 0)
     // {
@@ -773,7 +808,24 @@ std::string Request::get_response(std::string &method, char *buffer, int bytesRe
 {
     // function for static methods
     std::string res;
-    if (method == "GET")
+    if (f_favicon)
+    {
+        std::cout << "lllllllllllllllaaaaaaaaaaaaaaaaaaaavvvvvvvvvvvvvaaaaaaaaaaa\n" << error_page_num <<std::endl;
+        std::stringstream ss2;
+        ss2 << error_page_num;//error_page_num type is int
+        std::string header = "HTTP/1.1 " + ss2.str() + " " + status_message[error_page_num] + "\r\nContent-Length: ";
+        std::stringstream ss;
+        ss << servers[servIndex]->getFavicon();//axper esi fayli parunakutyuny chi qcum ss-i mej,henc zut path-na qcum,mihat haskanal es pahy,meke verjum traqav`[INFO]: URI used to connect to server: /.well-known/appspecific/com.chrome.devtools.json ay senc baner berum
+        res += ss.str().size();
+        res += "\r\n";//ste 0???
+        res += "Connection: keep-alive\r\n";
+        std::string whiteSpaces = "\r\n\r\n";
+
+        // std::clog << ss1.str() << "\n\n";
+
+        return header + res + whiteSpaces + ss.str();
+    }
+    else if (method == "GET")
     {
         error_page_num = 200;
         // request_header_validation.check_this_metdod_has_in_appropriate_server(method, locIndex);

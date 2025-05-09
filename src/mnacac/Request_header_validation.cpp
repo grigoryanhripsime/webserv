@@ -97,16 +97,13 @@ std::string    Request_header_validation::validation_of_the_first_line(Request &
     req.set_uri(uri);
     if (uri == "/favicon.ico")
     {
-        req.set_error_page_num(400);
-        throw std::runtime_error("The request is from favicon");
-        // Logger::printStatus("WARNING", "The request is from favicon");
-        // return "";
+        req.is_favicon();
     }
     size_t harcakanInd = uri.find('?');//stugel,norem avelacre
     if (harcakanInd != std::string::npos)
         req.set_query(uri.substr(harcakanInd + 1));
     int locIndex = have_this_uri_in_our_current_server(servIndex);//esi arajin toxi uri masi pahna
-    if (locIndex < 0)//&& result[0] != "DELETE",senc che vortev mez location polyubomu petqa voprtev metodery menak location-in en patkanum////////////////////////
+    if (locIndex < 0 && uri != "/favicon.ico")//&& result[0] != "DELETE",senc che vortev mez location polyubomu petqa voprtev metodery menak location-in en patkanum////////////////////////
     {
         req.set_error_page_num(404);//zdes kakoe cifr dat?
         throw std::runtime_error("error page pti bacvi browser-um");//es hmi exception em qcum vor segfault chta,bayc heto pti zut error page-@ bacenq
@@ -119,7 +116,7 @@ std::string    Request_header_validation::validation_of_the_first_line(Request &
         throw std::runtime_error("error page:: headery sxal a");
     }
     
-    if (check_this_metdod_has_in_appropriate_server(result[0], locIndex) < 0)
+    if (uri != "/favicon.ico" && check_this_metdod_has_in_appropriate_server(result[0], locIndex) < 0)
     {
         req.set_error_page_num(405);
         throw std::runtime_error("this method not allowed in appropriate location");

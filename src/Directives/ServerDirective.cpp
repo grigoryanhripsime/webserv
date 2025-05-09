@@ -14,6 +14,7 @@ ServerDirective::ServerDirective()
     validDirs[3] = "client_max_body_size";
     validDirs[4] = "root";
     validDirs[5] = "error_page";
+    validDirs[6] = "favicon";
 
     error_pages[400] = "error_pages/400.html";
     error_pages[401] = "error_pages/401.html";
@@ -28,6 +29,8 @@ std::map<int, std::string>& ServerDirective::getError_pages() { return error_pag
 std::vector<LocationDirective*>& ServerDirective::getLocdir() { return locdir; }
 std::pair<std::string, int> ServerDirective::getListen() const { return listen; }
 std::string ServerDirective::getServer_name() const { return server_name; }
+std::string ServerDirective::getFavicon() const { return favicon; }
+
 int ServerDirective::get_locIndex() const { return locIndex; }
 
 
@@ -158,7 +161,29 @@ void    ServerDirective::setServer_name(const std::string& name)
     server_name = name;
 }
 
+void    ServerDirective::setFavicon(const std::string& favicon)
+{
+    this->favicon = favicon;
+    if (!pathExists( this->favicon))
+        throw std::runtime_error("Path does not exist(FAVICON)");
+    // Handle file or directory
+   if (isDirectory( this->favicon)) {
+        throw std::runtime_error("Directory deletion is not supported(FAVICON)");
+    } 
+}
+
 void    ServerDirective::setLocDir(LocationDirective *loc)
 {
     locdir.push_back(loc);
+}
+
+bool ServerDirective::pathExists(const std::string& path)
+{
+    return (access(path.c_str(), F_OK) != -1);
+}
+
+bool ServerDirective::isDirectory(const std::string& path)
+{
+    struct stat info;
+    return stat(path.c_str(), &info) == 0 && S_ISDIR(info.st_mode);
 }
