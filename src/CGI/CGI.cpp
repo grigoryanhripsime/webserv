@@ -54,7 +54,7 @@ std::string CGI::CGI_handler()
     CGI_exec();
 
     if (output.empty()) {
-        CGI_err();
+        CGI_err("HTTP/1.1 500 Internal Server Error\r\n", "Content-Type: text/plain\r\n", "CGI script failed");
     }
     Logger::printStatus("INFO", "CGI has completed it's mission successfully!");
     return output;
@@ -96,7 +96,7 @@ void CGI::CGI_parse() {
 
 extern "C" void handle_timeout(int)
 {
-    const char* error = "Status: 500 Internal Server Error\r\nContent-Type: text/plain\r\n\r\nScript timed out";
+    const char* error = "Status: 500 Internal Server Error\r\nContent-Type: text/plain\r\nContent-Length: 17\r\n\r\nScript timed out";
     write(1, error, strlen(error));
     _exit(1);
 }
@@ -104,7 +104,7 @@ extern "C" void handle_timeout(int)
 void CGI::CGI_exec() {
     int stdin_pipe[2];
     int stdout_pipe[2];
-    unsigned int timeout = 2; // 2-second timeout
+    unsigned int timeout = 1; // 2-second timeout
 
     if (pipe(stdin_pipe) == -1 || pipe(stdout_pipe) == -1) {
         std::clog << "Error: pipe failed: " << strerror(errno) << std::endl;
@@ -177,18 +177,18 @@ void CGI::CGI_exec() {
                 if (bytes_read > 0) {
                     temp[bytes_read] = '\0';
                     buffer += temp;
-                } else if (bytes_read == 0) { // EOF, child closed pipe
+                } else if (bytes_read == 0) {
                     break;
                 } else {
                     std::clog << "Error: read failed: " << strerror(errno) << std::endl;
                     break;
                 }
-            } else if (ret == 0) { // Timeout
+            } else if (ret == 0) {
                 std::clog << "Error: CGI script timed out" << std::endl;
                 kill(pid, SIGTERM);
                 timed_out = true;
                 break;
-            } else { // Select error
+            } else {
                 std::clog << "Error: select failed: " << strerror(errno) << std::endl;
                 kill(pid, SIGTERM);
                 break;
@@ -200,14 +200,12 @@ void CGI::CGI_exec() {
         waitpid(pid, &status, 0);
 
         if (timed_out) {
-            output = "HTTP/1.1 504 Gateway Timeout\r\nContent-Type: text/plain\r\n\r\nCGI script timed out";
-            return;
+            return CGI_err("HTTP/1.1 504 Gateway Timeout\r\n", "Content-Type: text/plain\r\n", "CGI script timed out");
         }
 
         if (WIFEXITED(status) && WEXITSTATUS(status) != 0) {
             std::clog << "CGI script exited with status: " << WEXITSTATUS(status) << std::endl;
-            output = "HTTP/1.1 500 Internal Server Error\r\nContent-Type: text/plain\r\n\r\nCGI script failed";
-            return;
+            return CGI_err("HTTP/1.1 500 Internal Server Error\r\n", "Content-Type: text/plain\r\n", "CGI script failed");
         }
 
         output = buffer;
@@ -216,7 +214,7 @@ void CGI::CGI_exec() {
             header_end = output.find("\n\n");
             if (header_end == std::string::npos) {
                 output.clear();
-                return;
+                return CGI_err("HTTP/1.1 500 Internal Server Error\r\n", "Content-Type: text/plain\r\n", "CGI script failed");
             } else {
                 header_end += 2;
             }
@@ -255,7 +253,7 @@ void CGI::CGI_exec() {
 
         if (headers.find("Content-Type") == headers.end() && !body.empty()) {
             output.clear();
-            return;
+            return CGI_err("HTTP/1.1 500 Internal Server Error\r\n", "Content-Type: text/plain\r\n", "CGI script failed");
         }
 
         std::ostringstream response;
@@ -265,17 +263,11 @@ void CGI::CGI_exec() {
         }
         response << "\r\n" << body;
         output = response.str();
-        std::clog << "THIS IS CGI SUCCESS RESPONSE\n\n\n" << output;
     }
 }
 
-void CGI::CGI_err() {
+void CGI::CGI_err(const std::string& error, const std::string& cont_type, const std::string& body) {
     std::ostringstream response;
-    std::string res = "Internal Server Error: CGI execution failed";
-    response << "HTTP/1.1 500 Internal Server Error\r\n";
-    response << "Content-Type: text/plain\r\n";
-    response << "Content-Length: " << res.length();
-    response << "\r\n";
-    response << res;
-    output = response.str();
+    response << "Content-Length: " << body.length() << "\r\n\r\n";
+    output = error + cont_type + response.str() + body;
 }

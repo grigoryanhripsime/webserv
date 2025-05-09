@@ -15,7 +15,7 @@ class CGI {
 private:
     void CGI_parse();
     void CGI_exec();
-    void CGI_err();
+    void CGI_err(const std::string& error, const std::string& cont_type, const std::string& body);
     
     // Data members
     Request * const request;

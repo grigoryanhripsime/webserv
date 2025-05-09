@@ -1,6 +1,9 @@
 #!/usr/bin/python3
 print("Content-Type: text/html")
 print("")
+import time
+while(1):
+  print()
 print("""<!DOCTYPE html>
 <html>
 	<head>
