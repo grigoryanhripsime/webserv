@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <sys/types.h>
+#include <sys/select.h>
 #include <fcntl.h>
 #include <cstring>
 
@@ -22,7 +23,6 @@ std::string CGI::_get_index(const std::vector<std::string> &index, const std::st
 
 static const std::string _get_extension(const std::string& str)
 {
-
     std::string ext = str.substr(str.find_last_of('.', str.length()));
     return ext;
 }
@@ -63,11 +63,11 @@ std::string CGI::CGI_handler()
 void CGI::CGI_parse() {
     env.clear();
     env.push_back("REDIRECT_STATUS=200");
-	env.push_back("GATEWAY_INTERFACE=CGI/1.1");
+    env.push_back("GATEWAY_INTERFACE=CGI/1.1");
     env.push_back("REQUEST_METHOD=" + request->get_method());
     env.push_back("SCRIPT_NAME=" + script_name);
     env.push_back("SCRIPT_FILENAME=" + root + script_name);
-	std::ostringstream oss;
+    std::ostringstream oss;
     std::string content_type = request->get_content_type();
     oss << (content_type == "POST" ? request->get_content_length() : 0);
     env.push_back("CONTENT_LENGTH=" + oss.str());
@@ -78,8 +78,8 @@ void CGI::CGI_parse() {
     env.push_back("SERVER_NAME=" + server_name);
     env.push_back("SERVER_PORT=" + server_port);
     env.push_back("REMOTE_ADDR=" + remote_addr);
-	env.push_back("SERVER_PROTOCOL=HTTP/1.1");
-	env.push_back("SERVER_SOFTWARE=Weebserv/1.0");
+    env.push_back("SERVER_PROTOCOL=HTTP/1.1");
+    env.push_back("SERVER_SOFTWARE=Weebserv/1.0");
     
     headers_map headers = request->get_headers();
     for (std::map<std::string, std::string>::const_iterator it = headers.begin();
@@ -94,31 +94,33 @@ void CGI::CGI_parse() {
     }
 }
 
-void handle_timeout(int)
+extern "C" void handle_timeout(int)
 {
-    std::cerr << "Execution timed out" << std::endl;
-	
-    exit(EXIT_FAILURE);
+    const char* error = "Status: 500 Internal Server Error\r\nContent-Type: text/plain\r\n\r\nScript timed out";
+    write(1, error, strlen(error));
+    _exit(1);
 }
 
 void CGI::CGI_exec() {
     int stdin_pipe[2];
     int stdout_pipe[2];
-    unsigned int timeout = 0;
+    unsigned int timeout = 2; // 2-second timeout
 
     if (pipe(stdin_pipe) == -1 || pipe(stdout_pipe) == -1) {
+        std::clog << "Error: pipe failed: " << strerror(errno) << std::endl;
         return;
     }
     
     pid_t pid = fork();
     if (pid == -1) {
+        std::clog << "Error: fork failed: " << strerror(errno) << std::endl;
         close(stdin_pipe[0]);
         close(stdin_pipe[1]);
         close(stdout_pipe[0]);
         close(stdout_pipe[1]);
         return;
     }
-    if (pid == 0) {
+    if (pid == 0) { // Child process
         close(stdin_pipe[1]);
         close(stdout_pipe[0]);
         dup2(stdin_pipe[0], 0);
@@ -131,7 +133,6 @@ void CGI::CGI_exec() {
 
         std::vector<char*> envp;
         for (size_t i = 0; i < env.size(); ++i) {
-            std::clog << env[i] << std::endl;
             envp.push_back(const_cast<char*>(env[i].c_str()));
         }
         envp.push_back(0);
@@ -148,10 +149,10 @@ void CGI::CGI_exec() {
             execve(script_path.c_str(), argv, envp.data());
         }
 
-        std::string error = "Status: 500 Internal Server Error\r\nContent-Type: text/plain\r\n\r\nFailed to execute script";
-        write(1, error.c_str(), error.size());
-        exit(1);
-    } else {
+        const char* error = "Status: 500 Internal Server Error\r\nContent-Type: text/plain\r\n\r\nFailed to execute script";
+        write(1, error, strlen(error));
+        _exit(1);
+    } else { // Parent process
         close(stdin_pipe[0]);
         close(stdout_pipe[1]);
 
@@ -160,20 +161,56 @@ void CGI::CGI_exec() {
         }
         close(stdin_pipe[1]);
 
-        char buffer[1024];
-        ssize_t bytes_read;
-        while ((bytes_read = read(stdout_pipe[0], buffer, sizeof(buffer) - 1)) > 0) {
-            buffer[bytes_read] = '\0';
-            output += buffer;
+        std::string buffer;
+        char temp[1024];
+        bool timed_out = false;
+        while (true) {
+            fd_set read_fds;
+            FD_ZERO(&read_fds);
+            FD_SET(stdout_pipe[0], &read_fds);
+            struct timeval tv;
+            tv.tv_sec = timeout;
+            tv.tv_usec = 0;
+            int ret = select(stdout_pipe[0] + 1, &read_fds, NULL, NULL, &tv);
+            if (ret > 0 && FD_ISSET(stdout_pipe[0], &read_fds)) {
+                ssize_t bytes_read = read(stdout_pipe[0], temp, sizeof(temp) - 1);
+                if (bytes_read > 0) {
+                    temp[bytes_read] = '\0';
+                    buffer += temp;
+                } else if (bytes_read == 0) { // EOF, child closed pipe
+                    break;
+                } else {
+                    std::clog << "Error: read failed: " << strerror(errno) << std::endl;
+                    break;
+                }
+            } else if (ret == 0) { // Timeout
+                std::clog << "Error: CGI script timed out" << std::endl;
+                kill(pid, SIGTERM);
+                timed_out = true;
+                break;
+            } else { // Select error
+                std::clog << "Error: select failed: " << strerror(errno) << std::endl;
+                kill(pid, SIGTERM);
+                break;
+            }
         }
         close(stdout_pipe[0]);
 
         int status;
         waitpid(pid, &status, 0);
- 
-        std::string status_line = "200 OK";
-        std::map<std::string, std::string> headers;
-        std::string body;
+
+        if (timed_out) {
+            output = "HTTP/1.1 504 Gateway Timeout\r\nContent-Type: text/plain\r\n\r\nCGI script timed out";
+            return;
+        }
+
+        if (WIFEXITED(status) && WEXITSTATUS(status) != 0) {
+            std::clog << "CGI script exited with status: " << WEXITSTATUS(status) << std::endl;
+            output = "HTTP/1.1 500 Internal Server Error\r\nContent-Type: text/plain\r\n\r\nCGI script failed";
+            return;
+        }
+
+        output = buffer;
         size_t header_end = output.find("\r\n\r\n");
         if (header_end == std::string::npos) {
             header_end = output.find("\n\n");
@@ -188,10 +225,13 @@ void CGI::CGI_exec() {
         }
 
         std::string header_str = output.substr(0, header_end - (output[header_end-2] == '\r' ? 4 : 2));
-        body = output.substr(header_end);
+        std::string body = output.substr(header_end);
 
         std::istringstream header_stream(header_str);
         std::string line;
+        std::string status_line = "200 OK";
+        std::map<std::string, std::string> headers;
+        bool content_length = false;
         while (std::getline(header_stream, line)) {
             size_t colon = line.find(": ");
             if (colon != std::string::npos) {
@@ -200,9 +240,17 @@ void CGI::CGI_exec() {
                 if (key == "Status") {
                     status_line = value;
                 } else {
+                    if (content_length == false && key == "Content-Length") {
+                        content_length = true;
+                    }
                     headers[key] = value;
                 }
             }
+        }
+        if (content_length == false) {
+            std::stringstream ss;
+            ss << body.length();
+            headers["Content-Length"] = ss.str();
         }
 
         if (headers.find("Content-Type") == headers.end() && !body.empty()) {
@@ -217,14 +265,17 @@ void CGI::CGI_exec() {
         }
         response << "\r\n" << body;
         output = response.str();
+        std::clog << "THIS IS CGI SUCCESS RESPONSE\n\n\n" << output;
     }
 }
 
 void CGI::CGI_err() {
     std::ostringstream response;
+    std::string res = "Internal Server Error: CGI execution failed";
     response << "HTTP/1.1 500 Internal Server Error\r\n";
     response << "Content-Type: text/plain\r\n";
+    response << "Content-Length: " << res.length();
     response << "\r\n";
-    response << "Internal Server Error: CGI execution failed";
+    response << res;
     output = response.str();
 }

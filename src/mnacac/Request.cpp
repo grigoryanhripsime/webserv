@@ -493,6 +493,7 @@ std::string Request::get_need_string_that_we_must_be_pass_send_system_call(std::
     std::string whiteSpaces = "\r\n\r\n";
     std::stringstream ss1;
     ss1 << ss.str().size();
+    std::clog << ss1.str() << "\n\n";
 
     return header + ss1.str() + whiteSpaces + ss.str();
 }
