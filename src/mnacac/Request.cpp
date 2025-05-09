@@ -686,7 +686,9 @@ void Request::handleClientRequest(int client_fd) {
                 send(client_fd, response.c_str(), strlen(response.c_str()), 0);
                 break;
             case STATIC:
+            std::cout << buffer<<std::endl;
                 response = get_response(method, buffer, bytesRead);
+                std::cout << "paho->" << response.size() << std::endl;
                 send(client_fd, response.c_str(), strlen(response.c_str()), 0);
                 break;
         }
@@ -719,129 +721,49 @@ void Request::handleClientRequest(int client_fd) {
     // esi voncor petq chi stex,vortev ynde aranqayin Hripsimei grac funkcianeric mekum stugvuma http1-i momenty
 }
 
-bool Request::deleteDirectory(const std::string& dirPath)
-{
-    DIR* dir = opendir(dirPath.c_str());
-    struct dirent* entry;
-    bool success = true;
-
-    if (!dir)
-    {
-        // Failed to open directory
-        return false;
-    }
-
-    // Iterate over directory contents
-    while ((entry = readdir(dir)) != NULL)
-    {
-        // Skip "." and ".." entries
-        if (std::string(entry->d_name) == "." || std::string(entry->d_name) == "..")
-            continue;
-
-        // Construct full path for the entry
-        std::string entryPath = dirPath + "/" + entry->d_name;
-
-        // Check if entry is a file or directory
-        if (isFile(entryPath))
-        {
-            // Delete file
-            if (unlink(entryPath.c_str()) != 0)
-            {
-                success = false;
-                break;
-            }
-        }
-        else if (isDirectory(entryPath))
-        {
-            // Recursively delete subdirectory
-            if (!deleteDirectory(entryPath))
-            {
-                success = false;
-                break;
-            }
-        }
-    }
-
-    closedir(dir);
-
-    // If all contents were deleted, remove the empty directory
-    if (success)
-    {
-        if (rmdir(dirPath.c_str()) != 0)
-        {
-            success = false;
-        }
-    }
-
-    return success;
-}
-
 std::string Request::handleDelete(std::string filePath)
 {
-    // Clean filePath (remove trailing '?' like in constructingResponce)
-    if (!filePath.empty() && filePath[filePath.size() - 1] == '?')
+    std::cout << "filepath is->"<<filePath<<std::endl;
+    // Clean filePath (remove trailing '?')
+    if (!filePath.empty() && filePath[filePath.size() - 1] == '?') {
         filePath = filePath.substr(0, filePath.size() - 1);
+    }
 
-    // Check if DELETE is allowed in the location directive
-    std::vector<LocationDirective*> locdir = servers[servIndex]->getLocdir();
-    // int locIndex = servers[servIndex]->get_locIndex();
-    // std::vector<std::string> allowedMethods = locdir[locIndex]->getAllow_methods();
-    // bool methodAllowed = false;
-    // for (size_t i = 0; i < allowedMethods.size(); ++i)
-    // {
-    //     if (allowedMethods[i] == "DELETE")
-    //     {
-    //         methodAllowed = true;
-    //         break;
-    //     }
-    // }
-    // if (!methodAllowed)
-    // {
-    //     error_page_num = 405;
-    //     throw std::runtime_error("DELETE method not allowed for this location");
-    // }
-
+    // Sanitize filePath to prevent traversal
+    if (filePath.find("..") != std::string::npos) {
+        error_page_num = 400;
+        throw std::runtime_error("Invalid path: contains parent directory reference");
+    }
     // Check if path exists
-    if (!pathExists(filePath))
-    {
+    if (!pathExists(filePath)) {
         error_page_num = 404;
         throw std::runtime_error("Path does not exist");
     }
 
     // Check write permission
-    if (access(filePath.c_str(), W_OK) != 0)
-    {
+    if (access(filePath.c_str(), W_OK) != 0) {
         error_page_num = 403;
         throw std::runtime_error("Permission denied for deletion");
     }
 
-    // Handle file or directory deletion
-    if (isFile(filePath))
-    {
-        // Delete single file
-        if (unlink(filePath.c_str()) != 0)
-        {
+    // Handle file or directory
+    if (isFile(filePath)) {
+        // Delete file using std::remove
+        if (std::remove(filePath.c_str()) != 0) {
             error_page_num = 500;
             throw std::runtime_error("Failed to delete file");
         }
-    }
-    else if (isDirectory(filePath))
-    {
-        // Recursively delete directory
-        if (!deleteDirectory(filePath))
-        {
-            error_page_num = 500;
-            throw std::runtime_error("Failed to delete directory");
-        }
-    }
-    else
-    {
+    } else if (isDirectory(filePath)) {
+        // Directories are not allowed to be deleted
+        error_page_num = 403;
+        throw std::runtime_error("Directory deletion is not supported");
+    } else {
         error_page_num = 403;
         throw std::runtime_error("Path is neither a file nor a directory");
     }
 
     // Successful deletion: return 204 No Content
-    std::string response = "HTTP/1.1 204 " + status_message[error_page_num] + "\r\n";
+    std::string response = "HTTP/1.1 204 No Content\r\n";
     response += "Content-Length: 0\r\n";
     response += "\r\n";
     return response;
@@ -939,7 +861,7 @@ std::string Request::generateRedirectResponse(std::string filePath) {
    
     response += status_message[error_page_num] + "\r\n";
     response += "Location: " + filePath + "\r\n";
-    response += "Content-Length: 0\r\n";
+    response += "Content-Length: 0\r\n";//ste 0???
     response += "Connection: keep-alive\r\n";
     response += "\r\n";
     return response;
