@@ -97,8 +97,10 @@ std::string    Request_header_validation::validation_of_the_first_line(Request &
     req.set_uri(uri);
     if (uri == "/favicon.ico")
     {
-        Logger::printStatus("WARNING", "The request is from favicon");
-        return "";
+        req.set_error_page_num(400);
+        throw std::runtime_error("The request is from favicon");
+        // Logger::printStatus("WARNING", "The request is from favicon");
+        // return "";
     }
     size_t harcakanInd = uri.find('?');//stugel,norem avelacre
     if (harcakanInd != std::string::npos)

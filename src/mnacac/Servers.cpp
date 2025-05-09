@@ -78,9 +78,12 @@ void Servers::runLoop()
                     {
                         acceptClient(sockfd);
                         isServer = true;
+                        std::clog << "In for loop\n";
                         break;
                     }
                 }
+                std::clog << "After for loop\n";
+                
                 if (!isServer)
                 {
                     try{
