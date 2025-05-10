@@ -178,6 +178,9 @@ ServerDirective *DirectiveConfig::fillServers(Directive *serverBlock)//&-@ maqre
                 case 5:
                     serv->setError_pages(itSimpleDir->second);
                     break;
+                case 6:
+                    serv->setFavicon(itSimpleDir->second[0]);
+                    break;
                 default:
                     throw std::runtime_error("Invalid directive for server");
             }

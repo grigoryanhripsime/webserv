@@ -3,9 +3,9 @@
 #include "AGeneralDirective.hpp"
 #include "ServerDirective.hpp"
 #include "LocationDirective.hpp"
-class ServerDirective;
 #include "Directive.hpp"
 #include "Logger.hpp"
+class ServerDirective;
 class Directive;
 
 class DirectiveConfig
