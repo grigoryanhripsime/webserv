@@ -43,7 +43,6 @@ Request::Request(std::vector<ServerDirective *> servers)
     file_type = "text/plain";//default
     query = "";
     error_page_num = -1;
-    f_favicon = false;
     fill_status_message();
 }
 
@@ -96,11 +95,6 @@ void Request::parseUrlEncodedForm(const std::string &body)
     }
 }
 
-void Request::is_favicon()
-{
-    f_favicon = true;
-}
-
 std::string Request::post_method_tasovka(char *buffer, int bytesRead) {
     std::vector<LocationDirective*> locdir = servers[servIndex]->getLocdir();
     int locIndex = servers[servIndex]->get_locIndex();
@@ -118,6 +112,7 @@ std::string Request::post_method_tasovka(char *buffer, int bytesRead) {
     if (!supported_media_type)
     {
         error_page_num = 415;
+        std::cout<<"de hima\n";
         throw std::runtime_error("Unsupported media type: " + MainContentType);
     }
     /////////////////////////////////
@@ -717,13 +712,9 @@ void Request::handleClientRequest(int client_fd) {
         //     //grenq return ;?
         // }
     } catch (std::exception &e) {
-        // if (uri == "/favicon.ico")
-        // {
-            
-        //     // send_response(client_fd, response, epfd);
-        //     return;
-        // }
-        Logger::printStatus("ERROR", e.what());
+        Logger::printStatus("ERROiR", e.what());
+        std::clog << error_page_num << "\n";
+        if (error_page_num == -1) error_page_num = 500;
         std::string filename = servers[servIndex]->getError_pages().find(error_page_num)->second;
         std::string root =  servers[servIndex]->getRoot();
         std::string filePath = root + "/" + filename;
@@ -802,24 +793,7 @@ std::string Request::get_response(std::string &method, char *buffer, int bytesRe
 {
     // function for static methods
     std::string res;
-    if (f_favicon)
-    {
-        std::cout << "lllllllllllllllaaaaaaaaaaaaaaaaaaaavvvvvvvvvvvvvaaaaaaaaaaa\n" << error_page_num <<std::endl;
-        std::stringstream ss2;
-        ss2 << error_page_num;//error_page_num type is int
-        std::string header = "HTTP/1.1 " + ss2.str() + " " + status_message[error_page_num] + "\r\nContent-Length: ";
-        std::stringstream ss;
-        ss << servers[servIndex]->getFavicon();//axper esi fayli parunakutyuny chi qcum ss-i mej,henc zut path-na qcum,mihat haskanal es pahy,meke verjum traqav`[INFO]: URI used to connect to server: /.well-known/appspecific/com.chrome.devtools.json ay senc baner berum
-        res += ss.str().size();
-        res += "\r\n";//ste 0???
-        res += "Connection: keep-alive\r\n";
-        std::string whiteSpaces = "\r\n\r\n";
-
-        // std::clog << ss1.str() << "\n\n";
-
-        return header + res + whiteSpaces + ss.str();
-    }
-    else if (method == "GET")
+    if (method == "GET")
     {
         error_page_num = 200;
         // request_header_validation.check_this_metdod_has_in_appropriate_server(method, locIndex);
@@ -828,19 +802,6 @@ std::string Request::get_response(std::string &method, char *buffer, int bytesRe
         {
             error_page_num = servers[servIndex]->getLocdir()[servers[servIndex]->get_locIndex()]->getRedirect().begin()->first;
             std::string filePath = servers[servIndex]->getLocdir()[servers[servIndex]->get_locIndex()]->getRedirect().begin()->second;
-            // if (filePath.substr(0,8) != "https://" && filePath.substr(0,8) != "http://")
-            // {
-            //         std::string server;
-            //         if (servers[servIndex]->getServer_name() != "")
-            //             server = servers[servIndex]->getServer_name();
-            //         else
-            //             server = servers[servIndex]->getListen().first;
-            //         std::stringstream ss_num;
-            //         ss_num << server << ":" << servers[servIndex]->getListen().second;
-            //         ss_num >> server;
-            //         std::cout << "uuuuuuuuuuuuuuuuuuuu->"<<server << std::endl;
-            //         filePath = "http://" + server + filePath; 
-            // }
             return generateRedirectResponse(filePath);
         }
         ////////////////////////////////

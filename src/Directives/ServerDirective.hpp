@@ -13,7 +13,6 @@ class LocationDirective;
 class ServerDirective : public AGeneralDirective
 {
     private:
-        std::string favicon;
         std::map<int, std::string> error_pages;
         // std::string listen;//no default=>REQUIRE,   Must define port (no default)
         std::pair<std::string, int> listen;//<ipAdress, port>
@@ -28,7 +27,6 @@ class ServerDirective : public AGeneralDirective
         void    setServer_name(const std::string& name);
         void    setLocDir(LocationDirective *loc);
         void    setLocIndex(int ind) {locIndex = ind;}
-        void    setFavicon(const std::string& favicon);
         std::string validDirs[6];
         
     public:
@@ -41,7 +39,6 @@ class ServerDirective : public AGeneralDirective
         std::vector<LocationDirective*>& getLocdir();
         std::pair<std::string, int> getListen() const;
         std::string getServer_name() const;
-        std::string getFavicon() const;
         int get_locIndex() const;
 
         ////listen validacia//////////

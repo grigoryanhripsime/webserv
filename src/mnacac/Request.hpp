@@ -38,7 +38,6 @@ private:
     int epfd;
     std::map<std::string, std::string> form_data;//POST-i hamar
     headers_map headers;
-    bool f_favicon;
     
     std::string get_response(std::string &method, char *buffer, int bytesRead);
 
@@ -89,8 +88,6 @@ public:
     void    set_servIndex(int servIndex) {this->servIndex = servIndex;}
     void    set_method(std::string method) {this->method = method;}
     void    set_uri(std::string uri) {this->uri = uri;}
-    void    is_favicon();
-
     std::string autoindex(std::string filePath);
 
     std::string handleDelete(std::string filePath);

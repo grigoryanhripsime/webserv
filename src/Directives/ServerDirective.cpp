@@ -14,7 +14,6 @@ ServerDirective::ServerDirective()
     validDirs[3] = "client_max_body_size";
     validDirs[4] = "root";
     validDirs[5] = "error_page";
-    validDirs[6] = "favicon";
 
     error_pages[400] = "error_pages/400.html";
     error_pages[401] = "error_pages/401.html";
@@ -23,16 +22,14 @@ ServerDirective::ServerDirective()
     error_pages[404] = "error_pages/404.html";
     error_pages[405] = "error_pages/405.html";
     error_pages[413] = "error_pages/413.html";
+    error_pages[415] = "error_pages/415.html";
     error_pages[500] = "error_pages/500.html";
 }
 std::map<int, std::string>& ServerDirective::getError_pages() { return error_pages; }
 std::vector<LocationDirective*>& ServerDirective::getLocdir() { return locdir; }
 std::pair<std::string, int> ServerDirective::getListen() const { return listen; }
 std::string ServerDirective::getServer_name() const { return server_name; }
-std::string ServerDirective::getFavicon() const { return favicon; }
-
 int ServerDirective::get_locIndex() const { return locIndex; }
-
 
 void ServerDirective::validate() const
 {
@@ -53,7 +50,7 @@ void ServerDirective::validate() const
 
 ServerDirective::~ServerDirective()
 {
-    // std::cout << "ServerDirective dtor is called\n";
+    std::cout << "ServerDirective dtor is called\n";
     for (std::vector<LocationDirective*>::iterator it = locdir.begin(); it != locdir.end(); ++it)
         if (*it)
             delete *it;
@@ -159,17 +156,6 @@ void    ServerDirective::setListen(const std::string& ipAndPort)
 void    ServerDirective::setServer_name(const std::string& name)
 {
     server_name = name;
-}
-
-void    ServerDirective::setFavicon(const std::string& favicon)
-{
-    this->favicon = favicon;
-    if (!pathExists( this->favicon))
-        throw std::runtime_error("Path does not exist(FAVICON)");
-    // Handle file or directory
-   if (isDirectory( this->favicon)) {
-        throw std::runtime_error("Directory deletion is not supported(FAVICON)");
-    } 
 }
 
 void    ServerDirective::setLocDir(LocationDirective *loc)

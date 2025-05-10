@@ -7,7 +7,7 @@ std::map<std::pair<std::string, int>, std::vector<int> > DirectiveConfig::get_un
 
 DirectiveConfig::~DirectiveConfig()
 {
-    // std::cout << "DirectiveConfig dtor is called\n";
+    std::cout << "DirectiveConfig dtor is called\n";
     std::vector<ServerDirective*>::iterator it = servers.begin();
     for (; it != servers.end(); ++it)
         if (*it)
@@ -28,7 +28,6 @@ void DirectiveConfig::directiveValidation()
     // 3. Проверка всех блоков сервера
     std::multimap<std::string, Directive *>::iterator it = directives.blocks.begin();
     ServerDirective *serv = NULL;
-    try{
         for (; it != directives.blocks.end(); ++it)//es fory bolor serverneri(blokayin directiv) vrayov ancnelu hamara, pritom menak server enq unenalu,nu vapshe 2hat blokayin directiva linelu es proektum,bayc 2rdy`location-@ serveri meja linelu
         {
             // 3.1. Проверка, что блок именно server
@@ -60,11 +59,8 @@ void DirectiveConfig::directiveValidation()
                 if (itLoc->second->simpleDir.find("path") == itLoc->second->simpleDir.end())
                     throw DirectiveConfigException("Location directive must have 'path' specified!");
 
-                LocationDirective *loc = fillLocationsn(serv, itLoc->second);
-                serv->setLocDir(loc);
+                fillLocationsn(serv, itLoc->second);
             } 
-            servers.push_back(serv);
-
         }
         if (servers.size() > 1)
         {
@@ -77,15 +73,6 @@ void DirectiveConfig::directiveValidation()
         else
             if_config_has_more_servers__whether_each_server_has_name_when_they_have_the_same_ip_and_port(servers);
         Logger::printStatus("INFO", "General validation of servers has passed successfully?!");
-    }
-    catch(...)
-    {
-        // if (serv) 
-        //     delete serv;//es toxy prkec????))))))))
-        throw ;
-    }
-///////////////sharunakeli
-
 }
 
 int DirectiveConfig::server_names_with_duplicate_IPs_must_be_different(std::map<std::pair<std::string, int>, std::vector<int> > unique_listens)
@@ -147,7 +134,7 @@ void DirectiveConfig::if_config_has_more_servers__whether_each_server_has_name_w
 ServerDirective *DirectiveConfig::fillServers(Directive *serverBlock)//&-@ maqrelem,local popoxakani reference veradardznely etqany xelaci ban chi:)
 {
     ServerDirective *serv = new ServerDirective();
-    try{
+    servers.push_back(serv);
         std::multimap<std::string, std::vector<std::string> >::iterator itSimpleDir = serverBlock->simpleDir.begin();
         for (; itSimpleDir != serverBlock->simpleDir.end(); ++itSimpleDir)
         {
@@ -178,20 +165,11 @@ ServerDirective *DirectiveConfig::fillServers(Directive *serverBlock)//&-@ maqre
                 case 5:
                     serv->setError_pages(itSimpleDir->second);
                     break;
-                case 6:
-                    serv->setFavicon(itSimpleDir->second[0]);
-                    break;
                 default:
                     throw std::runtime_error("Invalid directive for server");
             }
         }
         return serv;
-    }
-    catch(...)
-    {
-        delete serv;
-        throw ;
-    }
 }
 
 LocationDirective *DirectiveConfig::fillLocationsn(ServerDirective *serv, Directive *locationBlock)
@@ -199,7 +177,7 @@ LocationDirective *DirectiveConfig::fillLocationsn(ServerDirective *serv, Direct
     std::multimap<std::string, std::vector<std::string> >::iterator itSimpleDirLoc = locationBlock->simpleDir.begin();
     std::multimap<std::string, Directive*>::iterator itCGIBlock = locationBlock->blocks.find("cgi_extension");
     LocationDirective *loc = new LocationDirective(serv);
-    try{
+    serv->setLocDir(loc);
         for (; itSimpleDirLoc != locationBlock->simpleDir.end(); ++itSimpleDirLoc)
         {
             if (itSimpleDirLoc->first != "index" && itSimpleDirLoc->first != "error_page" && itSimpleDirLoc->first != "allow_methods" && itSimpleDirLoc->first != "return" && itSimpleDirLoc->first != "cgi_extension" && itSimpleDirLoc->second.size() != 1)
@@ -244,13 +222,6 @@ LocationDirective *DirectiveConfig::fillLocationsn(ServerDirective *serv, Direct
         if (itCGIBlock != locationBlock->blocks.end()) 
             loc->setCgi_extension(itCGIBlock->second->simpleDir);
         return loc;
-    }
-    catch(...)
-    {
-        delete loc;
-        delete serv;
-        throw ;
-    }
 }
 
 DirectiveConfig::DirectiveConfigException::DirectiveConfigException(std::string err_msg)
