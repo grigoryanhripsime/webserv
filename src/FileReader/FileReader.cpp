@@ -40,7 +40,6 @@ void FileReader::fileToStr()
 
     while (std::getline(file, line))
     {
-        // std::cout << "htes->" << line << std::endl;
         if (line.find_first_of('#') != std::string::npos)
             line.erase(line.find_first_of('#'));//esi en pahna vor commentner karananq anenq?, hastat config fayli mej chi lenlu nenc tox(valid hraman)vor # chi parenakelu?
 

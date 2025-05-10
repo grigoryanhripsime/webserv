@@ -3,7 +3,7 @@ GREEN   = \033[1;32m
 YELLOW  = \033[1;33m
 RESET   = \033[0;37m
 
-CPP     = c++ -std=c++98 -g3 -fsanitize=address
+CPP     = g++ -std=c++98 -g3 -fsanitize=address
 CFLAGS  = -Wall -Wextra -Werror
 
 SRCSPATH = src
@@ -40,6 +40,11 @@ create_obj_dirs:
 	@mkdir -p $(OBJSPATH)/Directives
 	@mkdir -p $(OBJSPATH)/Sockets
 	@mkdir -p $(OBJSPATH)/CGI
+	@mkdir -p $(OBJSPATH)/Directive
+	@mkdir -p $(OBJSPATH)/DirectiveConfig
+	@mkdir -p $(OBJSPATH)/TokenConfig
+	@mkdir -p $(OBJSPATH)/FileReader
+	@mkdir -p $(OBJSPATH)/Logger
 
 
 clean:

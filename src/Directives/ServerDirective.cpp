@@ -53,7 +53,7 @@ void ServerDirective::validate() const
 
 ServerDirective::~ServerDirective()
 {
-    std::cout << "ServerDirective dtor is called\n";
+    // std::cout << "ServerDirective dtor is called\n";
     for (std::vector<LocationDirective*>::iterator it = locdir.begin(); it != locdir.end(); ++it)
         if (*it)
             delete *it;

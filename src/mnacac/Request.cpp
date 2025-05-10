@@ -510,20 +510,16 @@ std::string Request::uri_is_file(std::string filePath)
     std::vector<LocationDirective*> locdir = servers[servIndex]->getLocdir();
     std::string str = getFilepath(locdir[locIndex]->getPath());
     // int locIndex = servers[servIndex]->get_locIndex(); 
-    // std::cout << "locindexxxxxxxxxxx = " <<   locIndex<< std::endl;
     // std::string root =  this->get_cwd();
     // std::string str = root + locdir[locIndex]->getPath();
-    std::cout << "strse havasraaaaa->>>>>>>" << str << std::endl;
     size_t i = 0;
     for (; i < filePath.size() && i < str.size() && filePath[i] == str[i]; ++i)
         i++;
     if (i != str.size())
         i--;
-    std::cout << "i ===== " << i << std::endl;
     std::string left_part_of_filePath = filePath.substr(i);
     if (left_part_of_filePath[0] == '/')
         left_part_of_filePath.erase(0,1);
-    std::cout << "------------------------------>" << left_part_of_filePath << std::endl;
     currentIndex = find_in_index_vectors_this_string(left_part_of_filePath, locdir[locIndex]->getIndex());
     if (currentIndex < 0)
     {
@@ -533,8 +529,6 @@ std::string Request::uri_is_file(std::string filePath)
         // filePath = root + "/web/error404.html";
         // filePath = getFilepath("/web/error404.html");
     }
-    //////////
-    std::cout << "ete esi tpvela uremn jokela vor fayla\n";
     return get_need_string_that_we_must_be_pass_send_system_call(filePath);
 }
 
