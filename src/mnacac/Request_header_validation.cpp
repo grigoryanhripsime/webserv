@@ -20,22 +20,42 @@ std::string    Request_header_validation::if_received_request_valid(Request &req
     std::cout<<"--------------------------------------------------\n";
     std::stringstream ss(c_buffer);
     std::string line;
+    std::map<std::string, std::string> pairs;
     while (std::getline(ss, line))
-        lines.push_back(line);
-
-    if (lines.size() < 2)
+    {
+        std::stringstream ss1(line);
+        std::string title, value;
+        ss1 >> title;
+        std::cout<<"HELLOOOOOO: "<<title<<std::endl;
+        if (title.size() > 2 && title[title.size() - 1] != ':')
+            firstLine = line;
+        else
+        {
+            ss1 >> value;
+            std::cout<<"TITLE: "<<title.substr(0, title.size() - 1)<<std::endl;
+            pairs.insert(std::pair<std::string, std::string>(title.substr(0, title.size() - 1), value));
+            lines.push_back(line);
+        }
+    }
+    if (lines.size() < 1)
     {
         req.set_error_page_num(400);
         throw std::runtime_error("header cant contain less than 2 lines.");
     }
-    servIndex = getServerThatWeConnectTo(lines[1]);
+    std::map<std::string, std::string>::iterator it = pairs.find("Host");
+    if (it == pairs.end())
+    {
+        req.set_error_page_num(400); //TODOL check error code
+        throw std::runtime_error("There is no host");
+    }
+    servIndex = getServerThatWeConnectTo(it->second);
     req.set_servIndex(servIndex);
     if (servIndex < 0 || static_cast<size_t>(servIndex) >= servers.size()) {
-        req.set_error_page_num(500); // Internal Server Error for invalid server index
+        req.set_error_page_num(400); // Internal Server Error for invalid server index
         throw std::runtime_error("Invalid server index");
     }
     
-    method = validation_of_the_first_line(req, lines[0]);
+    method = validation_of_the_first_line(req, firstLine);
     if (!method.empty())
         Logger::printStatus("INFO", "Method of the request is: " + method);
     req.set_method(method);
@@ -90,6 +110,7 @@ std::string    Request_header_validation::validation_of_the_first_line(Request &
 
     while (iss >> word)
         result.push_back(word);
+    std::cout<<"EN ARAJI TOXN A"<<line<<std::endl;
     if (result.size() < 3)
     {
         req.set_error_page_num(400);
@@ -184,14 +205,15 @@ int Request_header_validation::check_this_metdod_has_in_appropriate_server(std::
 
 int Request_header_validation::getServerThatWeConnectTo(std::string line)
 {
-    std::stringstream ss(line);
+
+    // if (title != "Host:")
+    //     return -1;
     std::string serverName;
-    ss << serverName;
-    ss << serverName;
-    std::cout<<"apush " <<serverName<<std::endl;
-    // line >> 
+    // ss >> serverName;
+    // serverName = line;
+    std::cout<<"apush " <<line<<std::endl;
     // std::string serverName = line.substr(6);
-    serverName = serverName.substr(0, serverName.find(":"));
+    serverName = line.substr(0, serverName.find(":"));
 
     Logger::printStatus("INFO", "Specified servername: " + serverName);
     for (size_t i = 0; i < servers.size(); i++)

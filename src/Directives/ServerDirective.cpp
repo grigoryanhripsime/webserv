@@ -23,6 +23,7 @@ ServerDirective::ServerDirective()
     error_pages[405] = "error_pages/405.html";
     error_pages[413] = "error_pages/413.html";
     error_pages[415] = "error_pages/415.html";
+    error_pages[422] = "error_pages/415.html";
     error_pages[500] = "error_pages/500.html";
 }
 std::map<int, std::string>& ServerDirective::getError_pages() { return error_pages; }

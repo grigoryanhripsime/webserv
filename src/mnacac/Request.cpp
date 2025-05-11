@@ -23,6 +23,7 @@ void    Request::fill_status_message()
     status_message[408] = "REQUEST TIMEOUT";//Client took too long to send the request.petqa vor?
     status_message[413] = "PAYLOAD TOO LARGE";//
     status_message[415] = "UNSUPPORTED MEDIA TYPE";//POST
+    status_message[422] = "UNPROCESSABLE ENTITY";//POST
 
     // Critical 5xx Server Error
     status_message[500] = "INTERNAL SERVER ERROR";//Generic server error (e.g., unexpected crash or CGI failure)
@@ -700,32 +701,30 @@ void Request::handleClientRequest(int client_fd) {
                 break;
         }
         send_response(client_fd, response, epfd);
-        // ssize_t bytesSent = send(client_fd, response.c_str(), response.size(), 0);
-        // if (bytesSent == -1) {
-        //     std::cerr << "Error sending response to client" << std::endl;
-        //     epoll_ctl(epfd, EPOLL_CTL_DEL, client_fd, NULL);
-        //     close(client_fd);
-        //     return;
-        // }
-        // if (bytesSent < (ssize_t)response.size()) {
-        //     std::cerr << "Partial send, sent " << bytesSent << " of " << response.size() << " bytes" << std::endl;
-        //     //grenq return ;?
-        // }
     } catch (std::exception &e) {
-        Logger::printStatus("ERROiR", e.what());
+        Logger::printStatus("ERROR", e.what());
         std::clog << error_page_num << "\n";
         if (error_page_num == -1) error_page_num = 500;
-        std::string filename = servers[servIndex]->getError_pages().find(error_page_num)->second;
-        std::string root =  servers[servIndex]->getRoot();
-        std::string filePath = root + "/" + filename;
-        if (pathExists(filePath) == false ||  !isFile(filePath))
+        std::string filePath;
+        if (servIndex != -1)
+        {
+            std::map<int, std::string>::iterator it = servers[servIndex]->getError_pages().find(error_page_num);
+            if (it == servers[servIndex]->getError_pages().end())
+            {
+                throw std::runtime_error("Error page for that code is not found");
+            }
+            std::string filename = it->second;
+            std::string root =  servers[servIndex]->getRoot();
+            filePath = root + "/" + filename;
+        }
+        if (servIndex == -1 || pathExists(filePath) == false ||  !isFile(filePath))
         {
             Logger::printStatus("WARNING", "The error page from config file couldn't be reached!");
             char root_char[1024] = {0};
             getcwd(root_char, 1024);
             std::stringstream ss;
             ss << error_page_num;
-            servers[servIndex]->getError_pages()[error_page_num] = ss.str() + ".html";
+            // servers[servIndex]->getError_pages()[error_page_num] = ss.str() + ".html";
             filePath = std::string(root_char) + "/error_pages/" + ss.str() + ".html";
         }
         response = get_need_string_that_we_must_be_pass_send_system_call(filePath);

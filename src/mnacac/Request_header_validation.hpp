@@ -23,6 +23,7 @@ class Request_header_validation
         std::string uri;//GET-i hamar
         std::string method;
         std::vector<std::string> lines;
+        std::string firstLine;
     public:
         void    set_status(status_type status){this->status = status;}
         std::string get_uri() const;
