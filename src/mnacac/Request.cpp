@@ -869,6 +869,7 @@ std::string Request::generateRedirectResponse(std::string filePath) {
     response += "Location: " + filePath + "\r\n";
     response += "Content-Length: 0\r\n";//ste 0???
     response += "Connection: keep-alive\r\n";
+    response += "Cache-Control: no-cache\r\n";
     response += "\r\n";
     return response;
 }
