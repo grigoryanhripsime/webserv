@@ -19,7 +19,7 @@ public:
     bool isAllDigits(const std::string& str);
     bool is_all_letters(const std::string& str);
     virtual void    setIndex(const std::vector<std::string> indexVec);
-    void    setClient_max_body_size(const std::string& size);
+    virtual void    setClient_max_body_size(const std::string& size);
     void    setRoot(const std::string& rootPath);
     void    setError_pages(std::vector<std::string> pages);
 public:

@@ -73,9 +73,9 @@ size_t AGeneralDirective::parse_size_to_bytes(const std::string& value)
     // Если strtoul не нашла ни одной цифры, она вернёт 0, а endptr останется указывать на начало строки.
     // Это значит, что строка не является числом (например, "M10" или "invalid").
     switch (tolower(*end)) {
-        case 'k': return num * 1024;
-        case 'm': return num * 1024 * 1024;
-        case 'g': return num * 1024 * 1024 * 1024;
+        case 'k': std::cout << "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZzzzz\n";return num * 1024;
+        case 'm': std::cout << "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZzzzz222222222222\n";return num * 1024 * 1024;
+        case 'g': std::cout << "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZzzzz33333333333333\n";return num * 1024 * 1024 * 1024;
         default:  return num;  // Без суффикса (байты)
     }
 }
@@ -84,6 +84,7 @@ void    AGeneralDirective::setClient_max_body_size(const std::string& size)
 {
     if (!is_valid_client_max_body_size(size))
         throw std::runtime_error("invalid body size" + size);
+    std::cout << "kanchVVVVVVAAAAAAVVVVV\n";
     client_max_body_size = parse_size_to_bytes(size);
 
 }

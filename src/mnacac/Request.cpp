@@ -97,6 +97,7 @@ void Request::parseUrlEncodedForm(const std::string &body)
 }
 
 std::string Request::post_method_tasovka(char *buffer, int bytesRead) {
+    std::cout << "REQUEST:"<<buffer << std::endl;
     std::vector<LocationDirective*> locdir = servers[servIndex]->getLocdir();
     int locIndex = servers[servIndex]->get_locIndex();
     std::cout << "matryyyyyyyyyyyyy>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << buffer<<std::endl;
@@ -118,7 +119,7 @@ std::string Request::post_method_tasovka(char *buffer, int bytesRead) {
     }
     /////////////////////////////////
     std::string response_body;
-    std::string upload_dir = locdir[locIndex]->getUpload_dir();
+    std::string upload_dir = get_cwd() + "/" + locdir[locIndex]->getPath() + "/" + locdir[locIndex]->getUpload_dir();
     
     // Handle different content types
     if (MainContentType.find("application/x-www-form-urlencoded") != std::string::npos) {
@@ -162,6 +163,7 @@ std::string Request::post_method_tasovka(char *buffer, int bytesRead) {
         std::cout << "======" << upload_dir << std::endl;
         response_body = handle_simple_post(upload_dir);
     }
+
 
     // Build HTTP response
     std::cout << "hargeli errpr page->" << error_page_num<<std::endl;
@@ -252,6 +254,9 @@ void Request::set_contentLength(std::string line)
 
     std::vector<LocationDirective*> locdir = servers[servIndex]->getLocdir();
     int locIndex = servers[servIndex]->get_locIndex();
+    std::cout << "contentLength = " << contentLength<<std::endl;
+    std::cout << "locdir[locIndex]->getBodySize() = " << locdir[locIndex]->getBodySize()<<std::endl;
+
     if (contentLength > locdir[locIndex]->getBodySize()) {
         // set_error_page_num(413);
         error_page_num = 413;
@@ -265,6 +270,7 @@ std::string Request::handle_multipart_upload(const std::string &upload_dir)
     std::string file_path;
     std::string headers;
     std::string filename;
+
     if (boundary.empty()) {
         error_page_num = 400;
         throw std::runtime_error("Error: No boundary found for multipart/form-data");//mihat haskanal lava throw-ov te return-ov??
@@ -274,6 +280,7 @@ std::string Request::handle_multipart_upload(const std::string &upload_dir)
     if (!isDirectory(upload_dir) || access(upload_dir.c_str(), W_OK) != 0) {
         std::cout << "stEx hasav\n" << upload_dir;
         error_page_num = 403;
+        std::clog << "THIS IS UPDIR" << upload_dir << "\n\n";
         throw std::runtime_error("Upload directory does not exist or is not writable");
     }
     /////////////////////////////////////////////
@@ -354,6 +361,8 @@ std::string Request::handle_multipart_upload(const std::string &upload_dir)
     std::cout << "FILE-CONTENT-<" << file_content <<std::endl;
     std::cout << "FILE_PATH ->" << file_path <<std::endl;
     std::cout << "RESSSSSSSPONSE->" << response << std::endl;
+   
+    servers[servIndex]->set_file(filename);
     return response;
 }
 
@@ -385,6 +394,7 @@ std::string Request::handle_simple_post(const std::string &upload_dir)
     ///////////Check if upload_dir exists and is writable
     if (!isDirectory(upload_dir) || access(upload_dir.c_str(), W_OK) != 0) {
         error_page_num = 403;
+        std::clog << "THIS IS UPDIR" << upload_dir << "\n\n";
         throw std::runtime_error("Upload directory does not exist or is not writable");
     }
     ////////////////////////////////////////////////////
@@ -405,7 +415,7 @@ std::string Request::handle_simple_post(const std::string &upload_dir)
         throw std::runtime_error("Error: Failed to write POST data");
         return "Error: Failed to write POST data";
     }
-
+    servers[servIndex]->set_file(form_data[0]);//
     return "POST data saved successfully";
 }
 
@@ -768,7 +778,7 @@ std::string Request::handleDelete(std::string filePath)
     // Handle file or directory
     if (isFile(filePath)) {
         // Delete file using std::remove
-        if (std::remove(filePath.c_str()) != 0) {
+        if (std::remove(filePath.c_str()) != 0 && servers[servIndex]->get_file(filePath.c_str()) != "") {
             error_page_num = 500;
             throw std::runtime_error("Failed to delete file");
         }

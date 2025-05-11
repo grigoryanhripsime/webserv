@@ -1,7 +1,7 @@
 #pragma once
 #include "ClientSocket.hpp"
 #include "ServerSocket.hpp"
-
+#include <set>
 #include "Request.hpp"
 
 #define METHOD_ERROR -77

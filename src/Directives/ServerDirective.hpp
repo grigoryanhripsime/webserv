@@ -7,6 +7,7 @@
 #include "LocationDirective.hpp"
 #include "ServerSocket.hpp"
 #include <algorithm>
+#include <set>
 
 class LocationDirective;
 
@@ -19,6 +20,7 @@ class ServerDirective : public AGeneralDirective
         std::string server_name;//allow but not required
         std::vector<LocationDirective*> locdir;
         int locIndex;
+        std::set<std::string> files;
 
     public:
         //setters
@@ -40,6 +42,7 @@ class ServerDirective : public AGeneralDirective
         std::pair<std::string, int> getListen() const;
         std::string getServer_name() const;
         int get_locIndex() const;
+        std::string get_file(const std::string &key) const {return *(files.find(key)) ;}
 
         ////listen validacia//////////
         void    check_and_set_port(const std::string& ipAndPort, size_t& indexOfVerjaket, bool flag);
@@ -47,4 +50,6 @@ class ServerDirective : public AGeneralDirective
         ///////////////////////////////
         bool pathExists(const std::string& path);
         bool isDirectory(const std::string& path);
+
+        void    set_file(const std::string &key) {files.insert(key);}
 };

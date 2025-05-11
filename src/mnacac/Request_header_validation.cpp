@@ -20,6 +20,7 @@ std::string    Request_header_validation::if_received_request_valid(Request &req
     std::cout<<"--------------------------------------------------\n";
     std::stringstream ss(c_buffer);
     std::string line;
+    std::getline(ss, firstLine);
     std::map<std::string, std::string> pairs;
     while (std::getline(ss, line))
     {
@@ -27,15 +28,11 @@ std::string    Request_header_validation::if_received_request_valid(Request &req
         std::string title, value;
         ss1 >> title;
         std::cout<<"HELLOOOOOO: "<<title<<std::endl;
-        if (title.size() > 2 && title[title.size() - 1] != ':')
-            firstLine = line;
-        else
-        {
-            ss1 >> value;
-            std::cout<<"TITLE: "<<title.substr(0, title.size() - 1)<<std::endl;
-            pairs.insert(std::pair<std::string, std::string>(title.substr(0, title.size() - 1), value));
-            lines.push_back(line);
-        }
+
+        ss1 >> value;
+        std::cout<<"TITLE: "<<title.substr(0, title.size() - 1)<<std::endl;
+        pairs.insert(std::pair<std::string, std::string>(title.substr(0, title.size() - 1), value));
+        lines.push_back(line);
     }
     if (lines.size() < 1)
     {
@@ -54,7 +51,7 @@ std::string    Request_header_validation::if_received_request_valid(Request &req
         req.set_error_page_num(400); // Internal Server Error for invalid server index
         throw std::runtime_error("Invalid server index");
     }
-    
+    std::cout << "xi ay axper->" << firstLine  << std::endl;
     method = validation_of_the_first_line(req, firstLine);
     if (!method.empty())
         Logger::printStatus("INFO", "Method of the request is: " + method);
@@ -67,6 +64,41 @@ std::string    Request_header_validation::if_received_request_valid(Request &req
     
     return method;
 }
+
+// std::string    Request_header_validation::if_received_request_valid(Request &req, char *c_buffer)
+// {
+//     std::cout<<"--------------------------------------------------\n";
+//     std::cout << "REQUEST:" << c_buffer<<std::endl;
+//     std::cout<<"--------------------------------------------------\n";
+//     std::stringstream ss(c_buffer);
+//     std::string line;
+//     while (std::getline(ss, line))
+//         lines.push_back(line);
+
+//     if (lines.size() < 2)
+//     {
+//         req.set_error_page_num(400);
+//         throw std::runtime_error("header cant contain less than 2 lines.");
+//     }
+//     servIndex = getServerThatWeConnectTo(lines[1]);
+//     req.set_servIndex(servIndex);
+//     if (servIndex < 0 || static_cast<size_t>(servIndex) >= servers.size()) {
+//         req.set_error_page_num(500); // Internal Server Error for invalid server index
+//         throw std::runtime_error("Invalid server index");
+//     }
+
+//     method = validation_of_the_first_line(req, lines[0]);
+//     if (!method.empty())
+//         Logger::printStatus("INFO", "Method of the request is: " + method);
+//     req.set_method(method);
+//     if (method != "GET" && method != "POST" && method != "DELETE") 
+//     {
+//         req.set_error_page_num(405);
+//         throw std::runtime_error("senc method chunenq mer allow_methods-um-> 405 Method Not Allowed.\n");//return 77;
+//     }
+
+//     return method;
+// }
 
 
 void Request_header_validation::fill_headers_map(headers_map &headers)
@@ -114,6 +146,7 @@ std::string    Request_header_validation::validation_of_the_first_line(Request &
     if (result.size() < 3)
     {
         req.set_error_page_num(400);
+        std::cout << "line = " << line <<std::endl;
         throw std::runtime_error("error page piti bacvi, headeri error a");
     }
     uri = result[1];

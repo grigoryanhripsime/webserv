@@ -1,0 +1,146 @@
+5522786 return was corrected
+8c95530 tmp commit
+61feee2 qashvabq
+07c08ab Fixed DirectiveConfig
+bc6ed90 New work tree
+e2b9c99 leak
+cf279f9 try to handle favicon
+a874bd3 Merge branch 'main' into feature/cgi
+5d676de Fixed all issues about CGI
+b1cce54 DELETE works
+6a3ec18 Handled CGI endless loop of request
+af48399 vaxy kasem inch em arel
+bd6c192 temporary commit
+b0c7156 request as cgi is cleaned up
+f4851e7 till the request is done
+e663311 some unknown changes
+e342a25 some changes in post and have_this_uri_in_our_current_server function
+e2b9fff POST method already works as expected(the same nginx)
+32818c7 check why if we write es yeqa kody(Hrip-autoindex),meka ashxatum chklni meka ashxatuma
+aae0b29 sss
+72eb4e3 Removed code repeating with get_cwd()
+9639023 redirect works,but when I removed return directive in config meka redirectna ashxatum vochte index-@,mtacum enq xndiry cache-na
+623482d solve seg when uri dont have in our config(location path)
+3543f5b no leaks?mekel en validate virtual funkcian vor unenq grac ogtagorcenq iran,Hripsimei grac setUpload_dir(std::string) funkciayi mej en 3if-@ haskananq petqa bacel che?
+0f39832 solve problem in this example->in config location /delete_files/ and in uri is /delete_files
+d9b18eb Refactored cgi invalid index and more cleaned up
+e4d21b5 Created getcwd function in Request.cpp and clean up CGI
+cbe535b when in config file error_page does not exist,we open our default error pages which are located in getcwd + error_pages/
+e734126 merged
+634bf91 added
+1c58d98 Delete done vaytem,error pages logic voncor te work,mnuma check anel i avelacnel mnacac error_page_num-eri hamarnery
+c056138 Refactored response
+4ea0ca2 Merge branch 'main' into feature/cgi
+08acb04 vay Vardan
+f6cc301 yntacqi mej a, bayc Vbarseghy shat ban arel a, capaharutyunneeeeeeer
+4522852 some changes
+d28c3b0 Fixed hardcode for fileindex
+96b0404 Merge remote-tracking branch 'origin/error_pages' into feature/cgi
+625daff error_pages are working, but not properly checked
+ed2c970 Fixed parsing for multiple cgi
+f16baad with SEGV
+cbd8987 segv from uri_share fixed
+13e989e Finished CGI integration
+baf04a8 temporary commit, map for header was added
+a0f059e the Hrip is back
+55eb153 CGI execution failed
+59cb0b0 Merge branch 'main' into feature/cgi
+f0b6315 change status to 2variants
+f0af260 now we can merge our main and Tikos cgi
+87d2620 Added some examples and comments for parsing and function call
+c287720 Merge branch 'main' into feature/cgi
+2ce2c62 Added todo list
+7890ab7 already images correctly creating
+6ee8bfd erb content type-@ application/x-www-form-urlencoded a zut body-n lcnum enq map-i mej(karoxa poxenq zut stringum pagenq) ,fayl stexcel ban chenq anum,eti mer gorci mej chi mtnum
+b321f5a idk
+a8db7c7 Merge branch 'main' of github.com:grigoryanhripsime/webserv
+d94ef18 some changes
+4690511 solve problem when in location have root directive
+0191ac7 getters moved to cpps
+0c00073 added
+e1b99fa added
+707bdc1 starting create Request class
+9997276 initial commit
+4074d6c fixed
+d163e8a Refactored config
+7ff944c methods validation is separated and segfaulg
+61ade4c Fixed some bugs
+f920519 Fixed some bugs
+5f813b9 proccess for favicon is missed
+0d822a4 In POST method when Content-Type is->(multipart/form-data) workly correctly,daje ete upload_dir-@ miqani chanaparha parunakum(/../../) mkdira anum et sax u verjnakani mej stexcum fayly, menak chshtel ete upload_dir-@ sksuma /-ov zut pti jnjel et /-@ u kpcnel root-in....,te inchvor naxinacia ka
+9c309ea bana poxve?
+3a04c7c 8-@ galisa
+f1ff02b 8-@ galisa
+4f87d98 validation of the first line of get request header
+85a4ef6 merged
+4272f39 inch arelem lavem arel
+bbd0fd1 no leaks?? :)
+fafea14 solve the problem when filePath is directory and we dont have the location path,throw 404 error
+64b7abb autoindex partly done
+077229f leakssss
+e8e2239 method GET
+03cf2ad compile error a talu, chem uxxal vor miangamic gtnes inch em arel
+2d35845 Server names with duplicate IPs must be different.
+224d951 miqich gexeckacri hertakanutyun@, bayc allow_method vektori meji valunery()get,post,.., sxala linum,pordzem dzem hesa
+1715036 validation of request first line is done
+e9993f5 knereq indz nedarazumeni paha exe->int fd = it->second[0] sxalem gre,pti senc ylner int fd = servSock[it->second[0]].get_socket();
+57c9f1d fixed SEGFAULT, remove sockfd member in serverDirective(
+90a15e9 merged
+6959dcf complilable
+3244268 bind error was solved
+d940e5a dzelenq vor nuyn ip ev porotv serverneri hamar sarqvuma mihat socket(vor bind-i xndir chta), isk mnacacy->toist et nuyn ip ev portov servernery kapum enq en mi angam stexcvac soketin
+9b22aff bind anum enq vochte serverni qanakov ayl unique ip_port zuygerov
+5b45bdf chkaraca miqani serveri hamar check-er anel,vortev erb config-um mihatic avel server unenq bind-i xndira talis((((
+b28d9e6 vor name-ov chenq bacum ayl ip-ov,orinak->127.0.0.1:8080 jokuma vor pti baci(nu chisht ashxati) ,bayc sxal depqy chkaraca stugem vortev ete qcemq config fayli mej 127.0.0.23 a bayc browserum bacum em 127.0.0.1:8080 erroa tali browserum inchi patcharov en headery menq chenq stanum,dra hamarel chem karum et sxal depqy stugem
+4454707 server found, but need to handle if it came via ip
+057c85f a lot of stuff was done
+b0a973e we know what must be do
+6871aaf html file as output is done
+32ba552 prc websery
+e6c46a0 Yesterday's commit that I promised to do, but forgot
+7adf739 can continue
+ad91a59 some info about non blocking , epoll API
+dd99d10 some comments
+913b748 vrodi I am done my part,hela hac utem
+f5d6cb9 conflict solved?
+d67d463 added AGeneralDirective members setters and validations
+bdc42fe Directives for location maybe are done
+60132b8 amota ,celi orum mihat memberi(listen) validacia enq arel, bayc idealakan graca(husanq:0)
+b0d9409 added
+2be47c3 seg was solved
+ee7803d added
+79cc30c Merge branch 'main' of github.com:grigoryanhripsime/webserv
+94210d6 added
+8da165b print already done
+169717e print already done
+59c25ed Merge branch 'main' of github.com:grigoryanhripsime/webserv
+af4728f added
+8f51a65 nitoa
+99fd655 setters
+f91b2c4 added
+abf4295 multimap values name change em are SingleDir,sorry(
+6cfef6a add validation in ServerDirective and LocationDirective, but we must be fill this classes and after that check validation)
+0145cbc the fault with path of location was solved
+6ab477e senc sxal unenq erb locationi path chka asuma path chka bayc partadira,bayc henc yani path em avelacnum urish texica qcum,vory lav chi
+abfafa0 please answer in my questions
+27588ef seg was fixed
+a164ee6 added
+3573faf added
+c2ea50a naxord commiti xelqi berac tarberak
+cedc10d create Socket,ServerASocket, ClientSocket, ListeningSocket, Server classes
+0024120 some info about send and recv(receive)
+99c7abb Merge branch 'main' of github.com:grigoryanhripsime/webserv
+0066c59 added
+0d1ed4a about send i recv(receive)
+5d945d9 example of how to establish a connection between a server and a client
+ea82c13 esem karum,esem anum
+bc005f3 eli kardalu baner
+41a85eb some info about create socket,bind,and listen
+a9f7d5e Issues closed
+238b299 added
+8c695ac merged
+b8ccb74 added
+ce3523c some annoying prints
+524b0af parsing not carefully checked, but done
+0e818b6 file is read into string successfully
+bed2ec2 Very quick start

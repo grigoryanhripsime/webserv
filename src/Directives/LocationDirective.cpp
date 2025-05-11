@@ -10,6 +10,7 @@ LocationDirective::LocationDirective(ServerDirective *serv) :
     cgi_extension()
 {
     this->index = serv->getIndex();
+    this->client_max_body_size = serv->getBodySize();
     validDirs[0] = "path";
     validDirs[1] = "allow_methods";
     validDirs[2] = "autoindex";

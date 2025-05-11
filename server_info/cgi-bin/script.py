@@ -1,12 +1,10 @@
 #!/usr/bin/python3
 print("Content-Type: text/html")
 print("")
-import time
-while(1):
-  print()
 print("""<!DOCTYPE html>
 <html>
 	<head>
+  <link rel="icon" type="image/png" sizes="32x32" href="https://static.vecteezy.com/system/resources/thumbnails/029/570/400/small/cute-teddy-bear-ai-generative-free-png.png">
 		<style>
 			html {
   background-color: #000121;

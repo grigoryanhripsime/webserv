@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test POST Handler</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 20px;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 8px;
+      box-sizing: border-box;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    #response {
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      display: none;
+    }
+    .error {
+      color: red;
+      border-color: red;
+    }
+    .success {
+      color: green;
+      border-color: green;
+    }
+  </style>
+</head>
+<body>
+  <h1>Test POST Handler</h1>
+  <form id="testForm">
+    <div class="form-group">
+      <label for="name">Name:</label>
+      <input type="text" id="name" name="name" required>
+    </div>
+    <div class="form-group">
+      <label for="message">Message:</label>
+      <textarea id="message" name="message" required></textarea>
+    </div>
+    <button type="submit">Send POST Request</button>
+  </form>
+  <div id="response"></div>
+
+  <script>
+    document.getElementById('testForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const name = document.getElementById('name').value;
+      const message = document.getElementById('message').value;
+      const responseDiv = document.getElementById('response');
+      const payload = `name=${encodeURIComponent(name)}&message=${encodeURIComponent(message)}`;
+
+      try {
+        const response = await fetch('/post_request', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'text/plain',
+          },
+          body: payload,
+        });
+
+        const data = await response.text();
+
+        responseDiv.style.display = 'block';
+        responseDiv.className = 'success';
+        responseDiv.textContent = `Success: ${data}`;
+      } catch (error) {
+        responseDiv.style.display = 'block';
+        responseDiv.className = 'error';
+        responseDiv.textContent = `Error: ${error.message}`;
+      }
+    });
+  </script>
+</body>
+</html>

@@ -3,11 +3,12 @@
 
 ServerDirective::ServerDirective()
 {
+    files.clear();
     index.push_back("index.html");//qani vor stex default-ov push enq anum index.html-n ,setIndex-i mej clear enq anum vectory vortev ete kanchvela setIndex serveri hamar uremn inqy uni index directiv=>default depqy el chi ogtagorcvelu
     listen.first = "0.0.0.0";
     listen.second = -1;
     server_name = "";
-
+    // this->client_max_body_size = serv->getBodySize();
     validDirs[0] = "listen";
     validDirs[1] = "server_name";
     validDirs[2] = "index";

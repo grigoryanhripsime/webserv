@@ -33,6 +33,7 @@ def generate_html(name):
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CGI Greeting</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://static.vecteezy.com/system/resources/thumbnails/029/570/400/small/cute-teddy-bear-ai-generative-free-png.png">
     <style>
         body {{
             background-color: #f8f9fa;
