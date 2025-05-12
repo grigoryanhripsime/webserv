@@ -361,7 +361,7 @@ std::string Request::handle_multipart_upload(const std::string &upload_dir)
     std::cout << "FILE-CONTENT-<" << file_content <<std::endl;
     std::cout << "FILE_PATH ->" << file_path <<std::endl;
     std::cout << "RESSSSSSSPONSE->" << response << std::endl;
-   
+   std::cout << "success-<" << file_path<<std::endl;
     servers[servIndex]->set_file(filename);
     return response;
 }
@@ -644,7 +644,7 @@ std::string Request::constructingResponce(std::string filePath)
         error_page_num = 404;//kam 403
         throw std::runtime_error(" путь не существует или нет прав на доступ(файл/директория)");
     }
-    if (isFile(filePath)) //Если ты проверяешь путь и он:❌ не существует — верни ошибку 404 Not Found
+    if (isFile(filePath))
         return uri_is_file(filePath);
     else if (isDirectory(filePath))
         return uri_is_directory(filePath);
@@ -701,13 +701,9 @@ void Request::handleClientRequest(int client_fd) {
         switch(request_header_validation.get_status()) {
             case DYNAMIC:
                 response = cgi.CGI_handler();
-                // send(client_fd, response.c_str(), strlen(response.c_str()), 0);
                 break;
             case STATIC:
-            std::clog << buffer<<std::endl;
                 response = get_response(method, buffer, bytesRead);
-                std::cout << "paho->" << response.size() << std::endl;
-                // send(client_fd, response.c_str(), strlen(response.c_str()), 0);
                 break;
         }
         send_response(client_fd, response, epfd);
@@ -805,7 +801,6 @@ std::string Request::get_response(std::string &method, char *buffer, int bytesRe
     if (method == "GET")
     {
         error_page_num = 200;
-        // request_header_validation.check_this_metdod_has_in_appropriate_server(method, locIndex);
         //////redirecti masna//////
         if (!servers[servIndex]->getLocdir()[servers[servIndex]->get_locIndex()]->getRedirect().empty())
         {
@@ -820,13 +815,12 @@ std::string Request::get_response(std::string &method, char *buffer, int bytesRe
     else if(method == "POST")
     {
         error_page_num = 201;
-        // request_header_validation.check_this_metdod_has_in_appropriate_server(method, locIndex);
         res = post_method_tasovka(buffer, bytesRead);
     }
     else if (method == "DELETE")
     {
+        std::cout<<"MTEL EM\n";
         error_page_num = 204; // Default to success
-        // request_header_validation.check_this_metdod_has_in_appropriate_server(method, locIndex);
         std::string filePath = getFilepath(uri);
         res = handleDelete(filePath);
     }
@@ -856,11 +850,18 @@ int Request::if_http_is_valid(char *c_buffer)
 std::string Request::getFilepath(std::string needly_atribute)
 {
     std::vector<LocationDirective*> locdir = servers[servIndex]->getLocdir();
-    // int locIndex = servers[servIndex]->get_locIndex();
+    int locIndex = servers[servIndex]->get_locIndex();
     std::string root = this->get_cwd();
+    if (method == "DELETE")
+    {
+        root += locdir[locIndex]->getPath();
+        if (std::strncmp(locdir[locIndex]->getPath().c_str(), needly_atribute.c_str(), locdir[locIndex]->getPath().size()) == 0)
+            needly_atribute = needly_atribute.substr(locdir[locIndex]->getPath().size());
+    }
     std::string filePath = root + needly_atribute;
     return filePath;
 }
+
 
 std::string Request::get_cwd()
 {

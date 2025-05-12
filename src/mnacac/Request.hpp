@@ -91,7 +91,6 @@ public:
     std::string autoindex(std::string filePath);
 
     std::string handleDelete(std::string filePath);
-    bool    deleteDirectory(const std::string& dirPath);
     std::string generateRedirectResponse(std::string filePath);
     void check_directories(const std::string& dir_path);
 

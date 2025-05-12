@@ -27,10 +27,8 @@ std::string    Request_header_validation::if_received_request_valid(Request &req
         std::stringstream ss1(line);
         std::string title, value;
         ss1 >> title;
-        std::cout<<"HELLOOOOOO: "<<title<<std::endl;
 
         ss1 >> value;
-        std::cout<<"TITLE: "<<title.substr(0, title.size() - 1)<<std::endl;
         pairs.insert(std::pair<std::string, std::string>(title.substr(0, title.size() - 1), value));
         lines.push_back(line);
     }
@@ -142,11 +140,9 @@ std::string    Request_header_validation::validation_of_the_first_line(Request &
 
     while (iss >> word)
         result.push_back(word);
-    std::cout<<"EN ARAJI TOXN A"<<line<<std::endl;
     if (result.size() < 3)
     {
         req.set_error_page_num(400);
-        std::cout << "line = " << line <<std::endl;
         throw std::runtime_error("error page piti bacvi, headeri error a");
     }
     uri = result[1];
@@ -160,21 +156,23 @@ std::string    Request_header_validation::validation_of_the_first_line(Request &
     size_t harcakanInd = uri.find('?');//stugel,norem avelacre
     if (harcakanInd != std::string::npos)
         req.set_query(uri.substr(harcakanInd + 1));
-    int locIndex = have_this_uri_in_our_current_server(servIndex);//esi arajin toxi uri masi pahna
-    if (locIndex < 0)//&& result[0] != "DELETE",senc che vortev mez location polyubomu petqa voprtev metodery menak location-in en patkanum////////////////////////
+    if (!(result[0] == "DELETE" && servers[servIndex]->get_locIndex() > 0))
     {
-        req.set_error_page_num(404);//zdes kakoe cifr dat?
-        throw std::runtime_error("error page pti bacvi browser-um");//es hmi exception em qcum vor segfault chta,bayc heto pti zut error page-@ bacenq
+        int locIndex = have_this_uri_in_our_current_server(servIndex);//esi arajin toxi uri masi pahna
+        if (locIndex < 0)//&& result[0] != "DELETE",senc che vortev mez location polyubomu petqa voprtev metodery menak location-in en patkanum////////////////////////
+        {
+            req.set_error_page_num(404);//zdes kakoe cifr dat?
+            throw std::runtime_error("error page pti bacvi browser-um");//es hmi exception em qcum vor segfault chta,bayc heto pti zut error page-@ bacenq
+        }
+        servers[servIndex]->setLocIndex(locIndex);//set locIndex
     }
-    servers[servIndex]->setLocIndex(locIndex);//set locIndex
-
     if (result[2] != "HTTP/1.1" && result[2] != "HTTP/2")
     {
         req.set_error_page_num(505);
         throw std::runtime_error("error page:: headery sxal a");
     }
     
-    if (check_this_metdod_has_in_appropriate_server(result[0], locIndex) < 0)
+    if (check_this_metdod_has_in_appropriate_server(result[0], servers[servIndex]->get_locIndex()) < 0)
     {
         req.set_error_page_num(405);
         throw std::runtime_error("this method not allowed in appropriate location");
