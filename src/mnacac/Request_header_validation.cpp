@@ -106,7 +106,11 @@ std::string    Request_header_validation::validation_of_the_first_line(Request &
     }
     size_t harcakanInd = uri.find('?');
     if (harcakanInd != std::string::npos)
+    {
         req.set_query(uri.substr(harcakanInd + 1));
+        size_t pos = uri.find("?");
+        req.set_uri(req.get_uri().substr(0, pos));
+    }
     if (!(result[0] == "DELETE" && servers[servIndex]->get_locIndex() > 0))
     {
         int locIndex = have_this_uri_in_our_current_server(servIndex);

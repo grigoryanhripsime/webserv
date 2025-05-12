@@ -36,7 +36,7 @@ std::string CGI::CGI_handler()
     int serv_index = request->get_servIndex();
     std::vector<ServerDirective *> servers = request->get_servers();
     ServerDirective * server = servers[serv_index];
-    this->path_info = request->geturi();
+    this->path_info = request->get_uri();
     std::vector<LocationDirective *> locdir = server->getLocdir();
     int locIndex = server->get_locIndex();
     std::string index = _get_index(locdir[locIndex]->getIndex(), locdir[locIndex]->getPath());
