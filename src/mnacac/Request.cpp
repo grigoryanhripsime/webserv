@@ -119,11 +119,30 @@ std::string Request::post_method_tasovka(char *buffer, int bytesRead) {
     }
     /////////////////////////////////
     std::string response_body;
-    std::string upload_dir = get_cwd() + "/" + locdir[locIndex]->getPath() + "/" + locdir[locIndex]->getUpload_dir();
-    
+    std::string upload_dir = locdir[locIndex]->getUpload_dir();
+    std::cout << "UROD->" << upload_dir << std::endl;
     // Handle different content types
+    if (upload_dir.empty())
+        {
+            error_page_num = 403;
+            throw std::runtime_error("upload_dir is empty");
+        }
+        // Process upload directory path
+    std::clog << locdir[locIndex]->getPath() << "\n";
+    std::string root = this->get_cwd() + locdir[locIndex]->getPath() + "/";
+    std::clog << root << "\n";
+    
+    if (upload_dir[0] == '/')
+        upload_dir = upload_dir.substr(1);
+    upload_dir = root + upload_dir;
+
+    
+    // Remove trailing slash if present
+    if (!upload_dir.empty() && upload_dir[upload_dir.size() - 1] == '/')
+        upload_dir.erase(upload_dir.size() - 1);
+    
+    parseUrlEncodedForm(post_body);
     if (MainContentType.find("application/x-www-form-urlencoded") != std::string::npos) {
-        parseUrlEncodedForm(post_body);
         
         // Build response from parsed form data
         std::stringstream ss;
@@ -137,21 +156,22 @@ std::string Request::post_method_tasovka(char *buffer, int bytesRead) {
     else if (MainContentType.find("multipart/form-data") != std::string::npos)
     {
         std::cout << "VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV\n";
-        if (upload_dir.empty())
-        {
-            error_page_num = 403;
-            throw std::runtime_error("upload_dir is empty");
-        }
-        // Process upload directory path
-        std::string root = this->get_cwd();
-        if (upload_dir[0] != '/')
-            upload_dir = root + "/" + upload_dir;
-        else
-            upload_dir = root + upload_dir.substr(1);
+        // if (upload_dir.empty())
+        // {
+        //     error_page_num = 403;
+        //     throw std::runtime_error("upload_dir is empty");
+        // }
+        // // Process upload directory path
+        // std::string root = this->get_cwd() + locdir[locIndex]->getPath() + "/";
         
-        // Remove trailing slash if present
-        if (!upload_dir.empty() && upload_dir[upload_dir.size() - 1] == '/')
-            upload_dir.erase(upload_dir.size() - 1);
+        // if (upload_dir[0] == '/')
+        //     upload_dir = upload_dir.substr(1);
+        // upload_dir = root + upload_dir;
+
+        
+        // // Remove trailing slash if present
+        // if (!upload_dir.empty() && upload_dir[upload_dir.size() - 1] == '/')
+        //     upload_dir.erase(upload_dir.size() - 1);
         
         response_body = handle_multipart_upload(upload_dir);
     } 
@@ -362,7 +382,7 @@ std::string Request::handle_multipart_upload(const std::string &upload_dir)
     std::cout << "FILE_PATH ->" << file_path <<std::endl;
     std::cout << "RESSSSSSSPONSE->" << response << std::endl;
    std::cout << "success-<" << file_path<<std::endl;
-    servers[servIndex]->set_file(filename);
+    servers[servIndex]->set_file(file_path);
     return response;
 }
 
@@ -399,7 +419,10 @@ std::string Request::handle_simple_post(const std::string &upload_dir)
     }
     ////////////////////////////////////////////////////
     // Сохраняем тело POST в файл post_data.txt в upload_dir
-    std::string file_path = upload_dir + "/post_data.txt";
+    // std::string file_path = upload_dir + "/post_data.txt";
+    
+    std::string file_path = upload_dir + "/" + form_data["name"];
+    std::clog << file_path << "\n";
     int fd = open(file_path.c_str(), O_CREAT | O_WRONLY | O_TRUNC, 0644);
     if (fd == -1) {
         error_page_num = 500;
@@ -407,15 +430,19 @@ std::string Request::handle_simple_post(const std::string &upload_dir)
         // return "Error: Failed to open file for writing";
     }
 
-    ssize_t written = write(fd, post_body.c_str(), post_body.size());
+    for (std::map<std::string, std::string>::const_iterator it = form_data.begin(); it != form_data.end(); ++it) {
+        if (it->first == "name") continue ;
+        ssize_t written = write(fd, it->second.c_str(), it->second.length());
+        if (written == -1 || static_cast<size_t>(written) != post_body.size()) {
+            error_page_num = 500;
+            throw std::runtime_error("Error: Failed to write POST data");
+            return "Error: Failed to write POST data";
+        }
+    }
     close(fd);
 
-    if (written == -1 || static_cast<size_t>(written) != post_body.size()) {
-        error_page_num = 500;
-        throw std::runtime_error("Error: Failed to write POST data");
-        return "Error: Failed to write POST data";
-    }
-    servers[servIndex]->set_file(form_data[0]);//
+    std::cout << "simple->" << file_path << std::endl;
+    servers[servIndex]->set_file(file_path);//
     return "POST data saved successfully";
 }
 
