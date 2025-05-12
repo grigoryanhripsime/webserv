@@ -644,11 +644,11 @@ std::string Request::handleDelete(std::string filePath)
     }
 
     if (isFile(filePath)) {
-        if (servers[servIndex]->get_file(filePath).empty())
-        {
-            error_page_num = 403;
-            throw std::runtime_error("File can't be deleted, you did't create it!");
-        }
+        // if (servers[servIndex]->get_file(filePath).empty())
+        // {
+        //     error_page_num = 403;
+        //     throw std::runtime_error("File can't be deleted, you did't create it!");
+        // }
         if (std::remove(filePath.c_str()) != 0 && servers[servIndex]->get_file(filePath.c_str()) != "") {
             error_page_num = 500;
             throw std::runtime_error("Failed to delete file");
