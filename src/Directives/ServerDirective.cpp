@@ -4,11 +4,10 @@
 ServerDirective::ServerDirective()
 {
     files.clear();
-    index.push_back("index.html");//qani vor stex default-ov push enq anum index.html-n ,setIndex-i mej clear enq anum vectory vortev ete kanchvela setIndex serveri hamar uremn inqy uni index directiv=>default depqy el chi ogtagorcvelu
+    index.push_back("index.html");
     listen.first = "0.0.0.0";
     listen.second = -1;
     server_name = "";
-    // this->client_max_body_size = serv->getBodySize();
     validDirs[0] = "listen";
     validDirs[1] = "server_name";
     validDirs[2] = "index";
@@ -24,8 +23,8 @@ ServerDirective::ServerDirective()
     error_pages[405] = "error_pages/405.html";
     error_pages[413] = "error_pages/413.html";
     error_pages[415] = "error_pages/415.html";
-    error_pages[422] = "error_pages/415.html";
     error_pages[500] = "error_pages/500.html";
+    error_pages[505] = "error_pages/505.html";
 }
 std::map<int, std::string>& ServerDirective::getError_pages() { return error_pages; }
 std::vector<LocationDirective*>& ServerDirective::getLocdir() { return locdir; }
@@ -35,13 +34,6 @@ int ServerDirective::get_locIndex() const { return locIndex; }
 
 void ServerDirective::validate() const
 {
-    // if (listen.empty())
-    //     throw std::runtime_error("Server must have listen directive");
-
-    // if (root.empty())
-    //     throw std::runtime_error("Server must have root directive");
-     
-    // Проверка всех location
     for (std::vector<LocationDirective*>::const_iterator it = locdir.begin(); it != locdir.end(); ++it) 
     {
         if (*it == NULL)
@@ -52,7 +44,7 @@ void ServerDirective::validate() const
 
 ServerDirective::~ServerDirective()
 {
-    std::cout << "ServerDirective dtor is called\n";
+    // std::cout << "ServerDirective dtor is called\n";
     for (std::vector<LocationDirective*>::iterator it = locdir.begin(); it != locdir.end(); ++it)
         if (*it)
             delete *it;
@@ -75,8 +67,8 @@ void    ServerDirective::setError_pages(std::vector<std::string> pages)
         if (isAllDigits(*it))
         {
             ss >> ind;
-            //stugel indexi hamar vor error page-eri tverina patkanum te che
-            if (ind < 300 || ind >= 600)//коды 1xx и 2xx обычно не перенаправляются на error_page).
+            
+            if (ind < 300 || ind >= 600)
                 throw std::runtime_error("part of error page number is incorrect");
             error_pages[ind] = pages[pages.size() - 1];
             ss.clear();
@@ -88,7 +80,7 @@ void    ServerDirective::setError_pages(std::vector<std::string> pages)
 ////////////////listen validacia/////////
 int     ServerDirective::ip_part_contain_correct_integers(std::string ip_part)
 {
-    ip_part.insert(ip_part.end(), '.');//127.33.222.1000.(es verji kety avelacnum em)
+    ip_part.insert(ip_part.end(), '.');
     size_t ind_of_dot;
     while(!ip_part.empty())
     {
@@ -174,4 +166,11 @@ bool ServerDirective::isDirectory(const std::string& path)
 {
     struct stat info;
     return stat(path.c_str(), &info) == 0 && S_ISDIR(info.st_mode);
+}
+
+std::string ServerDirective::get_file(const std::string &key) const
+{
+    std::set<std::string>::const_iterator it = files.find(key);
+    std::string res = it == files.end() ? "" : *it;
+    return res;
 }

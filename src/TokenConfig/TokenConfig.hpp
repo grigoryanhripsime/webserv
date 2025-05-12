@@ -29,5 +29,5 @@ class TokenConfig
                 virtual ~TokenConfigException() throw();
                 const char* what() const throw();
         };
-        ~TokenConfig() {std::cout << "TokenConfig dtor is called\n";}
+        ~TokenConfig() {}//std::cout << "TokenConfig dtor is called\n";}
 };

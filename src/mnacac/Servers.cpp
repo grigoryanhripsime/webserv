@@ -2,7 +2,6 @@
 
 Servers::Servers(DirectiveConfig &dirConf)
 {
-    // std::cout << "Server ctor is called\n";
     config = &dirConf;
     connectingServerToSocket();
 
@@ -13,7 +12,7 @@ Servers::Servers(DirectiveConfig &dirConf)
 void Servers::connectingServerToSocket()
 {
     std::vector<ServerSocket> helper(config->get_servers().size(), ServerSocket());
-    servSock = helper;//helpery zut datark vektora mer serverni qanakov, mez petqer vor fiqsvac serverni qanakov vektor sarqeinq vor el insert,erase chaneinq zut et null-i vra arjeqavoreinq
+    servSock = helper;
 
     std::map<std::pair<std::string, int>, std::vector<int> > unique_listens = config->get_unique_listens();
     std::map<std::pair<std::string, int>, std::vector<int> >::iterator it  = unique_listens.begin();
@@ -34,24 +33,24 @@ void Servers::runningProcess()
 
 void Servers::setupEpoll()
 {
-    epfd = epoll_create(1);//создаёт новый epoll instance (дескриптор). Он нужен, чтобы отслеживать события на сокетах (например, кто-то подключился).
+    epfd = epoll_create(1);
     if (epfd == -1)
         throw std::runtime_error("epoll_create failed");
     std::stringstream ss;
     ss << "Current epoll fd is "<<epfd;
     Logger::printStatus("INFO", ss.str());
-    // Регистрируем каждый server socket в epoll
+
     std::map<std::pair<std::string, int>, std::vector<int> > unique_listens = config->get_unique_listens();
     std::map<std::pair<std::string, int>, std::vector<int> >::iterator it = unique_listens.begin();
     for (; it != unique_listens.end(); ++it)
     {
-        int fd = servSock[it->second[0]].get_socket();// Получаем сокет server_fd
-        struct epoll_event ev;// Создаём epoll_event, чтобы указать, какие события мы хотим слушать.
-        ev.events = EPOLLIN;// мы хотим знать, когда на сокете появятся входящие данные (например, клиент хочет подключиться).
-        ev.data.fd = fd;// сохраняем сам сокет, чтобы потом понять, на каком сокете произошло событие.
+        int fd = servSock[it->second[0]].get_socket();
+        struct epoll_event ev;
+        ev.events = EPOLLIN;
+        ev.data.fd = fd;
 
         if (epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &ev) == -1)
-        {//Регистрируем серверный сокет в epoll, чтобы он следил за событиями на нём.
+        {
             throw std::runtime_error("epoll_ctl ADD failed");
         }
     }
@@ -78,11 +77,9 @@ void Servers::runLoop()
                     {
                         acceptClient(sockfd);
                         isServer = true;
-                        std::clog << "In for loop\n";
                         break;
                     }
                 }
-                std::clog << "After for loop\n";
                 
                 if (!isServer)
                 {
@@ -93,7 +90,7 @@ void Servers::runLoop()
                     }
                     catch(std::exception& e)
                     {
-                        std::cout << "EXception: " << e.what() << std::endl; //TODO: maybe just open an error page or remove catcho, so if the server isnot valid programm stoped
+                        std::clog << "EXception: " << e.what() << std::endl;
                     }
                 }
             }
@@ -113,21 +110,19 @@ void Servers::acceptClient(int server_fd)
 {
     struct sockaddr_in clientAddr;
     socklen_t clientLen = sizeof(clientAddr);
-    int client_fd = accept(server_fd, (struct sockaddr *)&clientAddr, &clientLen);//Принимаем входящее соединение. Возвращается новый сокет для общения с этим клиентом (отдельно от серверного).
+    int client_fd = accept(server_fd, (struct sockaddr *)&clientAddr, &clientLen);
     
     if (client_fd == -1) {
         std::cerr << "Failed to accept client connection" << std::endl;
         return;
     }
 
-    // Зарегистрируем новый клиентский сокет в epoll
-    // Регистрируем новый клиентский сокет в epoll, чтобы следить за его входящими данными.
     struct epoll_event ev;
     ev.events = EPOLLIN;
     ev.data.fd = client_fd;
     if (epoll_ctl(epfd, EPOLL_CTL_ADD, client_fd, &ev) == -1) {
         std::cerr << "Failed to add client socket to epoll" << std::endl;
-        close(client_fd); // TODO: maybe we could throw an exception?
+        close(client_fd);
     } else {
         std::stringstream ss;
         ss <<"Accepted new client connection: fd "<<client_fd;
@@ -137,5 +132,5 @@ void Servers::acceptClient(int server_fd)
 
 Servers::~Servers()
 {
-    std::cout << "Servers dtor is called\n";
+    // std::cout << "Servers dtor is called\n";
 }

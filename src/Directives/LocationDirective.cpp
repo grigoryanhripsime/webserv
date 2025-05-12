@@ -29,16 +29,13 @@ std::string LocationDirective::getAutoindex() const { return autoindex; }
 std::string LocationDirective::getUpload_dir() const { return upload_dir; }
 std::string LocationDirective::getCgi_path(const std::string& key) { return cgi_extension[key]; }
 
-LocationDirective::~LocationDirective() {std::cout << "LocationDirective dtor\n";}
+LocationDirective::~LocationDirective() {}
 
 void LocationDirective::validate() const
 {
-    // if (path.empty())
-    //     throw std::runtime_error("Location: path cannot be empty");esi fillingDirectivesRec funkciayi mejenq nayum
     if (path[0] != '/')
         throw std::runtime_error("Location: path must start with '/'");
         
-    //checka anum arka metodnery,ev ete  baci get,post,delete-ic urish metod ka exception enq qcum
     std::set<std::string> unique_methods;
     for (std::vector<std::string>::const_iterator it = allow_methods.begin(); it != allow_methods.end(); ++it)
     {
@@ -49,17 +46,13 @@ void LocationDirective::validate() const
             throw std::runtime_error("Duplicate HTTP method: " + method);
    }
 
-   // Проверка autoindex
-    // if (autoindex != "on" && autoindex != "off")
-    //     throw std::runtime_error("Location: autoindex must be 'on' or 'off'");
     if (!upload_dir.empty() && upload_dir[0] != '/')
         throw std::runtime_error("Upload directory must be an absolute path (start with '/')");
 }
 
 void    LocationDirective::setIndex(const std::vector<std::string> indexVec)
 {
-    index.clear();//nerkayacnem incha katarvum->amenaskzbic serverin patkanox index-neri vectorum lcnum enq serverin patkanox index directivi valuenery(std::string)(nkatenq vor LocationDirective-i ctor-um menq ira index-neri vectory veragrum enq server-i index-neri vectorin)
-    // sa arvuma nra hamar vor ete location-um trvaca index directive-@ jnjenq serveri hamar push arac index-nery vortev ete location-um ka index uremn pti chogtagorcvi serveri index-nery,u ete locationum ka index-ner u menq frum enq bayc chenq qtnum tenc fayl get anelu hamar,pti 403 error ta vochte eta serveri index-neri vrov fra ytex man ga,serveri vrov fralua en jmk erb vor location-um bacakayi index directivy
+    index.clear();
     std::vector<std::string>::const_iterator it = indexVec.begin();
     for(; it != indexVec.end(); ++it)
     {
@@ -68,28 +61,16 @@ void    LocationDirective::setIndex(const std::vector<std::string> indexVec)
     }
 }
 
-// bool shouldHandleAsCgi(const std::string& filename) const {
-//     // Проверяем, заканчивается ли файл на cgi_extension
-//     if (!cgi_extension.empty() && 
-//         filename.size() >= cgi_extension.size() &&
-//         filename.compare(filename.size() - cgi_extension.size(), 
-//                         cgi_extension.size(), 
-//                         cgi_extension) == 0) {
-//         return true;
-//     }
-//     return false;
-// }
-
 ////////////////setters/////////////
 bool LocationDirective::isValidLocationPath(const std::string& path) {
     if (path.empty() || path[0] != '/')
-        return false;//partadir petqa path lini u sksvi '/'-ov
+        return false;
 
     for (std::string::size_type i = 1; i < path.size(); ++i)
     {
         char c = path[i];
         if (c == '/' && path[i - 1] == '/')
-            return false;//  "/not//valid"
+            return false;
         if (!std::isalnum(c) && c != '/' && c != '-' && c != '_' &&
             c != '.' && c != '?' && c != '=' && c != '&')
             return false;
@@ -126,7 +107,7 @@ void    LocationDirective::setAllow_methods(std::vector<std::string> methods)
     {
         if (*it != "GET" && *it != "POST" && *it != "DELETE")
             throw std::runtime_error("invalid method in config file: " + *it);
-        allow_methods.push_back(*it);///ste xienq aranc check anelu push anum?, arden anum enq)
+        allow_methods.push_back(*it);
     }
 }
 
@@ -168,13 +149,12 @@ void    LocationDirective::setRedirect(std::vector<std::string> red)
 void    LocationDirective::setUpload_dir(const std::string& upload_dir)
 {
     if (upload_dir.size() > 1 && upload_dir[upload_dir.size() - 1] == '/')
-        throw std::runtime_error("Upload dir must not have / at the end." + upload_dir);//jnjelem en checkeri pahy vortev et arden post metodi mejem anum,vortev sa aveli shat vochte configi xndira ayl post metodi!
+        throw std::runtime_error("Upload dir must not have / at the end." + upload_dir);
     this->upload_dir = upload_dir;
 }
 
 static void _validateCgi_extension_val(const std::string& cgi_path)
 {
-    std::clog << "JUPA JUPA\n";
     if (cgi_path.length() < 2 || cgi_path[0] != '/')
         throw std::runtime_error("CGI path must start with /" + cgi_path);
     if (access(cgi_path.c_str(), X_OK) != 0)
@@ -196,7 +176,6 @@ void    LocationDirective::setCgi_extension(const std::multimap<std::string, std
             throw std::runtime_error("CGI extension must look like this with '.py /usr/bin/python3'");
         std::string key = itExt->first;
         std::string val = itExt->second[0];
-        std::clog << "val = " << val << "\nkey = " << key;
         _validateCgi_extension_val(val);
         _validateCgi_extension_key(key);
         cgi_extension[key] = val;
@@ -209,7 +188,6 @@ void    LocationDirective::setCgi_extension(const std::vector<std::string>& exte
         throw std::runtime_error("CGI extension must look like this with '.py /usr/bin/python3'");
     std::string key = extension[0];
     std::string val = extension[1];
-    std::clog << "val = " << val << "\nkey = " << key;
     _validateCgi_extension_val(val);
     _validateCgi_extension_key(key);
     cgi_extension[key] = val;

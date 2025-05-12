@@ -4,7 +4,6 @@ ServerSocket::ServerSocket() : Socket() {}
 
 ServerSocket::ServerSocket(int domainIP, int service, int protocol, int port, std::string ipAddress, int queueCount) : Socket(domainIP, service, protocol, port, ipAddress)
 {
-    // std::cout << "ServerSocket ctor is callled\n";
     int opt = 1;
     setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
     connection = connectToNetwork();
@@ -25,6 +24,4 @@ int ServerSocket::connectToNetwork()
 
 ServerSocket::~ServerSocket(){
     // std::cout << "ServerSocket dtor is called\n";
-
-    // close(sockfd);takanqa es toxy,epoll_ctl i xndir er tali sra patcharov
 }

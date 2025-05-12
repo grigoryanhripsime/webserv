@@ -15,9 +15,8 @@ class ServerDirective : public AGeneralDirective
 {
     private:
         std::map<int, std::string> error_pages;
-        // std::string listen;//no default=>REQUIRE,   Must define port (no default)
-        std::pair<std::string, int> listen;//<ipAdress, port>
-        std::string server_name;//allow but not required
+        std::pair<std::string, int> listen;
+        std::string server_name;
         std::vector<LocationDirective*> locdir;
         int locIndex;
         std::set<std::string> files;
@@ -34,7 +33,7 @@ class ServerDirective : public AGeneralDirective
     public:
         ServerDirective();
         ~ServerDirective();
-        virtual void validate() const;  // для валидации значений
+        virtual void validate() const;
 
         ///getter///
         std::map<int, std::string>& getError_pages();
@@ -42,7 +41,7 @@ class ServerDirective : public AGeneralDirective
         std::pair<std::string, int> getListen() const;
         std::string getServer_name() const;
         int get_locIndex() const;
-        std::string get_file(const std::string &key) const {return *(files.find(key)) ;}
+        std::string get_file(const std::string &key) const;
 
         ////listen validacia//////////
         void    check_and_set_port(const std::string& ipAndPort, size_t& indexOfVerjaket, bool flag);

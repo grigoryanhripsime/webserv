@@ -40,8 +40,8 @@ Request::Request(std::vector<ServerDirective *> servers)
     servIndex = -1;
     locIndex = -1;
     method = "";
-    uri = "";//GET-i hamar
-    file_type = "text/plain";//default
+    uri = "";
+    file_type = "text/plain";
     query = "";
     error_page_num = -1;
     fill_status_message();
@@ -77,10 +77,8 @@ std::string Request::urlDecode(const std::string &str)
 
 void Request::parseUrlEncodedForm(const std::string &body)
 {
-    std::cout << "ekanq parseUrlEncodedForm\n";
     form_data.clear();
     size_t pos = 0;
-    std::cout << "body->"<<body <<std::endl;
     while (pos < body.length()) {
         size_t amp_pos = body.find('&', pos);
         std::string pair = body.substr(pos, 
@@ -97,54 +95,42 @@ void Request::parseUrlEncodedForm(const std::string &body)
 }
 
 std::string Request::post_method_tasovka(char *buffer, int bytesRead) {
-    std::cout << "REQUEST:"<<buffer << std::endl;
+    
     std::vector<LocationDirective*> locdir = servers[servIndex]->getLocdir();
     int locIndex = servers[servIndex]->get_locIndex();
-    std::cout << "matryyyyyyyyyyyyy>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << buffer<<std::endl;
+    
     parse_post_request(buffer, bytesRead);
-    ////////////////////////////////
+
     bool supported_media_type = false;
     if (MainContentType.find("application/x-www-form-urlencoded") != std::string::npos ||
         MainContentType.find("multipart/form-data") != std::string::npos)
         supported_media_type = true;
-    // Optionally, support text/plain and application/octet-stream
     if (MainContentType.find("text/plain") != std::string::npos ||
         MainContentType.find("application/octet-stream") != std::string::npos)
         supported_media_type = true;
     if (!supported_media_type)
     {
         error_page_num = 415;
-        std::cout<<"de hima\n";
         throw std::runtime_error("Unsupported media type: " + MainContentType);
     }
-    /////////////////////////////////
     std::string response_body;
     std::string upload_dir = locdir[locIndex]->getUpload_dir();
-    std::cout << "UROD->" << upload_dir << std::endl;
-    // Handle different content types
     if (upload_dir.empty())
         {
             error_page_num = 403;
             throw std::runtime_error("upload_dir is empty");
         }
-        // Process upload directory path
-    std::clog << locdir[locIndex]->getPath() << "\n";
     std::string root = this->get_cwd() + locdir[locIndex]->getPath() + "/";
-    std::clog << root << "\n";
     
     if (upload_dir[0] == '/')
         upload_dir = upload_dir.substr(1);
     upload_dir = root + upload_dir;
 
-    
-    // Remove trailing slash if present
     if (!upload_dir.empty() && upload_dir[upload_dir.size() - 1] == '/')
         upload_dir.erase(upload_dir.size() - 1);
     
     parseUrlEncodedForm(post_body);
     if (MainContentType.find("application/x-www-form-urlencoded") != std::string::npos) {
-        
-        // Build response from parsed form data
         std::stringstream ss;
         ss << "Form data received:\n";
         for (std::map<std::string, std::string>::const_iterator it = form_data.begin(); 
@@ -154,71 +140,33 @@ std::string Request::post_method_tasovka(char *buffer, int bytesRead) {
         response_body = ss.str();
     }
     else if (MainContentType.find("multipart/form-data") != std::string::npos)
-    {
-        std::cout << "VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV\n";
-        // if (upload_dir.empty())
-        // {
-        //     error_page_num = 403;
-        //     throw std::runtime_error("upload_dir is empty");
-        // }
-        // // Process upload directory path
-        // std::string root = this->get_cwd() + locdir[locIndex]->getPath() + "/";
-        
-        // if (upload_dir[0] == '/')
-        //     upload_dir = upload_dir.substr(1);
-        // upload_dir = root + upload_dir;
-
-        
-        // // Remove trailing slash if present
-        // if (!upload_dir.empty() && upload_dir[upload_dir.size() - 1] == '/')
-        //     upload_dir.erase(upload_dir.size() - 1);
-        
         response_body = handle_multipart_upload(upload_dir);
-    } 
     else
     {
-        // Handle other content types (raw data)
         if (upload_dir.empty())
             upload_dir = this->get_cwd();
-        std::cout << "======" << upload_dir << std::endl;
         response_body = handle_simple_post(upload_dir);
     }
 
-
-    // Build HTTP response
-    std::cout << "hargeli errpr page->" << error_page_num<<std::endl;
     std::stringstream ss2;
     ss2 << error_page_num;
     std::stringstream ss;
-    ss << "HTTP/1.1 " + ss2.str() + " " + status_message[error_page_num] + "\r\n"//200 texy dnenq error_oage_NUm(yani vorpes status code?te  henc 200e toxem?)
+    ss << "HTTP/1.1 " + ss2.str() + " " + status_message[error_page_num] + "\r\n"
        << "Content-Length: " << response_body.size() << "\r\n"
-       << "Content-Type: " << get_content_type() + "\r\n"//bayc voncor esi petq chi
-    //    << "Content-Type: text/plain\r\n"
+       << "Content-Type: " << get_content_type() + "\r\n"
        << "\r\n"
        << response_body;
-
-
-    std::cout << "TPENQ->" << "HTTP/1.1" + ss2.str() + " " + status_message[error_page_num] + "\r\n";
     return ss.str();
 }
 
-// Парсинг POST-запроса
 void Request::parse_post_request(char *buffer, int bytesRead)
 {
-    std::cout << "buffer = " << buffer<<std::endl;
-    std::cout << "prc buffer\n";
     std::string request_body;
     std::string buf_str = std::string(buffer, bytesRead);
     size_t body_start = buf_str.find("\r\n\r\n");
 
-    // Сбрасываем код ошибки
-    // error_page_num = 0;
-
     if (body_start != std::string::npos) {
-        // Извлекаем тело запроса (включая все \r\n)
         request_body = buf_str.substr(body_start + 4);
-        std::cout << "uzmes ases->" << request_body<<std::endl;
-        // Обрабатываем заголовки
         std::stringstream ss(buf_str.substr(0, body_start));
         std::string line;
         while (getline(ss, line)) {
@@ -232,22 +180,15 @@ void Request::parse_post_request(char *buffer, int bytesRead)
         }
     }
 
-    // Сохраняем тело для дальнейшей обработки
     this->post_body = request_body;
-    std::cout << "Content type is->" << MainContentType << std::endl;
-    std::cout << "LENGHT->" << contentLength << std::endl << std::endl;
-
-    std::cout << "POST BODY->" << post_body << std::endl<<std::endl<<std::endl;
 }
 
-// Установка Content-Type и границы для multipart
 void Request::set_MainContentType(std::string line)
 {
     size_t pos = line.find("Content-Type: ");
     if (pos != std::string::npos) {
         MainContentType = line.substr(pos + 14);
         MainContentType = MainContentType.substr(0, MainContentType.find(';'));
-        std::cout << "MainContentType = " <<MainContentType<<std::endl;
         if (MainContentType == "multipart/form-data")
         {
             size_t boundary_pos = line.find("boundary=");
@@ -260,12 +201,8 @@ void Request::set_MainContentType(std::string line)
         else
             file_type = MainContentType;
     }
-    std::cout << "HELPER->" << file_type<< std::endl;
-    std::cout << "BOUNDARY->" << boundary<< std::endl;
-
 }
 
-// Установка Content-Length и проверка на превышение лимита
 void Request::set_contentLength(std::string line)
 {
     std::stringstream ss(line);
@@ -274,11 +211,7 @@ void Request::set_contentLength(std::string line)
 
     std::vector<LocationDirective*> locdir = servers[servIndex]->getLocdir();
     int locIndex = servers[servIndex]->get_locIndex();
-    std::cout << "contentLength = " << contentLength<<std::endl;
-    std::cout << "locdir[locIndex]->getBodySize() = " << locdir[locIndex]->getBodySize()<<std::endl;
-
     if (contentLength > locdir[locIndex]->getBodySize()) {
-        // set_error_page_num(413);
         error_page_num = 413;
         throw std::runtime_error("Contet Length is higher than our config max body size.");
     }
@@ -293,73 +226,51 @@ std::string Request::handle_multipart_upload(const std::string &upload_dir)
 
     if (boundary.empty()) {
         error_page_num = 400;
-        throw std::runtime_error("Error: No boundary found for multipart/form-data");//mihat haskanal lava throw-ov te return-ov??
-        // return "Error: No boundary found for multipart/form-data";
+        throw std::runtime_error("Error: No boundary found for multipart/form-data");
     }
-    ///////////Check if upload_dir exists and is writable//////////////
     if (!isDirectory(upload_dir) || access(upload_dir.c_str(), W_OK) != 0) {
-        std::cout << "stEx hasav\n" << upload_dir;
         error_page_num = 403;
-        std::clog << "THIS IS UPDIR" << upload_dir << "\n\n";
         throw std::runtime_error("Upload directory does not exist or is not writable");
     }
-    /////////////////////////////////////////////
     std::string body = post_body;
     std::string response = "Files uploaded successfully:\n";
     size_t pos = 0;
 
-    // Создаем директорию, если она не существует
-    // mkdir(upload_dir.c_str(), 0755);//esi pakvuma
-
     while ((pos = body.find(boundary)) != std::string::npos)
     {
         body = body.substr(pos + boundary.length());
-        std::cout << "cur body->" << body << std::endl;
-        if (body.empty() || body.find("--") == 0)//body pustoy ili body начинается с двух дефисов --.
-            break; // Конец multipart
-        // Извлекаем заголовки части
+        if (body.empty() || body.find("--") == 0)
+            break;
         size_t header_end = body.find("\r\n\r\n");
         if (header_end == std::string::npos)
             continue;
         headers = body.substr(0, header_end);
-        std::cout << "headers->" << headers << std::endl<<std::endl;
 
         body = body.substr(header_end + 4);
-        std::cout << "do body->" << body << std::endl<<std::endl;
-        // Находим конец части
         size_t part_end = body.find(boundary);
         if (part_end == std::string::npos)
             part_end = body.length();
-        // Ищем имя файла в Content-Disposition
         size_t filename_pos = headers.find("filename=\"");
         if (filename_pos != std::string::npos) {
             filename_pos += 10;
             size_t filename_end = headers.find("\"", filename_pos);
             filename = headers.substr(filename_pos, filename_end - filename_pos);
         }
-        std::cout << "FILENAME-> "<< filename << std::endl;
         if (!filename.empty())
         {
             if (filename.find("/") != std::string::npos || filename.find("..") != std::string::npos) {
                 error_page_num = 400;
-                std::cout << "VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVAAAAAAAAAAAAAAAAAAAAAAAAAAAt chi\n";
                 throw std::runtime_error("Filename contains invalid characters");
-            }//vor senc ban chkarana lini`../malicious.txt kam /src/file.txt nginx-nela kanxum filename-i mej sirectory unenaly,bayc chjoka xi,bayc secure mcnelu hamara arvum
-            // Извлекаем содержимое файла
-            file_content = body.substr(0, part_end - 2); // Удаляем \r\n
-
+            }
+            file_content = body.substr(0, part_end - 2);
             file_path = upload_dir + "/" + filename;
-
-            std::cout << "FILE PATH->" << file_path <<std::endl;
-            
+    
             std::string dir_path = file_path.substr(0, file_path.find_last_of('/'));
-            // create_directories(dir_path);//backend,ESI POXVUMA DARNUM CHECK_DIRECTORIES
             check_directories(dir_path);
             int fd = open(file_path.c_str(), O_CREAT | O_WRONLY | O_TRUNC, 0644);
             if (fd == -1) {
                 error_page_num = 500;
-                throw std::runtime_error("Error: Failed to open file for writing");//nuyny stex haskanal,vorova lav throw or return
-                // return "Error: Failed to open file for writing";
+                throw std::runtime_error("Error: Failed to open file for writing");
             }
             ssize_t written = write(fd, file_content.c_str(), file_content.size());
             close(fd);
@@ -367,7 +278,6 @@ std::string Request::handle_multipart_upload(const std::string &upload_dir)
             if (written == -1 || static_cast<size_t>(written) != file_content.size()) {
                 error_page_num = 500;
                   throw std::runtime_error("Error: Failed to write file");
-                // return "Error: Failed to write file";
             }
 
             response += "Uploaded: " + filename + "\n";
@@ -375,13 +285,6 @@ std::string Request::handle_multipart_upload(const std::string &upload_dir)
         // Обрезаем body для следующей части
         body = body.substr(part_end);
     }
-    std::cout << "posle body->" << body << std::endl;
-    std::cout << "BOUNDARTY is->" << boundary << std::endl;
-    std::cout << "HEADER->" << headers << std::endl;
-    std::cout << "FILE-CONTENT-<" << file_content <<std::endl;
-    std::cout << "FILE_PATH ->" << file_path <<std::endl;
-    std::cout << "RESSSSSSSPONSE->" << response << std::endl;
-   std::cout << "success-<" << file_path<<std::endl;
     servers[servIndex]->set_file(file_path);
     return response;
 }
@@ -408,41 +311,30 @@ void Request::check_directories(const std::string& dir_path)
     }
 }
 
-// Обработка простых POST-запросов (не multipart)
 std::string Request::handle_simple_post(const std::string &upload_dir)
 {
-    ///////////Check if upload_dir exists and is writable
     if (!isDirectory(upload_dir) || access(upload_dir.c_str(), W_OK) != 0) {
         error_page_num = 403;
-        std::clog << "THIS IS UPDIR" << upload_dir << "\n\n";
         throw std::runtime_error("Upload directory does not exist or is not writable");
     }
-    ////////////////////////////////////////////////////
-    // Сохраняем тело POST в файл post_data.txt в upload_dir
-    // std::string file_path = upload_dir + "/post_data.txt";
     
     std::string file_path = upload_dir + "/" + form_data["name"];
-    std::clog << file_path << "\n";
     int fd = open(file_path.c_str(), O_CREAT | O_WRONLY | O_TRUNC, 0644);
     if (fd == -1) {
         error_page_num = 500;
         throw std::runtime_error("Error: Failed to open file for writing");
-        // return "Error: Failed to open file for writing";
     }
 
     for (std::map<std::string, std::string>::const_iterator it = form_data.begin(); it != form_data.end(); ++it) {
         if (it->first == "name") continue ;
         ssize_t written = write(fd, it->second.c_str(), it->second.length());
-        if (written == -1 || static_cast<size_t>(written) != post_body.size()) {
+        if (written == -1 || static_cast<size_t>(written) != it->second.length()) {
             error_page_num = 500;
             throw std::runtime_error("Error: Failed to write POST data");
-            return "Error: Failed to write POST data";
         }
     }
     close(fd);
-
-    std::cout << "simple->" << file_path << std::endl;
-    servers[servIndex]->set_file(file_path);//
+    servers[servIndex]->set_file(file_path);
     return "POST data saved successfully";
 }
 
@@ -501,9 +393,7 @@ int Request::find_in_index_vectors_this_string(std::string left_part_of_filePath
 {
     for(size_t i = 0; i < cur_loc_index.size(); ++i)
     {
-        // std::cout << "cur_loc_index i-n  = " <<cur_loc_index[i]<< std::endl;
         if (cur_loc_index[i] == left_part_of_filePath) {
-    std::clog << "💩💩Current index index = " << i << "\n\n";
             return i;
         }
     }
@@ -519,20 +409,18 @@ std::string Request::get_need_string_that_we_must_be_pass_send_system_call(std::
         if (!file)
             std::cerr << "Failed to open file" << std::endl;
     
-        ss << file.rdbuf(); // read entire content
+        ss << file.rdbuf();
     }
     else 
         ss << filePath;
 
 
-    // После обработки можешь отправить ответ:
     std::stringstream ss2;
-    ss2 << error_page_num;//error_page_num type is int
+    ss2 << error_page_num;
     std::string header = "HTTP/1.1 " + ss2.str() + " " + status_message[error_page_num] + "\r\nContent-Length: ";
     std::string whiteSpaces = "\r\n\r\n";
     std::stringstream ss1;
     ss1 << ss.str().size();
-    std::clog << ss1.str() << "\n\n";
 
     return header + ss1.str() + whiteSpaces + ss.str();
 }
@@ -542,9 +430,6 @@ std::string Request::uri_is_file(std::string filePath)
 {
     std::vector<LocationDirective*> locdir = servers[servIndex]->getLocdir();
     std::string str = getFilepath(locdir[locIndex]->getPath());
-    // int locIndex = servers[servIndex]->get_locIndex(); 
-    // std::string root =  this->get_cwd();
-    // std::string str = root + locdir[locIndex]->getPath();
     size_t i = 0;
     for (; i < filePath.size() && i < str.size() && filePath[i] == str[i]; ++i)
         i++;
@@ -558,9 +443,6 @@ std::string Request::uri_is_file(std::string filePath)
     {
         error_page_num = 404;
         throw std::runtime_error("not right location");
-        // std::string root =  this->get_cwd();
-        // filePath = root + "/web/error404.html";
-        // filePath = getFilepath("/web/error404.html");
     }
     return get_need_string_that_we_must_be_pass_send_system_call(filePath);
 }
@@ -598,11 +480,6 @@ std::string Request::uri_is_directory(std::string filePath)
         filePath += '/';
     std::vector<LocationDirective*> locdir = servers[servIndex]->getLocdir();
     std::string str = getFilepath(locdir[locIndex]->getPath());
-    // int locIndex = servers[servIndex]->get_locIndex();
-    // std::string root =  (locdir[locIndex]->getRoot() != "") ? locdir[locIndex]->getRoot() : servers[servIndex]->getRoot();
-    // std::cout << "rooooooooooooooot = " << root << std::endl;
-    // std::string str = root + locdir[locIndex]->getPath();
-    // size_t i = 0;
     if (str[str.size() - 1] == '?')
         str = str.substr(0, str.size() - 1);
     if (str[str.size() - 1] != '/')
@@ -612,7 +489,7 @@ std::string Request::uri_is_directory(std::string filePath)
         error_page_num = 404;
         throw std::runtime_error("es el a inchvor exception");
     }
-    else if (getFilesInDirectory(filePath) != "NULL")//filePath == str esi el petq chi stugel,verevy ka
+    else if (getFilesInDirectory(filePath) != "NULL")
     {
         if (filePath[filePath.size() - 1] != '/')
             filePath += '/' + getFilesInDirectory(filePath);
@@ -637,28 +514,19 @@ std::string Request::autoindex(std::string filePath)
     std::string listedFiles = "";
 
     std::vector<std::string>::iterator it = files.begin();
-    std::cout<<"🎩🎩🎩🎩\n";
     for (; it != files.end(); it++)
     {
-        std::cout<<*it<<std::endl;
         std::string server;
-        std::cout<<"😃😃😃\n";
         if (servers[servIndex]->getServer_name() != "")
             server = servers[servIndex]->getServer_name();
         else
             server = servers[servIndex]->getListen().first;
         std::stringstream ss_num;
         ss_num << server << ":" << servers[servIndex]->getListen().second;
-
-        std::cout<<"🍄🍄🍄 "<<ss_num.str()<<" 🍄🍄🍄"<<std::endl;
         std::string uri_to_use = "";
         if (uri != "/") uri_to_use = uri;
         listedFiles += "<a href=\"http://" + ss_num.str() + uri_to_use + "/" + *it + "\">" + *it + "</a><br>";
     }
-    std::cout<<"🎩🎩🎩🎩\n";
-
-    std::cout<<listedFiles<<std::endl;
-    std::cout<<"🐞🐞🐞\n";
     return get_need_string_that_we_must_be_pass_send_system_call(listedFiles);
 }
 
@@ -669,7 +537,7 @@ std::string Request::constructingResponce(std::string filePath)
     if (pathExists(filePath) == false)
     {
         error_page_num = 404;//kam 403
-        throw std::runtime_error(" путь не существует или нет прав на доступ(файл/директория)");
+        throw std::runtime_error("Path does not exist or no permission to file/directory");
     }
     if (isFile(filePath))
         return uri_is_file(filePath);
@@ -689,31 +557,26 @@ static void    send_response(int client_fd, std::string response, int epfd)
     }
     if (bytesSent < (ssize_t)response.size()) {
         std::cerr << "Partial send, sent " << bytesSent << " of " << response.size() << " bytes" << std::endl;
-        //grenq return ;?
     }
 }
 
 void Request::handleClientRequest(int client_fd) {
     char buffer[SIZE] = {0};
-    // ssize_t bytesRead = read(client_fd, buffer, sizeof(buffer));
     ssize_t bytesRead = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
     if (bytesRead == -1) {
-        std::cerr << "Error reading from client socket" << std::endl; // TODO: maybe exception?
-        epoll_ctl(epfd, EPOLL_CTL_DEL, client_fd, NULL); // 🔻 Удаляем из epoll
-        close(client_fd); // Закрываем сокет при ошибке
+        std::cerr << "Error reading from client socket" << std::endl;
+        epoll_ctl(epfd, EPOLL_CTL_DEL, client_fd, NULL);
+        close(client_fd);
         return;
     }
     else if (bytesRead == 0) {
         std::stringstream ss;
         ss<<"Client disconnected: fd " << client_fd;
         Logger::printStatus("INFO", ss.str());
-        epoll_ctl(epfd, EPOLL_CTL_DEL, client_fd, NULL); // 🔻 Удаляем из epoll
-        close(client_fd); // Закрываем сокет, если клиент отключился
+        epoll_ctl(epfd, EPOLL_CTL_DEL, client_fd, NULL);
+        close(client_fd);
         return;
     }
-
-    // // Здесь ты можешь обработать запрос клиента
-    // std::cout << std::string(buffer, bytesRead) << std::endl;
 
     Request_header_validation request_header_validation(servers);
     std::string response;
@@ -722,7 +585,6 @@ void Request::handleClientRequest(int client_fd) {
         request_header_validation.if_received_request_valid(*this, buffer);
         request_header_validation.fill_headers_map(headers);
         locIndex = servers[servIndex]->get_locIndex();
-        //checking if http request header is correct
         request_header_validation.status_handler();
         CGI cgi(this);
         switch(request_header_validation.get_status()) {
@@ -736,7 +598,6 @@ void Request::handleClientRequest(int client_fd) {
         send_response(client_fd, response, epfd);
     } catch (std::exception &e) {
         Logger::printStatus("ERROR", e.what());
-        std::clog << error_page_num << "\n";
         if (error_page_num == -1) error_page_num = 500;
         std::string filePath;
         if (servIndex != -1)
@@ -757,64 +618,48 @@ void Request::handleClientRequest(int client_fd) {
             getcwd(root_char, 1024);
             std::stringstream ss;
             ss << error_page_num;
-            // servers[servIndex]->getError_pages()[error_page_num] = ss.str() + ".html";
             filePath = std::string(root_char) + "/error_pages/" + ss.str() + ".html";
         }
         response = get_need_string_that_we_must_be_pass_send_system_call(filePath);
-        // std::cout<<res<<std::endl;
         send_response(client_fd, response, epfd);
-        // send(client_fd, response.c_str(), response.size(), 0);
     }
-    // if (if_http_is_valid(buffer) < 0)
-    // {
-    //     error_page_num = 505;
-    //     std::cout << "505 HTTP Version Not Supported.\n";
-    // }
-    // esi voncor petq chi stex,vortev ynde aranqayin Hripsimei grac funkcianeric mekum stugvuma http1-i momenty
 }
 
 std::string Request::handleDelete(std::string filePath)
 {
-    std::cout << "filepath is->"<<filePath<<std::endl;
-    // Clean filePath (remove trailing '?')
     if (!filePath.empty() && filePath[filePath.size() - 1] == '?') {
         filePath = filePath.substr(0, filePath.size() - 1);
     }
-
-    // Sanitize filePath to prevent traversal
     if (filePath.find("..") != std::string::npos) {
         error_page_num = 400;
         throw std::runtime_error("Invalid path: contains parent directory reference");
     }
-    // Check if path exists
     if (!pathExists(filePath)) {
         error_page_num = 404;
         throw std::runtime_error("Path does not exist");
     }
-
-    // Check write permission
     if (access(filePath.c_str(), W_OK) != 0) {
         error_page_num = 403;
         throw std::runtime_error("Permission denied for deletion");
     }
 
-    // Handle file or directory
     if (isFile(filePath)) {
-        // Delete file using std::remove
+        if (servers[servIndex]->get_file(filePath).empty())
+        {
+            error_page_num = 403;
+            throw std::runtime_error("File can't be deleted, you did't create it!");
+        }
         if (std::remove(filePath.c_str()) != 0 && servers[servIndex]->get_file(filePath.c_str()) != "") {
             error_page_num = 500;
             throw std::runtime_error("Failed to delete file");
         }
     } else if (isDirectory(filePath)) {
-        // Directories are not allowed to be deleted
         error_page_num = 403;
         throw std::runtime_error("Directory deletion is not supported");
     } else {
         error_page_num = 403;
         throw std::runtime_error("Path is neither a file nor a directory");
     }
-
-    // Successful deletion: return 204 No Content
     std::string response = "HTTP/1.1 204 No Content\r\n";
     response += "Content-Length: 0\r\n";
     response += "\r\n";
@@ -823,7 +668,6 @@ std::string Request::handleDelete(std::string filePath)
 
 std::string Request::get_response(std::string &method, char *buffer, int bytesRead)
 {
-    // function for static methods
     std::string res;
     if (method == "GET")
     {
@@ -846,8 +690,7 @@ std::string Request::get_response(std::string &method, char *buffer, int bytesRe
     }
     else if (method == "DELETE")
     {
-        std::cout<<"MTEL EM\n";
-        error_page_num = 204; // Default to success
+        error_page_num = 204;
         std::string filePath = getFilepath(uri);
         res = handleDelete(filePath);
     }
@@ -865,10 +708,6 @@ int Request::if_http_is_valid(char *c_buffer)
     ss >> http_version;
     ss >> http_version;
     ss >> http_version;
-
-    //В HTTP/1.1 он обязателен.
-    // Если отсутствует — 400 Bad Request.senc bana asum gpt-n mihat stugel ete nenc request kara ga vor bacakayi et http1-@ lracnenq et masy
-    std::cout << "hmis stex pti http_version lini http->" << http_version << std::endl;
     if (http_version != "HTTP/1.1")
         return -20;
     return 1;
@@ -905,7 +744,7 @@ std::string Request::generateRedirectResponse(std::string filePath) {
    
     response += status_message[error_page_num] + "\r\n";
     response += "Location: " + filePath + "\r\n";
-    response += "Content-Length: 0\r\n";//ste 0???
+    response += "Content-Length: 0\r\n";
     response += "Connection: keep-alive\r\n";
     response += "Cache-Control: no-cache\r\n";
     response += "\r\n";

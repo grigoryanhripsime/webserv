@@ -5,6 +5,7 @@
 #include <vector>
 #include "ServerDirective.hpp"
 #include "Request.hpp"
+
 class Request;
 typedef enum e_status
 {
@@ -20,7 +21,7 @@ class Request_header_validation
         std::vector<ServerDirective *> servers;
         status_type status;
         int servIndex;
-        std::string uri;//GET-i hamar
+        std::string uri;
         std::string method;
         std::vector<std::string> lines;
         std::string firstLine;

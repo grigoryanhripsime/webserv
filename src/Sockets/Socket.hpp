@@ -3,14 +3,14 @@
 #include <iostream>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <netinet/in.h> // For sockaddr_in
-#include <unistd.h>     // For close()
-#include <arpa/inet.h> //for htons()
+#include <netinet/in.h>
+#include <unistd.h>
+#include <arpa/inet.h>
 #include <stdexcept>
 class Socket
 {
     protected:
-        int sockfd;//vor el dublikat chunenanq,serversoketum` server_fd, clientsoketum`client_fd
+        int sockfd;
         struct sockaddr_in serverAddr;
     public:
         Socket();

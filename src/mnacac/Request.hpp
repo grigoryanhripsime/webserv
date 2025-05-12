@@ -27,16 +27,16 @@ private:
     int locIndex;
     int currentIndex;
     std::string method;
-    std::string uri;//GET-i hamar
-    std::string MainContentType;//POST-i hamar
-    size_t contentLength;//POST-i hamar
-    std::string boundary;//POST-i hamar
-    std::string post_body;//POST-i hamar
-    std::string file_type;//POST-i hamar
-    std::string query;//uri-i mej ?-ic heto sax,ete ka
+    std::string uri;
+    std::string MainContentType;
+    size_t contentLength;
+    std::string boundary;
+    std::string post_body;
+    std::string file_type;
+    std::string query;
     int error_page_num;
     int epfd;
-    std::map<std::string, std::string> form_data;//POST-i hamar
+    std::map<std::string, std::string> form_data;
     headers_map headers;
     
     std::string get_response(std::string &method, char *buffer, int bytesRead);
@@ -95,7 +95,3 @@ public:
     void check_directories(const std::string& dir_path);
 
 };
-
-
-//TODO resposnum content type-@ mery dnel
-// error_page_num-ery init anel amen erroric araj throw aneluc

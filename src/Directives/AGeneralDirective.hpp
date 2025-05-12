@@ -9,11 +9,10 @@
 class AGeneralDirective
 {
 protected:
-    std::vector<std::string> index;//Should have a default (e.g., index.html)., ham kara serverum lini ham locationum 
-    size_t client_max_body_size;//Optional but recommended.ham kara serverum lini ham locationum     bool,    default: 1MB (или другое разумное значение)
+    std::vector<std::string> index;
+    size_t client_max_body_size;
  
-    std::string root;//can be overridden in location, required dlya servera no mojet bit pustoy na locatione
-    // std::map<int, std::string> error_pages;//type-@ yst deepseeki ,  default: стандартные страницы ошибок сервера
+    std::string root;
 public:
     //////////setters////////////
     bool isAllDigits(const std::string& str);
@@ -24,8 +23,8 @@ public:
     void    setError_pages(std::vector<std::string> pages);
 public:
     AGeneralDirective();
-    virtual ~AGeneralDirective() = 0;//xi senc vor????
-    virtual void validate() const = 0;  // для валидации значений
+    virtual ~AGeneralDirective() = 0;
+    virtual void validate() const = 0;
     const std::string& getRoot() const { return root; }
 
         /////getters////

@@ -3,7 +3,6 @@
 Request_header_validation::Request_header_validation(std::vector<ServerDirective *> servers)
 {
     this->servers = servers;
-    // this->req = req;
     status = STATIC;
 }
 
@@ -15,9 +14,7 @@ std::string Request_header_validation::get_method() const { return method; }
 
 std::string    Request_header_validation::if_received_request_valid(Request &req, char *c_buffer)
 {
-    std::cout<<"--------------------------------------------------\n";
-    std::cout << "REQUEST:" << c_buffer<<std::endl;
-    std::cout<<"--------------------------------------------------\n";
+    // std::cout << "REQUEST:" << c_buffer<<std::endl;
     std::stringstream ss(c_buffer);
     std::string line;
     std::getline(ss, firstLine);
@@ -40,16 +37,15 @@ std::string    Request_header_validation::if_received_request_valid(Request &req
     std::map<std::string, std::string>::iterator it = pairs.find("Host");
     if (it == pairs.end())
     {
-        req.set_error_page_num(400); //TODOL check error code
+        req.set_error_page_num(400);
         throw std::runtime_error("There is no host");
     }
     servIndex = getServerThatWeConnectTo(it->second);
     req.set_servIndex(servIndex);
     if (servIndex < 0 || static_cast<size_t>(servIndex) >= servers.size()) {
-        req.set_error_page_num(400); // Internal Server Error for invalid server index
+        req.set_error_page_num(400);
         throw std::runtime_error("Invalid server index");
     }
-    std::cout << "xi ay axper->" << firstLine  << std::endl;
     method = validation_of_the_first_line(req, firstLine);
     if (!method.empty())
         Logger::printStatus("INFO", "Method of the request is: " + method);
@@ -63,42 +59,6 @@ std::string    Request_header_validation::if_received_request_valid(Request &req
     return method;
 }
 
-// std::string    Request_header_validation::if_received_request_valid(Request &req, char *c_buffer)
-// {
-//     std::cout<<"--------------------------------------------------\n";
-//     std::cout << "REQUEST:" << c_buffer<<std::endl;
-//     std::cout<<"--------------------------------------------------\n";
-//     std::stringstream ss(c_buffer);
-//     std::string line;
-//     while (std::getline(ss, line))
-//         lines.push_back(line);
-
-//     if (lines.size() < 2)
-//     {
-//         req.set_error_page_num(400);
-//         throw std::runtime_error("header cant contain less than 2 lines.");
-//     }
-//     servIndex = getServerThatWeConnectTo(lines[1]);
-//     req.set_servIndex(servIndex);
-//     if (servIndex < 0 || static_cast<size_t>(servIndex) >= servers.size()) {
-//         req.set_error_page_num(500); // Internal Server Error for invalid server index
-//         throw std::runtime_error("Invalid server index");
-//     }
-
-//     method = validation_of_the_first_line(req, lines[0]);
-//     if (!method.empty())
-//         Logger::printStatus("INFO", "Method of the request is: " + method);
-//     req.set_method(method);
-//     if (method != "GET" && method != "POST" && method != "DELETE") 
-//     {
-//         req.set_error_page_num(405);
-//         throw std::runtime_error("senc method chunenq mer allow_methods-um-> 405 Method Not Allowed.\n");//return 77;
-//     }
-
-//     return method;
-// }
-
-
 void Request_header_validation::fill_headers_map(headers_map &headers)
 {
     headers.clear();
@@ -111,7 +71,6 @@ void Request_header_validation::fill_headers_map(headers_map &headers)
             std::string key = line.substr(0, colonPos);
             std::string value = line.substr(colonPos + 1);
 
-            // Trim leading and trailing spaces (basic version)
             while (!key.empty() && key[0] == ' ') key.erase(0, 1);
             while (!key.empty() && key[key.size() - 1] == ' ') key.erase(key.size() - 1, 1);
             while (!value.empty() && value[0] == ' ') value.erase(0, 1);
@@ -120,20 +79,11 @@ void Request_header_validation::fill_headers_map(headers_map &headers)
             headers[key] = value;
         }
     }
-
-    // // Output the map
-    // for (std::map<std::string, std::string>::iterator it = headers.begin(); it != headers.end(); ++it) {
-    //     std::cout << it->first << " => " << it->second << std::endl;
-    // }
 }
 
 
 std::string    Request_header_validation::validation_of_the_first_line(Request &req, std::string line)
 {
-    // if (servIndex < 0 || static_cast<size_t>(servIndex) >= servers.size()) {
-    //     req.set_error_page_num(500); // Internal Server Error for invalid server index
-    //     throw std::runtime_error("Invalid server index");
-    // }
     std::vector<std::string> result;
     std::istringstream iss(line);
     std::string word;
@@ -153,18 +103,18 @@ std::string    Request_header_validation::validation_of_the_first_line(Request &
         req.set_error_page_num(404);
         throw std::runtime_error("favicon is missing");
     }
-    size_t harcakanInd = uri.find('?');//stugel,norem avelacre
+    size_t harcakanInd = uri.find('?');
     if (harcakanInd != std::string::npos)
         req.set_query(uri.substr(harcakanInd + 1));
     if (!(result[0] == "DELETE" && servers[servIndex]->get_locIndex() > 0))
     {
-        int locIndex = have_this_uri_in_our_current_server(servIndex);//esi arajin toxi uri masi pahna
-        if (locIndex < 0)//&& result[0] != "DELETE",senc che vortev mez location polyubomu petqa voprtev metodery menak location-in en patkanum////////////////////////
+        int locIndex = have_this_uri_in_our_current_server(servIndex);
+        if (locIndex < 0)
         {
-            req.set_error_page_num(404);//zdes kakoe cifr dat?
-            throw std::runtime_error("error page pti bacvi browser-um");//es hmi exception em qcum vor segfault chta,bayc heto pti zut error page-@ bacenq
+            req.set_error_page_num(404);
+            throw std::runtime_error("error page pti bacvi browser-um");
         }
-        servers[servIndex]->setLocIndex(locIndex);//set locIndex
+        servers[servIndex]->setLocIndex(locIndex);
     }
     if (result[2] != "HTTP/1.1" && result[2] != "HTTP/2")
     {
@@ -197,7 +147,7 @@ int Request_header_validation::have_this_uri_in_our_current_server(int servIndex
             continue ;
         size_t tmpLength = 0;
         size_t j;
-        for (j = 1; j < uri.size() && path[j] == uri[j]; ++j)//1ic em sksum vortevdemi simvoli saxi mot /a linelu
+        for (j = 1; j < uri.size() && path[j] == uri[j]; ++j)
             tmpLength++;
         if (uri.size() < path.size())
             continue ;
@@ -224,43 +174,33 @@ int Request_header_validation::check_this_metdod_has_in_appropriate_server(std::
 {
     LocationDirective* locdir;
     locdir = servers[servIndex]->getLocdir()[which_location];
-    // std::cout << "tvyal locdir" << locdir->getPath() << std::endl;
     std::vector<std::string> allow_methods = locdir->getAllow_methods();
     for(size_t i = 0; i < allow_methods.size(); ++i)
     {
         if (allow_methods[i] == method)
-            return 1;//ka
+            return 1;
     }
-    return -1;//chkar tenc metod
+    return -1;
 }
 
 int Request_header_validation::getServerThatWeConnectTo(std::string line)
 {
 
-    // if (title != "Host:")
-    //     return -1;
     std::string serverName;
-    // ss >> serverName;
-    // serverName = line;
-    std::cout<<"apush " <<line<<std::endl;
-    // std::string serverName = line.substr(6);
     serverName = line.substr(0, serverName.find(":"));
 
     Logger::printStatus("INFO", "Specified servername: " + serverName);
     for (size_t i = 0; i < servers.size(); i++)
     {
         if (servers[i]->getServer_name() == serverName)
-        //    || serverName == servers[i]->getListen().first)
             return i;
     }
     for (size_t i = 0; i < servers.size(); i++)
     {
         if (serverName == servers[i]->getListen().first)
             return i;
-    }//arandzin for-erov em grel nra hamar vortev`
-    //ete unenq nuyn ip-ov ev port-ov serverner bayc tvelenq server_name apa zaprosty etalua et name-ov serverin
-    //bayc ete unenq nuyn ip-ov ev port-ov serverner bayc chenq tvel server_name apa zaprosty etalua arajin et ip-ov u prot-ov serverin
-    return 0;//xi 0????????????????????vor chisht anunov server chunenq pti meka arajin exac serverin eta requesty te -1 reurn anum u ynde stugum em eroor page bacem 500
+    }
+    return 0;
 }
 
 
@@ -271,14 +211,13 @@ void    Request_header_validation::status_handler()
     std::string token;
     
     while (std::getline(iss, token, '/')) {
-        if (!token.empty()) {  // Пропускаем пустые токены
+        if (!token.empty()) {
             uri_share.push_back(token);
         }
     }
     if (!uri_share.empty() && uri_share[0] == "cgi-bin")
     {
         std::vector<LocationDirective*> locdir = servers[servIndex]->getLocdir();
-        // LocationDirective *loc = locdir[locIndex];
         status = DYNAMIC;
         Logger::printStatus("INFO", "The request is DYNAMIC");
 

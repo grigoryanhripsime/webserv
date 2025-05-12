@@ -9,7 +9,7 @@
 #include "Directive.hpp"
 int main(int argc, char *argv[])
 {
-    std::string fileName = argc == 2 ? argv[1] : "configs/default.conf";
+    std::string fileName = argc == 2 ? argv[1] : "configs/webserv.conf";
     try 
     {
         FileReader fileReader(fileName);
@@ -17,25 +17,10 @@ int main(int argc, char *argv[])
         std::string strFile = fileReader.getFileStr();
         
         TokenConfig tokenConfig(strFile);
-        // std::cout << "file->" << strFile << std::endl;
         tokenConfig.fillingDirectives();
-        //printf the all directives`blocks and simple
-        // tokenConfig.printDirective(tokenConfig.getDirectives(), 0);
         Logger::printStatus("INFO", "Parsing of configuration file completed!");
         DirectiveConfig dirConf(tokenConfig.getDirectives());
         dirConf.directiveValidation();
-        // dirConf.printServers();
-        ////////////
-    //     std::map<std::pair<std::string, int>, std::vector<int> >::iterator pr = dirConf.get_unique_listens().begin();
-    // for (; pr != dirConf.get_unique_listens().end(); ++pr)
-    // {
-    //     std::cout << "ip and port->" << (*pr).first.first << " " << (*pr).first.second << std::endl;
-    //     std::vector<int> vec = (*pr).second;
-    //     std::cout << "krknvox ip ev porteri indexnery->";
-    //     for(size_t i = 0; i < vec.size(); ++i)
-    //         std::cout << vec[i] << " ";
-    //     std::cout << std::endl;
-    // }
         Servers obj(dirConf);
     } catch(std::exception &e)
     {

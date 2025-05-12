@@ -4,7 +4,7 @@ class   ServerSocket : public Socket
 {
     private:
         int max_count_people_in_queue;
-        int status;//example not bound,hishi nkary
+        int status;
         int connection;
         virtual int connectToNetwork();
     public:

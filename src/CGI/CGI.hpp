@@ -5,11 +5,8 @@
 #include <map>
 #include <vector>
 class Request;
-#if 1// TODO: include true headers
 
-#include "Request.hpp" // Assuming Request is a struct/class defined elsewhere
-
-#endif 
+#include "Request.hpp" 
 
 class CGI {
 private:
@@ -17,7 +14,6 @@ private:
     void CGI_exec();
     void CGI_err(const std::string& error, const std::string& cont_type, const std::string& body);
     
-    // Data members
     Request * const request;
     std::string interpreter;
     std::string script_path;

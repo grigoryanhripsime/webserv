@@ -7,45 +7,37 @@ std::map<std::pair<std::string, int>, std::vector<int> > DirectiveConfig::get_un
 
 DirectiveConfig::~DirectiveConfig()
 {
-    std::cout << "DirectiveConfig dtor is called\n";
+    // std::cout << "DirectiveConfig dtor is called\n";
     std::vector<ServerDirective*>::iterator it = servers.begin();
     for (; it != servers.end(); ++it)
         if (*it)
             delete *it;
-        // delete[] *it;
 }
 
 void DirectiveConfig::directiveValidation()
 {
-    // 1. Проверка, что нет простых директив вне блоков
     if (!directives.simpleDir.empty())
         throw DirectiveConfigException("In config file can't be simple directives outside of any block!");
 
-    // 2. Проверка, что есть хотя бы один сервер
     if (directives.blocks.empty())
         throw DirectiveConfigException("In config file you need to have at least one server block!");
 
-    // 3. Проверка всех блоков сервера
     std::multimap<std::string, Directive *>::iterator it = directives.blocks.begin();
     ServerDirective *serv = NULL;
-        for (; it != directives.blocks.end(); ++it)//es fory bolor serverneri(blokayin directiv) vrayov ancnelu hamara, pritom menak server enq unenalu,nu vapshe 2hat blokayin directiva linelu es proektum,bayc 2rdy`location-@ serveri meja linelu
+        for (; it != directives.blocks.end(); ++it)
         {
-            // 3.1. Проверка, что блок именно server
             if (it->first != "server")
                 throw DirectiveConfigException("You can't have any other main directive except for server!");
-            Directive* serverBlock = it->second;//es serverBlock-nel uni simpleDir u blocks
+            Directive* serverBlock = it->second;
 
-            // 3.2. Проверка обязательных полей сервера
             if (serverBlock->simpleDir.find("listen") == serverBlock->simpleDir.end())
                 throw DirectiveConfigException("Server directive must have 'listen' directive!");
 
             if (serverBlock->simpleDir.find("root") == serverBlock->simpleDir.end())
                 throw DirectiveConfigException("Server directive must have 'root' directive!");
 
-            // ServerDirective *serv = NULL;
-            serv = fillServers(serverBlock);//chem jokum inchnel lcnelu
+            serv = fillServers(serverBlock);
 
-            // 3.3. Проверка location блоков
             std::multimap<std::string, Directive*>::iterator itLoc = serverBlock->blocks.begin();
             for (; itLoc != serverBlock->blocks.end(); ++itLoc)
             {
@@ -55,7 +47,6 @@ void DirectiveConfig::directiveValidation()
                 if (!itLoc->second->blocks.empty() && !(itLoc->second->blocks.size() == 1 && itLoc->second->blocks.find("cgi_extension") != itLoc->second->blocks.end()))
                     throw DirectiveConfigException("location block can't have any block directives inside!");
 
-                // Проверка обязательного path у location
                 if (itLoc->second->simpleDir.find("path") == itLoc->second->simpleDir.end())
                     throw DirectiveConfigException("Location directive must have 'path' specified!");
 
@@ -67,8 +58,6 @@ void DirectiveConfig::directiveValidation()
             if_config_has_more_servers__whether_each_server_has_name_when_they_have_the_same_ip_and_port(servers);
             if (server_names_with_duplicate_IPs_must_be_different(unique_listens) < 0)
                 throw std::runtime_error("Server names with duplicate IPs must be different.");
-            //stugum enq vor unique listensi secondi`toist int-eri vectori(voronq irancic nerkayacnum enq serverneri indeqsnery voronc ip:port-ery nuynn en, iranc server_name-ery ampayman tarber linen,hakarak depqum karanq exception qcenq)
-            //Armany asec vor ete nuyn ip port unen 1ic avel serverver configi error tanq,lav chi vor nayum enq ete anunnery tarber enq asum enq lav 
         }
         else
             if_config_has_more_servers__whether_each_server_has_name_when_they_have_the_same_ip_and_port(servers);
@@ -92,7 +81,6 @@ int DirectiveConfig::checkDuplicates(std::vector<int> values)
 
     for (size_t i = 0; i < values.size(); ++i)
     {
-        // servers[*it]->getServer_name();
         if (seen.find(servers[i]->getServer_name()) != seen.end())
             return -1;
         seen.insert(servers[i]->getServer_name());
@@ -116,22 +104,11 @@ void DirectiveConfig::if_config_has_more_servers__whether_each_server_has_name_w
         else
             itMap->second.push_back(i);
     }
- 
-    // std::map<std::pair<std::string, int>, std::vector<int> >::iterator pr = unique_listens.begin();
-    // for (; pr != unique_listens.end(); ++pr)
-    // {
-    //     std::cout << "ip and port->" << (*pr).first.first << " " << (*pr).first.second << std::endl;
-    //     std::vector<int> vec = (*pr).second;
-    //     std::cout << "krknvox ip ev porteri indexnery->";
-    //     for(size_t i = 0; i < vec.size(); ++i)
-    //         std::cout << vec[i] << " ";
-    //     std::cout << std::endl;
-    // }
 }
 
 
 
-ServerDirective *DirectiveConfig::fillServers(Directive *serverBlock)//&-@ maqrelem,local popoxakani reference veradardznely etqany xelaci ban chi:)
+ServerDirective *DirectiveConfig::fillServers(Directive *serverBlock)
 {
     ServerDirective *serv = new ServerDirective();
     servers.push_back(serv);
@@ -148,7 +125,7 @@ ServerDirective *DirectiveConfig::fillServers(Directive *serverBlock)//&-@ maqre
             switch (i)
             {
                 case 0:
-                    serv->setListen(itSimpleDir->second[0]);//itSimpleDir->second[0]
+                    serv->setListen(itSimpleDir->second[0]);
                     break;
                 case 1:
                     serv->setServer_name(itSimpleDir->second[0]);
@@ -192,13 +169,13 @@ LocationDirective *DirectiveConfig::fillLocationsn(ServerDirective *serv, Direct
                     loc->setPath(itSimpleDirLoc->second[0], serv);
                     break;
                 case 1:
-                    loc->setAllow_methods(itSimpleDirLoc->second);//vectora dra hamar
+                    loc->setAllow_methods(itSimpleDirLoc->second);
                     break;
                 case 2:
                     loc->setAutoindex(itSimpleDirLoc->second[0]);
                     break;
                 case 3:
-                    loc->setRedirect(itSimpleDirLoc->second);//qani vor vectora
+                    loc->setRedirect(itSimpleDirLoc->second);
                     break;
                 case 4:
                     loc->setUpload_dir(itSimpleDirLoc->second[0]);
@@ -259,10 +236,6 @@ void DirectiveConfig::printServers()
         std::vector<LocationDirective*>::iterator ot = locdir.begin();
         for(; ot != locdir.end(); ++ot)
         {
-            // for(std::vector<std::string>::iterator ott = (*ot)->getIndex().begin(); ott != (*ot)->getIndex().end(); ++ott)
-            // {
-            //     std::cout << "index = " << *ott << std::endl;
-            // }
             std::cout << "path = " << (*ot)->getPath() << std::endl;
             ////////
             std::map<int, std::string> red  = (*ot)->getRedirect();

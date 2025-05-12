@@ -6,7 +6,7 @@ ClientSocket::ClientSocket(int domainIP, int service, int protocol, int port, st
     (void)protocol;
     (void)port;
     (void)ipAddress;
-    connection = connectToNetwork();//for the server this function will be call bind system call
+    connection = connectToNetwork();
     if (connection < 0)
         throw std::runtime_error("Error: connect");
 }

@@ -11,7 +11,7 @@ class Servers
 {
     private:
         DirectiveConfig *config;
-        std::vector<ServerSocket> servSock;//eto server soket(bind,listen),a ne resultat accepta
+        std::vector<ServerSocket> servSock;
         int epfd;
         std::vector<Request> requests;
         

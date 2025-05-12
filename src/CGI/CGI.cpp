@@ -121,7 +121,7 @@ void CGI::CGI_exec() {
         close(stdout_pipe[1]);
         return;
     }
-    if (pid == 0) { // Child process
+    if (pid == 0) {
         close(stdin_pipe[1]);
         close(stdout_pipe[0]);
         dup2(stdin_pipe[0], 0);
@@ -153,7 +153,7 @@ void CGI::CGI_exec() {
         const char* error = "Status: 500 Internal Server Error\r\nContent-Type: text/plain\r\n\r\nFailed to execute script";
         write(1, error, strlen(error));
         _exit(1);
-    } else { // Parent process
+    } else { 
         close(stdin_pipe[0]);
         close(stdout_pipe[1]);
 

@@ -10,7 +10,7 @@ FileReader::FileReader(const std::string &fileName) : file(fileName.c_str())
 FileReader::~FileReader()
 {
     file.close();
-    std::cout << "FileReader dtor is called\n";
+    // std::cout << "FileReader dtor is called\n";
     
     // std::cout<<"FileReader was destroyed!\n";
 }
@@ -41,22 +41,21 @@ void FileReader::fileToStr()
     while (std::getline(file, line))
     {
         if (line.find_first_of('#') != std::string::npos)
-            line.erase(line.find_first_of('#'));//esi en pahna vor commentner karananq anenq?, hastat config fayli mej chi lenlu nenc tox(valid hraman)vor # chi parenakelu?
+            line.erase(line.find_first_of('#'));
 
         while (!line.empty() && (line[0] == ' ' || line[0] == '\t'))
-            line.erase(0, 1);//skzbic ktrel white spacery
+            line.erase(0, 1);
 
         while (!line.empty() && (line[line.length() - 1] == ' ' || line[line.length() - 1] == '\t' || line[line.length() - 1] == '\n')) 
-            line.erase(line.length() - 1, 1);//verjic ktrel white spacery
+            line.erase(line.length() - 1, 1);
         
         if (line.empty())
-            continue;//inch case kara lini????
+            continue;
 
         if (!(line[line.length() - 1] == ';' || line[line.length() - 1] == '{' || line[line.length() - 1] == '}'))
             throw FileReadingException("there is no valid symbol at the end!");
 
-        fileStr += line;//fileStr i mej celi fayly kpcnum enq mi stroki mej
+        fileStr += line;
     }
-    // std::cout<<fileStr<<std::endl;
     Logger::printStatus("INFO", "Config file was successfully read!");
 }
