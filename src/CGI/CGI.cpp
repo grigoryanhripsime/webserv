@@ -16,6 +16,7 @@ std::string CGI::_get_index(const std::vector<std::string> &index, const std::st
         if (path_info == path + '/' + index[i]) {
             return index[i];
         }
+        
     }
     request->set_error_page_num(502);
     throw std::runtime_error("Invalid index, no such file");
@@ -35,7 +36,7 @@ std::string CGI::CGI_handler()
     int serv_index = request->get_servIndex();
     std::vector<ServerDirective *> servers = request->get_servers();
     ServerDirective * server = servers[serv_index];
-    this->path_info = request->get_uri();
+    this->path_info = request->geturi();
     std::vector<LocationDirective *> locdir = server->getLocdir();
     int locIndex = server->get_locIndex();
     std::string index = _get_index(locdir[locIndex]->getIndex(), locdir[locIndex]->getPath());
@@ -56,8 +57,9 @@ std::string CGI::CGI_handler()
 
     if (output.empty()) {
         CGI_err("HTTP/1.1 500 Internal Server Error\r\n", "Content-Type: text/plain\r\n", "CGI script failed");
+    } else {
+        Logger::printStatus("INFO", "CGI has completed it's mission successfully!");
     }
-    Logger::printStatus("INFO", "CGI has completed it's mission successfully!");
     return output;
 }
 
