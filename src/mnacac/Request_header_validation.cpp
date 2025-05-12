@@ -41,6 +41,7 @@ std::string    Request_header_validation::if_received_request_valid(Request &req
         throw std::runtime_error("There is no host");
     }
     servIndex = getServerThatWeConnectTo(it->second);
+    std::clog<<servIndex<<std::endl;
     req.set_servIndex(servIndex);
     if (servIndex < 0 || static_cast<size_t>(servIndex) >= servers.size()) {
         req.set_error_page_num(400);
@@ -50,12 +51,12 @@ std::string    Request_header_validation::if_received_request_valid(Request &req
     if (!method.empty())
         Logger::printStatus("INFO", "Method of the request is: " + method);
     req.set_method(method);
-    if (method != "GET" && method != "POST" && method != "DELETE") 
+    if (method != "GET" && method != "POST" && method != "DELETE")
     {
         req.set_error_page_num(405);
         throw std::runtime_error("senc method chunenq mer allow_methods-um-> 405 Method Not Allowed.\n");//return 77;
     }
-    
+
     return method;
 }
 
@@ -121,7 +122,7 @@ std::string    Request_header_validation::validation_of_the_first_line(Request &
         req.set_error_page_num(505);
         throw std::runtime_error("error page:: headery sxal a");
     }
-    
+
     if (check_this_metdod_has_in_appropriate_server(result[0], servers[servIndex]->get_locIndex()) < 0)
     {
         req.set_error_page_num(405);
@@ -185,22 +186,27 @@ int Request_header_validation::check_this_metdod_has_in_appropriate_server(std::
 
 int Request_header_validation::getServerThatWeConnectTo(std::string line)
 {
+std::clog<<line<<"\n";
+    std::string serverName, port;
+    serverName = line.substr(0, line.find(":"));
+    port = line.substr(line.find(":") + 1);
+    std::stringstream ss(port);
+    int port_num;
+    ss >> port_num;
 
-    std::string serverName;
-    serverName = line.substr(0, serverName.find(":"));
-
+        std::clog << "num = " << port_num << std::endl;
     Logger::printStatus("INFO", "Specified servername: " + serverName);
     for (size_t i = 0; i < servers.size(); i++)
     {
-        if (servers[i]->getServer_name() == serverName)
+        if (servers[i]->getServer_name() == serverName && servers[i]->getListen().second == port_num)
             return i;
     }
     for (size_t i = 0; i < servers.size(); i++)
     {
-        if (serverName == servers[i]->getListen().first)
+        if (serverName == servers[i]->getListen().first && servers[i]->getListen().second == port_num)
             return i;
     }
-    return 0;
+    return -1;
 }
 
 
@@ -209,7 +215,7 @@ void    Request_header_validation::status_handler()
     std::vector<std::string> uri_share;
     std::istringstream iss(uri);
     std::string token;
-    
+
     while (std::getline(iss, token, '/')) {
         if (!token.empty()) {
             uri_share.push_back(token);

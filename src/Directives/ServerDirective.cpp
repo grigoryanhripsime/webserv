@@ -5,7 +5,7 @@ ServerDirective::ServerDirective()
 {
     files.clear();
     index.push_back("index.html");
-    listen.first = "0.0.0.0";
+    listen.first = "127.0.0.1";
     listen.second = -1;
     server_name = "";
     validDirs[0] = "listen";
@@ -130,7 +130,9 @@ void    ServerDirective::check_and_set_port(const std::string& ipAndPort, size_t
 }
 
 void    ServerDirective::setListen(const std::string& ipAndPort)
-{   
+{
+    if (listen.second != -1)
+        throw std::runtime_error("There must be only one listen directive");
     size_t indexOfVerjaket = ipAndPort.find(":");
     if (indexOfVerjaket != std::string::npos)
     {
