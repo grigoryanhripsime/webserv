@@ -73,9 +73,10 @@ size_t AGeneralDirective::parse_size_to_bytes(const std::string& value)
 void    AGeneralDirective::setClient_max_body_size(const std::string& size)
 {
     if (!is_valid_client_max_body_size(size))
-        throw std::runtime_error("invalid body size" + size);
+        throw std::runtime_error("invalid body size: " + size);
     client_max_body_size = parse_size_to_bytes(size);
-
+    if (client_max_body_size > 2 * 1048576)
+        throw std::runtime_error("invalid body size: " + size);
 }
 ///////validacia Root///////
 bool AGeneralDirective::is_valid_root(const std::string& rootPath)

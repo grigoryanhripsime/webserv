@@ -83,15 +83,9 @@ void Servers::runLoop()
                 
                 if (!isServer)
                 {
-                    // try{
                         Request request(config->get_servers());
                         request.handleClientRequest(sockfd);
                         requests.push_back(request);
-                    // }
-                    // catch(std::exception& e)
-                    // {
-                    //     std::clog << "EXception: " << e.what() << std::endl;
-                    // }
                 }
             }
             else if (events[i].events & EPOLLERR || events[i].events & EPOLLHUP)
