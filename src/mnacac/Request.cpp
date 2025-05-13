@@ -614,11 +614,9 @@ void Request::handleClientRequest(int client_fd) {
         if (servIndex == -1 || pathExists(filePath) == false ||  !isFile(filePath))
         {
             Logger::printStatus("WARNING", "The error page from config file couldn't be reached!");
-            char root_char[1024] = {0};
-            getcwd(root_char, 1024);
             std::stringstream ss;
             ss << error_page_num;
-            filePath = std::string(root_char) + "/error_pages/" + ss.str() + ".html";
+            filePath = std::string(PWD) + "/error_pages/" + ss.str() + ".html";
         }
         response = get_need_string_that_we_must_be_pass_send_system_call(filePath);
         send_response(client_fd, response, epfd);

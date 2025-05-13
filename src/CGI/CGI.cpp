@@ -16,7 +16,6 @@ std::string CGI::_get_index(const std::vector<std::string> &index, const std::st
         if (path_info == path + '/' + index[i]) {
             return index[i];
         }
-        
     }
     request->set_error_page_num(502);
     throw std::runtime_error("Invalid index, no such file");
