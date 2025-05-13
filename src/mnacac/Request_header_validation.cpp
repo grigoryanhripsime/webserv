@@ -41,7 +41,6 @@ std::string    Request_header_validation::if_received_request_valid(Request &req
         throw std::runtime_error("There is no host");
     }
     servIndex = getServerThatWeConnectTo(it->second);
-    std::clog<<servIndex<<std::endl;
     req.set_servIndex(servIndex);
     if (servIndex < 0 || static_cast<size_t>(servIndex) >= servers.size()) {
         req.set_error_page_num(400);
@@ -190,15 +189,12 @@ int Request_header_validation::check_this_metdod_has_in_appropriate_server(std::
 
 int Request_header_validation::getServerThatWeConnectTo(std::string line)
 {
-std::clog<<line<<"\n";
     std::string serverName, port;
     serverName = line.substr(0, line.find(":"));
     port = line.substr(line.find(":") + 1);
     std::stringstream ss(port);
     int port_num;
     ss >> port_num;
-
-        std::clog << "num = " << port_num << std::endl;
     Logger::printStatus("INFO", "Specified servername: " + serverName);
     for (size_t i = 0; i < servers.size(); i++)
     {

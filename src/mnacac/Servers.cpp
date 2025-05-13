@@ -90,7 +90,7 @@ void Servers::runLoop()
                     }
                     catch(std::exception& e)
                     {
-                        std::clog << "EXception: " << e.what() << std::endl;
+                        std::clog << "Exception: " << e.what() << std::endl;
                     }
                 }
             }
