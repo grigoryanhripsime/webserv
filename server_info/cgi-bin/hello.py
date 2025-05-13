@@ -37,7 +37,7 @@ print(f'''
     <div class="container">
         <h1>Hello, {name}!</h1>
         <p>This is a Python CGI script.</p>
-        <form method="POST" action="/cgi-bin/hello.py">
+        <form method="GET" action="/cgi-bin/hello.py">
             <input type="text" name="name" placeholder="Enter your name">
             <button type="submit">Submit</button>
         </form>
